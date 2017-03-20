@@ -1,0 +1,25 @@
+easyblock = "PythonPackage"
+
+name = 'dptools'
+version = '0.1p3'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://www.dftb-plus.info/tools/dptools'
+description = "This package contains a few scripts to ease the life of DFTB+ user."
+
+toolchain = {'name': 'intel', 'version': '2017a'}
+
+source_urls = ['https://www.dftb-plus.info/fileadmin/DFTB-Plus/public/tools/dptools']
+sources = [SOURCE_TAR_GZ]
+checksums = ['a56f024d83594916671ac00a87c3f80c']
+
+dependencies = [
+    ('Python', '2.7.12'),
+]
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
+}
+
+moduleclass = 'phys'

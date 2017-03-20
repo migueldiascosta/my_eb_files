@@ -1,0 +1,61 @@
+easyblock = 'MakeCp'
+
+name = 'VASP'
+version = '5.4.1'
+versionsuffix = '_w90v1_wsoc'
+
+homepage = 'http://www.vasp.at'
+description = """The Vienna Ab initio Simulation Package (VASP) is a computer program for atomic scale
+materials modelling, e.g. electronic structure calculations and quantum-mechanical molecular dynamics,
+from first principles."""
+
+toolchain = {'name': 'intel', 'version': '2017a'}
+toolchainopts = {'usempi': True}
+
+# Vasp is proprietary software, see http://www.vasp.at/index.php/faqs on how to get access to the code
+sources = [SOURCELOWER_TAR_GZ]
+
+patches = [
+    'patch.5.4.1.08072015',
+    'patch.5.4.1.27082015',
+    'patch.5.4.1.06112015',
+    'vasp.5.4.1.wsoc.patch',
+]
+
+checksums = [
+    '57c2b07d0f70987000033984e913f1a6',  # vasp.5.4.1.tar.gz
+    'ee242452bba6bb37459745f4617649d7',  # patch.5.4.1.08072015
+    'b137eb13804a60df382e77495dc738f9',  # patch.5.4.1.27082015
+    'd64b8f0ae861db7a76e6e9c9ffa188a1',  # patch.5.4.1.06112015
+    '0b7fd2ba4bf27d4fc54f0c17f8dcddd8',  # vasp.5.4.1.wsoc.patch
+]
+
+dependencies = [('Wannier90', '1.2')]
+
+prebuildopts = 'cp arch/makefile.include.linux_intel ./makefile.include && '
+
+# path to libfftw3xf_intel.a is hardcoded in makefile.include
+prebuildopts += 'sed -i "s|\$(MKLROOT)/interfaces/fftw3xf|\$(FFTW_LIB_DIR)|" makefile.include && '
+
+# we use static mkl later
+prebuildopts += 'sed -i "s|-mkl||" makefile.include && '
+
+# add wannier90 support to CPP_OPTIONS (which has other options)
+prebuildopts += 'sed -i "s/CPP_OPTIONS=/CPP_OPTIONS=-DVASP2WANNIER90/" makefile.include && '
+prebuildopts += 'sed -i "s|\$(SCALAPACK)|\$(EBROOTWANNIER90)/lib/libwannier.a \$(SCALAPACK)|" makefile.include && '
+
+# VASP uses LIBS as a list of folders
+prebuildopts += 'unset LIBS && '
+
+buildopts = 'all BLACS="$LIBBLACS" SCALAPACK="$LIBSCALAPACK"'
+
+parallel = 1
+
+files_to_copy = [(['bin/vasp_std', 'bin/vasp_gam', 'bin/vasp_ncl'], 'bin')]
+
+sanity_check_paths = {
+    'files': ['bin/vasp_std', 'bin/vasp_gam', 'bin/vasp_ncl'],
+    'dirs': []
+}
+
+moduleclass = 'phys'

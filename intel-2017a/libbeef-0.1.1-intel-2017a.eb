@@ -1,0 +1,23 @@
+easyblock = 'ConfigureMake'
+
+name = 'libbeef'
+version = '0.1.1'
+
+homepage = 'https://confluence.slac.stanford.edu/display/SUNCAT/BEEF+Functional+Software'
+description = """libbeef is a package providing the class of BEEF-vdW functionals and
+ Bayesian error estimates to Fortran- or C-based DFT codes."""
+
+toolchain = {'name': 'intel', 'version': '2017a'}
+toolchainopts = {'opt': True}
+
+sources = [SOURCE_TAR_GZ]
+source_urls = ['https://confluence.slac.stanford.edu/download/attachments/146704476/']
+
+sanity_check_paths = {
+    'files': ['bin/bee', 'lib/libbeef.a'],
+    'dirs': [],
+}
+
+parallel = 1
+
+moduleclass = 'chem'

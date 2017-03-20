@@ -1,0 +1,25 @@
+easyblock = "PythonPackage"
+
+name = 'FireWorks'
+version = '1.3.7'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://pypi.python.org/pypi/FireWorks'
+description = """FireWorks helps run calculation workflows, with a centralized workflow server
+ controlling many worker nodes."""
+
+toolchain = {'name': 'intel', 'version': '2017a'}
+
+source_urls = [PYPI_SOURCE]
+sources = [SOURCE_TAR_GZ]
+
+dependencies = [
+    ('Python', '2.7.12'),
+]
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
+}
+
+moduleclass = 'base'

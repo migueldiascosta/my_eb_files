@@ -1,0 +1,24 @@
+easyblock = "PythonPackage"
+
+name = 'atomate'
+version = '0.4.2'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://pythonhosted.org/atomate/'
+description = """atomate has implementations of FireWorks workflows for Materials Science."""
+
+toolchain = {'name': 'intel', 'version': '2017a'}
+
+source_urls = [PYPI_SOURCE]
+sources = [SOURCE_TAR_GZ]
+
+dependencies = [
+    ('Python', '2.7.12'),
+]
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
+}
+
+moduleclass = 'base'

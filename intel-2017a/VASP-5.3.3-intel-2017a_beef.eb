@@ -1,0 +1,48 @@
+easyblock = 'MakeCp'
+
+name = 'VASP'
+version = '5.3.3'
+versionsuffix = '_beef'
+
+homepage = 'http://www.vasp.at'
+description = """The Vienna Ab initio Simulation Package (VASP) is a computer program for atomic scale
+materials modelling, e.g. electronic structure calculations and quantum-mechanical molecular dynamics,
+from first principles."""
+
+toolchain = {'name': 'intel', 'version': '2017a'}
+toolchainopts = {'usempi': True}
+
+# Vasp is proprietary software, see http://www.vasp.at/index.php/faqs on how to get access to the code
+sources = [
+    'vasp.5.3.3.tar.gz',
+    'vasp.5.lib.tar.gz',
+]
+
+patches = [
+    'vasp.5.3.3.patch',
+    'vasp.5.lib.patch',
+    'vasp.5.3.beef.patch',
+]
+
+dependencies = [('libbeef', '0.1.1')]
+
+prebuildopts = "cd ../vasp.5.lib && "
+buildopts = "-f makefile.linux_ifc_P4 && cd ../vasp.5.3 && cp makefile.linux_ifc_P4 makefile && "
+buildopts += "make && cp vasp vasp_std && "
+buildopts += "sed -i 's/\-o vasp/\-o vasp_gam/' makefile && "
+buildtops += "sed -i 's/\-DNGZhalf/\-DNGZhalf \-DwNGZhalf/' makefile && make clean && make && "
+buildopts += "sed -i 's/\-o vasp_gam/\-o vasp_ncl/' makefile && "
+buildopts += "sed -i 's/\-DNGZhalf/\-DNGZhalf \-DwNGZhalf/' makefile && make clean && make "
+
+parallel = 1
+
+# buildininstalldir=True
+
+files_to_copy = [(['vasp_std', 'vasp_gam', 'vasp_ncl'], 'bin')]
+
+sanity_check_paths = {
+    'files': ['bin/vasp_std', 'bin/vasp_gam', 'bin/vasp_ncl'],
+    'dirs': []
+}
+
+moduleclass = 'phys'

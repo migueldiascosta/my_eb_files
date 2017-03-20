@@ -1,0 +1,50 @@
+easyblock = "PythonPackage"
+
+name = 'phono3py'
+version = '1.11.7.20'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'http://atztogo.github.io/phono3py'
+description = """Phono3py is an open source package for phonon-phonon interaction
+ and lattice thermal conductivity calculations."""
+
+toolchain = {'name': 'intel', 'version': '2017a'}
+
+source_urls = [
+    PYPI_SOURCE,
+    'http://www.netlib.org/lapack/',
+]
+
+sources = [
+    SOURCE_TAR_GZ,
+    'lapack-3.6.1.tgz',
+]
+
+patches = ['%s-%s_setup.patch' % (name, version)]
+
+# easybuild expects setup.py not setup3.py
+# prebuildopts = 'mv setup.py setup1.py && mv setup3.py setup.py && '
+
+# build lapacke
+prebuildopts = 'cd ../lapack-3.6.1 && cp make.inc.example make.inc && '
+prebuildopts += "sed -i 's/gfortran/ifort -fPIC/g' make.inc && "
+prebuildopts += "sed -i 's/gcc/icc -fPIC/g' make.inc && "
+prebuildopts += "sed -i 's/INT_ETIME/INT_CPU_TIME/g' make.inc && "
+prebuildopts += 'make blaslib && make lapackelib && cd ../phono3py-%s' % version
+
+dependencies = [
+    ('Python', '2.7.12'),
+    ('PyYAML', '3.12', versionsuffix),
+    ('matplotlib', '1.5.3', versionsuffix),
+    ('h5py', '2.6.0', versionsuffix + '-HDF5-1.8.18'),
+    ('phonopy', '1.11.6.20', versionsuffix),
+]
+
+# options = {'modulename': 'phonopy'}
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
+}
+
+moduleclass = 'base'
