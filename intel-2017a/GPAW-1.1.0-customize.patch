@@ -1,0 +1,42 @@
+* get libraries from environment and enable parallel build
+author: Miguel Dias Costa (National University of Singapore)
+--- customize.py.orig	2017-01-26 17:53:15.787195000 +0800
++++ customize.py	2017-02-03 15:12:58.929314603 +0800
+@@ -28,20 +28,21 @@
+     libraries += ['somelib', 'otherlib']
+ """
+ 
+-# compiler = 'gcc'
+-# mpicompiler = 'mpicc'  # use None if you don't want to build a gpaw-python
+-# mpilinker = 'mpicc'
++compiler = 'mpicc'
++mpicompiler = 'mpicc'  # use None if you don't want to build a gpaw-python
++mpilinker = 'mpicc'
+ # platform_id = ''
+-# scalapack = False
++scalapack = True
++import os
++library_dirs = os.getenv('LD_LIBRARY_PATH').split(':')
++
+ # hdf5 = False
+ 
+ # Use ScaLAPACK:
+ # Warning! At least scalapack 2.0.1 is required!
+ # See https://trac.fysik.dtu.dk/projects/gpaw/ticket/230
+ if scalapack:
+-    libraries += ['scalapack-openmpi',
+-                  'blacsCinit-openmpi',
+-                  'blacs-openmpi']
++    libraries = [libfile[3:-2] for libfile in os.getenv('SCALAPACK_STATIC_LIBS').split(',')]
+     define_macros += [('GPAW_NO_UNDERSCORE_CBLACS', '1')]
+     define_macros += [('GPAW_NO_UNDERSCORE_CSCALAPACK', '1')]
+ 
+@@ -49,6 +50,8 @@
+ # In order to link libxc installed in a non-standard location
+ # (e.g.: configure --prefix=/home/user/libxc-2.0.1-1), use:
+ 
++libraries.append('xc')
++
+ # - static linking:
+ if 0:
+     include_dirs += ['/home/user/libxc-2.0.1-1/include']

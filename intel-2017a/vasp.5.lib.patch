@@ -1,0 +1,20 @@
+--- ../vasp.5.lib/makefile.linux_ifc_P4.orig	2017-03-06 14:32:45.861293000 +0800
++++ ../vasp.5.lib/makefile.linux_ifc_P4	2017-03-06 14:33:01.190664000 +0800
+@@ -5,7 +5,7 @@
+ # however it might work on other platforms as well
+ #
+ # this release of vasp.4.lib contains lapack v2.0
+-# this can be compiled with pgf90 compiler if the option -O1 is used
++# this can be compiled with pgifort compiler if the option -O1 is used
+ #
+ # Mind: one user reported that he had to copy preclib.F diolib.F
+ #  dlexlib.F and drdatab.F to the directory vasp.4.4, compile the files
+@@ -16,7 +16,7 @@
+ 
+ # C-preprocessor
+ CPP     = gcc -E -P -C $*.F >$*.f
+-FC=ifc
++FC=ifort
+ 
+ CFLAGS = -O
+ FFLAGS = -O0 -FI

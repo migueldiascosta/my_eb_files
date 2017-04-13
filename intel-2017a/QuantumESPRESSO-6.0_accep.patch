@@ -1,0 +1,21 @@
+--- qe-6.0/PW/src/symm_base.f90.orig	2016-10-04 18:37:55.000000000 +0800
++++ qe-6.0/PW/src/symm_base.f90	2016-11-17 14:06:39.256483336 +0800
+@@ -346,6 +346,18 @@
+   !
+   INTEGER :: i
+   LOGICAL :: sym (48)
++  !
++  ! get accep value from environment if set
++  !
++  character env_name*20, env_val*40
++  integer env_len, env_status
++  env_name = 'QE_ACCEP_VALUE'
++  CALL get_environment_variable(env_name, env_val, env_len, env_status, .true.)
++  IF (env_status .eq. 0) THEN
++     READ(env_val,*) accep
++     CALL infomsg ('find_sym', 'accep changed to ' // TRIM(env_val))
++  ENDIF
++  !
+   ! if true the corresponding operation is a symmetry operation
+   !
+   IF ( .not. allocated(irt) ) ALLOCATE( irt( 48, nat ) )

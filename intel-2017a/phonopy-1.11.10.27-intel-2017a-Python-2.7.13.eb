@@ -1,0 +1,28 @@
+easyblock = "PythonPackage"
+
+name = 'phonopy'
+version = '1.11.10.27'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'http://atztogo.github.io/phonopy'
+description = """Phonopy is an open source package for phonon calculations
+ at harmonic and quasi-harmonic levels."""
+
+toolchain = {'name': 'intel', 'version': '2017a'}
+
+source_urls = [PYPI_SOURCE]
+sources = [SOURCE_TAR_GZ]
+
+dependencies = [
+    ('Python', '2.7.13'),
+    ('PyYAML', '3.12', versionsuffix),
+    ('matplotlib', '2.0.0', versionsuffix),
+    ('h5py', '2.6.0', versionsuffix + '-HDF5-1.8.18'),
+]
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
+}
+
+moduleclass = 'base'

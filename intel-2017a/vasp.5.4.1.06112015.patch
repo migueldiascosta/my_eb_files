@@ -1,0 +1,12 @@
+diff -rupN '--exclude-from=/fs/home/mmars/bin/exl_pattern' ./src/fock.F ../repo/src/fock.F
+--- ./src/fock.F	2015-06-29 16:00:37.000000000 +0200
++++ ../repo/src/fock.F	2015-11-06 14:23:35.815478092 +0100
+@@ -3829,7 +3829,7 @@ CONTAINS
+     DEALLOCATE(GWORK,CXI,CKAPPA,CRHOLM,CDIJ,CDLM,W1,POTFAK)
+     CALL DEALLOCATE_ROT_HANDLE(ROT_HANDLE)
+     CALL DELWAV(WQ,.TRUE.)
+-    DO N=1,NGLB
++    DO N=1,NBLK
+        CALL DELWAV(WIN(N) ,.TRUE.)
+     ENDDO
+     DEALLOCATE(WIN)

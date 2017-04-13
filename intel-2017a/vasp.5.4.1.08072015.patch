@@ -1,0 +1,125 @@
+diff -rupN '--exclude-from=/fs/home/mmars/bin/exl_pattern' ./arch/makefile.include.linux_intel ../../vasp.5.1/arch/makefile.include.linux_intel
+--- ./arch/makefile.include.linux_intel	2015-06-29 16:00:20.000000000 +0200
++++ ../../vasp.5.1/arch/makefile.include.linux_intel	2015-07-08 12:48:47.565679302 +0200
+@@ -7,8 +7,8 @@ CPP_OPTIONS= -DMPI -DHOST=\"IFC91_ompi\"
+ 
+ CPP        = fpp -f_com=no -free -w0  $*$(FUFFIX) $*$(SUFFIX) $(CPP_OPTIONS)
+ 
+-FC         = mpif90
+-FCL        = mpif90 -mkl
++FC         = mpiifort
++FCL        = mpiifort -mkl
+ 
+ FREE       = -free -names lowercase
+ 
+@@ -20,7 +20,7 @@ DEBUG      = -O0
+ MKL_PATH   = $(MKLROOT)/lib/intel64
+ BLAS       =
+ LAPACK     =
+-BLACS      = -lmkl_blacs_openmpi_lp64
++BLACS      = -lmkl_blacs_intelmpi_lp64
+ SCALAPACK  = $(MKL_PATH)/libmkl_scalapack_lp64.a $(BLACS)
+ 
+ OBJECTS    = fftmpiw.o fftmpi_map.o fftw3d.o fft3dlib.o \
+diff -rupN '--exclude-from=/fs/home/mmars/bin/exl_pattern' ./src/mlwf.F ../../vasp.5.1/src/mlwf.F
+--- ./src/mlwf.F	2015-06-29 16:00:41.000000000 +0200
++++ ../../vasp.5.1/src/mlwf.F	2015-07-08 11:39:16.204278866 +0200
+@@ -229,7 +229,7 @@
+       REAL(q), ALLOCATABLE :: FTMP(:),FR(:,:),FGTMP(:,:),FG(:,:,:)
+       INTEGER, PARAMETER :: NMAX=1000
+ 
+-      COMPLEX(q) S(WDES%NB_TOT,WDES%NB_TOT)
++      COMPLEX(q), ALLOCATABLE :: S(:,:)
+       GDEF, ALLOCATABLE :: A(:,:),AP(:,:)
+       REAL(q), ALLOCATABLE :: ROTYLM(:,:)
+       REAL(q), ALLOCATABLE :: HYBRID_ORBITAL(:)
+@@ -410,6 +410,8 @@
+       ALLOCATE(A_matrix(num_bands,num_wann,num_kpts))
+       ALLOCATE(eigenvalues(num_bands,num_kpts))
+ 
++      ALLOCATE(S(WDES%NB_TOT,WDES%NB_TOT))
++
+       ! just a precaution, in case the compiler does not
+       ! nullify pointers by default
+       R%R=>NULL(); R%SI=>NULL()
+@@ -835,6 +837,7 @@
+       DEALLOCATE(nnlist,nncell)
+       DEALLOCATE(proj_site,proj_l,proj_m,proj_radial,proj_z,proj_x,proj_zona,exclude_bands)
+       DEALLOCATE(EXCLUDE_BAND)
++      DEALLOCATE(S)
+       DEALLOCATE(M_matrix,A_matrix,eigenvalues)
+ 
+       IF (ASSOCIATED(R%R)) THEN
+diff -rupN '--exclude-from=/fs/home/mmars/bin/exl_pattern' ./src/scala.F ../../vasp.5.1/src/scala.F
+--- ./src/scala.F	2015-06-29 16:00:47.000000000 +0200
++++ ../../vasp.5.1/src/scala.F	2015-07-08 11:39:16.224279063 +0200
+@@ -33,7 +33,6 @@
+    LOGICAL, PUBLIC :: LscaLU     = .FALSE.  ! use parallel LU  decomposition
+    LOGICAL, PUBLIC :: LscaAWARE  = .FALSE.  ! do not store sub space matrix
+    LOGICAL, PUBLIC :: LscaAWARE_read  = .FALSE.  ! LscaAWARE was read from file
+-   INTEGER,SAVE :: BG_NP=1, BG_NQ=1
+ 
+   CONTAINS
+     SUBROUTINE  INIT_SCALAAWARE( NB_TOT, NRPLWV, COMM )
+diff -rupN '--exclude-from=/fs/home/mmars/bin/exl_pattern' ./src/subrot.F ../../vasp.5.1/src/subrot.F
+--- ./src/subrot.F	2015-06-29 16:00:45.000000000 +0200
++++ ../../vasp.5.1/src/subrot.F	2015-07-08 11:39:16.236279181 +0200
+@@ -1169,7 +1169,7 @@ END MODULE subrot
+ !
+ !=======================================================================
+ 
+-#ifdef MPI
++#if defined(MPI) && defined(scaLAPACK)
+   SUBROUTINE DUMP_HAM_DISTRI( STRING, WDES, CHAM_DISTRI, NB_TOT, DESCA, IU)
+     USE wave
+     USE scala
+diff -rupN '--exclude-from=/fs/home/mmars/bin/exl_pattern' ./src/us.F ../../vasp.5.1/src/us.F
+--- ./src/us.F	2015-06-29 16:00:45.000000000 +0200
++++ ../../vasp.5.1/src/us.F	2015-07-08 11:39:16.260279418 +0200
+@@ -1460,7 +1460,9 @@ END MODULE
+       USE asa
+       USE paw
+       USE constant
+-      USE us
++#ifndef PGF90
++      USE us, ONLY: SETDIJ_
++#endif
+       IMPLICIT NONE
+ 
+       TYPE (type_info)   T_INFO
+@@ -2693,8 +2695,9 @@ END MODULE
+       USE mgrid
+       USE lattice
+       USE wave
+-      USE us
+-
++#ifndef PGF90
++      USE us, ONLY: AUGMENTATION_CHARGE
++#endif
+       IMPLICIT NONE
+ 
+       TYPE (type_info)   T_INFO
+@@ -2768,8 +2771,9 @@ END MODULE
+       USE mgrid
+       USE lattice
+       USE wave
+-      USE us
+-
++#ifndef PGF90
++      USE us, ONLY: AUGMENTATION_CHARGE
++#endif
+       IMPLICIT NONE
+ 
+       TYPE (type_info)   T_INFO
+diff -rupN '--exclude-from=/fs/home/mmars/bin/exl_pattern' ./src/vdwforcefield.F ../../vasp.5.1/src/vdwforcefield.F
+--- ./src/vdwforcefield.F	2015-06-29 16:00:46.000000000 +0200
++++ ../../vasp.5.1/src/vdwforcefield.F	2015-07-08 11:39:16.308279891 +0200
+@@ -9934,7 +9934,7 @@ MODULE vdwforcefield
+           DO ny=1,GRIDC%NGY
+             DO nx=1,GRIDC%NGX
+                NC=NC+1
+-               IF (REAL(CWORK1(NC))>1e-8 .AND. REAL(CWORK2(NC)))>1e-8) THEN
++               IF (REAL(CWORK1(NC))>1e-8 .AND. REAL(CWORK2(NC))>1e-8) THEN
+                  RDUM=REAL(CWORK2(NC)/CWORK1(NC))            
+                  CALL rel_vol_plane3(T_INFO,LATT_CUR,RDUM,WDF(indx)%R%NMAX,WDF(indx)%RHO,WDF(indx)%R%R,&
+                  & PP%R%H, DYN%POSION(:,i),&

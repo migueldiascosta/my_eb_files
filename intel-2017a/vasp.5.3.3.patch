@@ -1,0 +1,106 @@
+--- makefile.linux_ifc_P4.orig	2017-03-06 14:31:36.412194000 +0800
++++ makefile.linux_ifc_P4	2017-03-06 14:31:54.642940000 +0800
+@@ -59,7 +59,7 @@
+ #-----------------------------------------------------------------------
+ # fortran compiler and linker
+ #-----------------------------------------------------------------------
+-FC=ifort 
++FC=mpiifort 
+ # fortran linker
+ FCL=$(FC)
+ 
+@@ -105,7 +105,7 @@
+ # the WAVECAR file becomes huge
+ #-----------------------------------------------------------------------
+ 
+-FFLAGS =  -FR -names lowercase -assume byterecl 
++FFLAGS = -FR -names lowercase -assume byterecl -I$(MKLROOT)/include/fftw
+ 
+ #-----------------------------------------------------------------------
+ # optimization
+@@ -120,7 +120,7 @@
+ #-----------------------------------------------------------------------
+ 
+ # ifc.9.1, ifc.10.1 recommended
+-OFLAG=-O2 -ip  
++OFLAG=-O3 -xHOST
+ 
+ OFLAG_HIGH = $(OFLAG)
+ OBJ_HIGH = 
+@@ -140,13 +140,13 @@
+ # mkl path for ifc 12 compiler
+ MKL_PATH=$(MKLROOT)/lib/intel64
+ 
+-MKL_FFTW_PATH=$(MKLROOT)/interfaces/fftw3xf/
++#MKL_FFTW_PATH=$(MKLROOT)/interfaces/fftw3xf/
+ 
+ # BLAS
+ # setting -DRPROMU_DGEMV  -DRACCMU_DGEMV in the CPP lines usually speeds up program execution
+ # BLAS= -Wl,--start-group $(MKL_PATH)/libmkl_intel_lp64.a $(MKL_PATH)/libmkl_intel_thread.a $(MKL_PATH)/libmkl_core.a -Wl,--end-group -lguide 
+ # faster linking and available from at least version 11
+-BLAS= -lguide  -mkl 
++BLAS= $(LIBSCALAPACK)
+ 
+ 
+ # LAPACK, use vasp.5.lib/lapack_double
+@@ -155,7 +155,7 @@
+ 
+ # LAPACK from mkl, usually faster and contains scaLAPACK as well
+ 
+-LAPACK= $(MKL_PATH)/libmkl_intel_lp64.a 
++LAPACK=
+ 
+ # here a tricky version, link in libgoto and use mkl as a backup
+ # also needs a special line for LAPACK
+@@ -179,15 +179,15 @@
+ # since this version is faster on P4 machines, we recommend to use it
+ #-----------------------------------------------------------------------
+ 
+-FFT3D   = fft3dfurth.o fft3dlib.o
++#FFT3D   = fft3dfurth.o fft3dlib.o
+ 
+ # alternatively: fftw.3.1.X is slighly faster and should be used if available
+ #FFT3D   = fftw3d.o fft3dlib.o   /opt/libs/fftw-3.1.2/lib/libfftw3.a
+ 
+ # you may also try to use the fftw wrapper to mkl (but the path might vary a lot)
+ # it seems this is best for AMD based systems
+-#FFT3D   = fftw3d.o fft3dlib.o $(MKL_FFTW_PATH)/libfftw3xf_intel.a
+-#INCS = -I$(MKLROOT)/include/fftw 
++FFT3D   = fftw3d.o fft3dlib.o $(MKL_FFTW_PATH)/libfftw3xf_intel.a
++INCS = -I$(MKLROOT)/include/fftw 
+ 
+ #=======================================================================
+ # MPI section, uncomment the following lines until 
+@@ -202,8 +202,8 @@
+ # fortran linker for mpi
+ #-----------------------------------------------------------------------
+ 
+-#FC=mpif90
+-#FCL=$(FC)
++FC=mpiifort
++FCL=$(FC)
+ 
+ #-----------------------------------------------------------------------
+ # additional options for CPP in parallel version (see also above):
+@@ -220,6 +220,10 @@
+ 
+ #-----------------------------------------------------------------------
+ 
++CPP    = $(CPP_) -DMPI  -DHOST=\"LinuxIFC\" -DIFC \
++     -DCACHE_SIZE=32000 -DPGF90 -Davoidalloc -DNGZhalf \
++     -DMPI_BLOCK=64000 -Duse_collective -DscaLAPACK  -DMKL_ILP64
++
+ #CPP    = $(CPP_) -DMPI  -DHOST=\"LinuxIFC\" -DIFC \
+ #     -DCACHE_SIZE=4000 -DPGF90 -Davoidalloc -DNGZhalf \
+ #     -DMPI_BLOCK=8000 -Duse_collective -DscaLAPACK
+@@ -254,8 +258,8 @@
+ 
+ # you may also try to use the fftw wrapper to mkl (but the path might vary a lot)
+ # it seems this is best for AMD based systems
+-#FFT3D   = fftmpiw.o fftmpi_map.o  fftw3d.o  fft3dlib.o   $(MKL_FFTW_PATH)/libfftw3xf_intel.a
+-#INCS = -I$(MKLROOT)/include/fftw 
++FFT3D   = fftmpiw.o fftmpi_map.o  fftw3d.o  fft3dlib.o #  $(MKL_FFTW_PATH)/libfftw3xf_intel.a
++INCS = -I$(MKLROOT)/include/fftw 
+ 
+ #-----------------------------------------------------------------------
+ # general rules and compile lines

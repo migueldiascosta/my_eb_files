@@ -1,0 +1,286 @@
+--- yambo-3.4.2.original/src/pol_function/O_driver.F	2016-01-03 23:05:26.000000000 +0800
++++ yambo-3.4.2/src/pol_function/O_driver.F	2016-10-04 17:14:47.838028256 +0800
+@@ -78,9 +78,14 @@
+    !
+    call tddft_do_X_W_typs(iq,X,wv)
+    !
+-   n_freqs=wv%n(1)
++   n_freqs=wv%n(1) 
++
++ !!@@tea>>
++   if (l_alda_fxc) call tddft_alda_g_space(Xen,Xk,iq)
++!@@tea<<
+    !
+-   if (l_alda_fxc) call tddft_alda_g_space(Xen,Xk)
++
++!   if (l_alda_fxc) call tddft_alda_g_space(Xen,Xk)
+    !
+    ! In TDDFT with BS based kernel eps0 is non-sense
+    ! as shifted of the K diagonal
+--- yambo-3.4.2.original/src/pol_function/X_em1.F	2016-01-03 23:05:26.000000000 +0800
++++ yambo-3.4.2/src/pol_function/X_em1.F	2016-10-04 17:00:17.696042567 +0800
+@@ -114,12 +114,17 @@
+  call X_alloc('X',(/X%ng,X%ng,Xw%n(2)/))
+  !
+  do iq=iq_to_start,X%iq(2)
+-   !
+-   ! TDDFT setup
+-   !
++      !
+    call tddft_do_X_W_typs(iq,X,Xw)
+-   if (l_alda_fxc) call tddft_alda_g_space(Xen,Xk)
++   
++!
++   ! TDDFT setup!@@tea>>
++   if (l_alda_fxc) call tddft_alda_g_space(Xen,Xk,iq)
++   !@@tea<
++
++!if (l_alda_fxc) call tddft_alda_g_space(Xen,Xk)
+    !
++   
+    call X_os(X_mat,iq,Xen,Xk,Xw,X)  
+    !
+    ! When X%whoami == 1 X is Xo (ACFDT). 
+diff -ru yambo-3.4.2.original/src/tddft/tddft_alda_g_space.F yambo-3.4.2/src/tddft/tddft_alda_g_space.F
+--- yambo-3.4.2.original/src/tddft/tddft_alda_g_space.F	2016-01-03 23:05:26.000000000 +0800
++++ yambo-3.4.2/src/tddft/tddft_alda_g_space.F	2016-10-05 17:19:07.947847797 +0800
+@@ -19,7 +19,7 @@
+ ! Software Foundation, Inc., 59 Temple Place - Suite 330,Boston, 
+ ! MA 02111-1307, USA or visit http://www.gnu.org/copyleft/gpl.txt.
+ !
+-subroutine tddft_alda_g_space(E,k)
++subroutine tddft_alda_g_space(E,k,iq)
+  !
+  use pars,          ONLY:DP,SP
+  use memory_m,      ONLY:mem_est
+@@ -27,13 +27,27 @@
+  use com,           ONLY:msg
+  use FFT_m,         ONLY:fft_size,fftw_plan,fft_dim,fft_g_table
+  use electrons,     ONLY:levels
++!@@tea>>                                                                        
++ use D_lattice,     ONLY:DL_vol
++ use R_lattice,     ONLY:bz_samp,G_m_G,bare_qpg
++!@@tea<<        
+  use R_lattice,     ONLY:bz_samp,G_m_G
+  use wave_func,     ONLY:WF_load,WF_free
+  use xc_functionals,ONLY:F_xc
+  use global_XC,     ONLY:WF_kind,WF_xc_functional
+  implicit none
+  type(levels) ::E
+- type(bz_samp)::k
++ type(bz_samp)::k!                                                                                                                                                                                                           
++ ! Work Space                                                                                                                                                                                                
++ !                                                                                                                                                                                                          
++!@@tea>>                                                                                                                                                                                                     
++ real(SP)     :: qmod,beg
++ !real(DP)     :: rspts(fft_size),rho_alext(fft_size)                                                                                                                                                        
++ real(SP), allocatable :: rho_sp(:)
++ real(DP), allocatable :: rho(:)
++ complex(DP)  :: flhxcdyn
++ integer      :: i3,ir,iq
++!@@tea<<     
+  ! 
+  ! Work Space
+  !
+@@ -41,6 +55,7 @@
+  complex(DP), allocatable :: F_xc_DP(:)
+  integer, external        :: eval_G_minus_G
+  !
++
+  if (allocated(FXC)) return
+  !
+  ! Fxc RL size setup looking at the max index of G-G'
+@@ -56,26 +71,67 @@
+  !
+  ! ALDA functional
+  !
+- allocate(F_xc(fft_size),F_xc_DP(fft_size))
+- call XC_potential_driver(E,k,WF_KIND,WF_xc_functional,2)
+- F_xc_DP=F_xc
++!@@tea>>
++! allocate(F_xc(fft_size),F_xc_DP(fft_size))
++! call XC_potential_driver(E,k,WF_KIND,WF_xc_functional,2)
++! F_xc_DP=F_xc
+  !
+  ! need to reset the plan to do a BACKWARD FFT (R->G)
+  !
+- fftw_plan=0
+-#if defined _FFTW
+- call fft_3d(F_xc_DP,fft_dim,-1,fftw_plan)
+-#else
+- call fft_3d(F_xc_DP,fft_dim,-1)
+-#endif
++! fftw_plan=0
++!#if defined _FFTW
++! call fft_3d(F_xc_DP,fft_dim,-1,fftw_plan)
++!#else
++! call fft_3d(F_xc_DP,fft_dim,-1)
++!#endif
+  !
+  ! Fxc
+  !
+  allocate(FXC(FXC_n_g_corr,FXC_n_g_corr,1))
+- call mem_est("FXC",(/size(FXC)/))
++ allocate(rho(fft_size),rho_sp(fft_size))
++
++ rho(:)=0.d0
++ rho_sp(:)=0.d0
++call mem_est("FXC",(/size(FXC)/))
++!@@tea>>
++ beg = 3.2d0 ! eV (exp) 
++ beg=beg/27.2114d0
++ write(*,*)'subroutine tddft_alda_g_space'
++ write(*,*)'fft_size',fft_size,'  iq',iq
++ call el_density(E,k,rho_sp,.false.)
++! call el_density(E,k,rho,.false.) 
++ rho=rho_sp*real(fft_size,DP)/real(DL_vol,DP)
++
++ write(*,*)'rho(1)',rho(1),' rho(1000)',rho(1000)
++
++
+  do i1=1,FXC_n_g_corr
+    do i2=1,FXC_n_g_corr
+      FXC(i1,i2,1)=F_xc_DP( fft_g_table( G_m_G(i1,i2) ,1) )/real(fft_size,SP)
++ qmod=(bare_qpg(iq,i1)*bare_qpg(iq,i2))**0.5d0
++
++  do ir=1,fft_size
++     call ffxcjel(qmod,rho(ir),beg,flhxcdyn)
++     F_xc_DP(ir)=flhxcdyn
++    enddo
++
++    fftw_plan=0
++#   if defined _FFTW
++     call fft_3d(F_xc_DP,fft_dim,-1,fftw_plan)
++#   else
++     call fft_3d(F_xc_DP,fft_dim,-1)
++#   endif
++    FXC(i1,i2,1)=F_xc_DP( fft_g_table( G_m_G(i1,i2) ,1) )/real(fft_size,SP)
++!!  PET 
++!    FXC(i1,i2,1)=F_xc_DP( fft_g_table( G_m_G(i1,i2) ,1) )/(2.d0*real(fft_size,SP))  
++   if((i1==i2).and.(i1==1)) then
++     print*, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
++     print*,'!!!ALPHA Value', FXC(i1,i2,1)*(qmod**2.d0),'!!!'
++     print*,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
++
++   endif
++
++
+    enddo
+  enddo
+  !
+@@ -85,3 +141,115 @@
+  call WF_free()
+  !
+ end subroutine
++
++!@tea>>
++!=======================================================================
++      subroutine ffxcjel(q1,densb,beg,flhxc)
++!=======================================================================
++!     calculate dynamic exchange-correlation kernel flhxc  
++!-----------------------------------------------------------------------
++ use pars,          ONLY:DP,SP,pi
++
++       implicit double precision (a-h,o-z)
++
++!       real densb
++       real q1,beg
++!       real alfaq2e,alfaq2bk
++       complex(DP) :: flhxc
++       integer fxcm 
++!       parameter( pi = 3.1415926535897932384626433832795 )
++
++
++!      write(*,*)'subroutine ffxcjel'
++!      write(*,*)'q1',q1,'  densb',densb,' beg',beg
++!       fxcm=1 ! model of the kernel
++!       fxcm=1
++       fxcm=3
++       dl=1.d0
++!       dl=2.d0
++       densb1=densb/dl/dl/dl
++!       densb1=rhoav/dl/dl/dl
++       q=q1*q1/dl/dl
++!        u=u1/dl/dl
++       u=0.d0
++       akf1=(3.d0*pi*pi*densb1)**(1.d0/3.d0)
++       rs1=(3.d0/4.d0/pi/densb1)**(1.d0/3.d0)
++!        beg=0.0d0
++! Band Gap for Silicon 
++!        beg = 1.17d0 ! eV (exp)
++! Band Gap for LiF
++!        beg = 14.2d0 ! eV (exp)
++! Band Gap for Diam
++!        beg = 5.48d0 ! eV (exp)
++! Band Gap for Ge
++!        beg = 0.74d0 ! eV (exp)
++! Band Gap for GaAs
++!        beg = 1.42d0
++! Band Gap for SiC (C3)
++!        beg = 2.36d0
++!
++       alpha=0.0255184916d0
++       beta=-0.691590707d0
++       gamma1=-0.114548231d0
++       gamma2=-0.614523371d0
++       fzero=-4.d0*pi*alpha*(densb1**beta)
++       finfinity=gamma1*(densb1**gamma2)
++       c=finfinity/fzero
++       aa=(1.d0+rs1)**6.5
++       cc=10.5d0
++       a=dexp(cc/aa)+0.5
++       rap=(1.d0+a*(u**1)+c*(u**2))/(1.d0+(u**2))
++           
++       a1=2.15d0
++       a2=0.435d0
++       b1=1.57d0
++       b2=0.409
++       x=dsqrt(rs1)
++       bn=(1.d0+a1*x+a2*x*x*x)/(3.d0+b1*x+b2*x*x*x)
++       bb1=0.000976519726d0
++       bb2=-1.02046383d0
++       cn=pi*akf1*akf1*akf1*bb1*(densb1**bb2)/2.d0
++       akno=-fzero*rap/4.d0/pi/bn
++       if(fxcm.eq.1)then
++!@ fxcm=1 >>
++        alpha11=beg*beg/densb1
++       else
++!@ fxcm=2 & fxcm=3 >>
++        av1=-0.025518491d0
++        av2=-0.691590707d0
++        d0=densb1
++        omegap=dsqrt(4.d0*pi*d0)
++        AKF=(1.d0/RS1)*((9.d0*pi/4.d0)**(1.d0/3.d0))
++        EF=akf**2/2.d0
++        fxcv=4.d0*pi*av1*d0**av2
++
++!        bv=1.d0
++!        bv1=-fxcv*3.d0/2.d0*d0/EF
++
++        x1=omegap**2/12.d0/akf**4/beg**2
++        x2=(beg-3.d0*akf**2)**2+3.d0*akf**4
++        epsilon0=1.d0+x1*x2
++        if(fxcm.eq.2)then
++         bv=1.d0
++        else
++         bv=-fxcv*3.d0/2.d0*d0/EF
++        endif
++        alpha11=4.d0*pi/(epsilon0-1.d0)*bv
++!@ fxcm=2 & fxcm=3 <<
++       endif
++!@ fxcm <<
++!@ akno & flhxc
++       ct=1.0d0
++       bn=(bn+beg*ct)/(1.d0+beg*ct)
++       cn=cn/(1.d0+beg*ct)
++!
++       akno=akno+alpha11/q/4.d0/pi/bn
++       flhxc3=(1.d0/dl)*(4.d0*pi*bn/q*(dexp(-akno*q)-1.d0)-(q/(1.d0+q))*4.d0*pi*cn/akf1/akf1)
++!       flhxc3=(1.d0/dl)*(4.d0*pi*bn/q*(dexp(-akno*q)-1.d0))
++       flhxc=4.d0*pi/q/dl*0.d0+flhxc3
++
++!    write(*,*)'flhxc',flhxc
++
++       return
++       end
++!@tea<<

@@ -13,11 +13,10 @@ sources = [SOURCELOWER_TAR_GZ]
 source_urls = ['http://www.wannier.org/code']
 checksums = ['07a81c002b41d6d0f97857e55c57d769']
 
-# patches = ['Wannier90_2x_ignore_makesys.patch']
-
-# build program and library
 prebuildopts = 'cp ./config/make.inc.ifort ./make.inc && '
-buildopts = 'all F90=$MPIF90 FCOPTS="$FFLAGS" LDOPTS="$FFLAGS" LIBDIR="$LAPACK_LIB_DIR" LIBS="$LIBLAPACK" '
+
+buildopts = 'all F90=$F90 MPIF90=$MPIF90 FCOPTS="$FFLAGS" LDOPTS="$FFLAGS" '
+buildopts += 'LIBDIR="$LAPACK_LIB_DIR" LIBS="$LIBLAPACK" '
 buildopts += 'COMMS=mpi'
 
 files_to_copy = [(['wannier90.x', 'postw90.x'], 'bin'), (['libwannier.a'], 'lib')]
@@ -27,4 +26,4 @@ sanity_check_paths = {
     'dirs': []
 }
 
-moduleclass = 'phys'
+moduleclass = 'chem'

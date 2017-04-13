@@ -2,6 +2,7 @@ easyblock = 'ConfigureMake'
 
 name = 'libxc'
 version = '3.0.0'
+versionsuffix = '_runtest'
 
 homepage = 'http://www.tddft.org/programs/octopus/wiki/index.php/Libxc'
 description = """Libxc is a library of exchange-correlation functionals for density-functional theory.
@@ -9,13 +10,14 @@ description = """Libxc is a library of exchange-correlation functionals for dens
 
 toolchain = {'name': 'intel', 'version': '2017a'}
 # Results for some functionals (e.g. mgga_c_tpss) deviate with too aggressive optimization settings.
-toolchainopts = {'lowopt': True, 'optarch': False}
+toolchainopts = {'lowopt': True}
 
 sources = [SOURCE_TAR_GZ]
 source_urls = ['http://www.tddft.org/programs/octopus/down.php?file=libxc/']
 
 configopts = 'FC="$F77" FCFLAGS="$FFLAGS" --enable-shared --enable-fortran'
 
+# a few tests still fail on Intel Haswell
 runtest = 'check'
 
 sanity_check_paths = {

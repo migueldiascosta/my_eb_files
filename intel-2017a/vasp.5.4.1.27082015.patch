@@ -1,0 +1,503 @@
+diff -rupN '--exclude-from=/fs/home/mmars/bin/exl_pattern' vasp.5.4.1/src/lattlib.F /fs/home/mmars/src/vasp/vasp.5.1/src/lattlib.F
+--- vasp.5.4.1/src/lattlib.F	2015-06-29 16:00:37.000000000 +0200
++++ /fs/home/mmars/src/vasp/vasp.5.1/src/lattlib.F	2015-08-27 12:48:35.806726767 +0200
+@@ -2415,7 +2415,7 @@
+ 
+ !***********************************************************************
+ !                                                                      *
+-      SUBROUTINE PRICELV(IBRAV,CELDIM,A1,A2,A3,TAU,VEC,P1,P2,P3,PTRANS,NCELL, &
++      SUBROUTINE PRICELV(IBRAV,CELDIM,A1,A2,A3,TAU,VEC,SPIN,P1,P2,P3,PTRANS,NCELL, &
+      &                 IPTYP,PDIM,NSP,NSX,NA,NAX,NC,TAUROT,INDEX,WRK,PRCHAN)
+       USE prec
+       USE sym_prec
+@@ -2481,12 +2481,14 @@
+ !***********************************************************************
+ 
+       LOGICAL TNTRAN,EXIST,TCONT
++      LOGICAL TSPIN,TMAYFLIP,TFLIPPED
+       INTEGER PRCHAN
+ 
+       DIMENSION A1(3),A2(3),A3(3),NA(NSP),TAU(NAX,3,NSX),TRA(3),PDIM(6)
+       DIMENSION P1(3),P2(3),P3(3),B1(3),B2(3),B3(3),DIF(3),WRK(NAX+2,3)
+       DIMENSION TAUROT(NAX,3,NSX),INDEX(NAX+2),TAUSAV(3),PTRANS(NAX+2,3)
+       DIMENSION VEC(NAX,3,NSX,NC),VECROT(NAX,3,NSX,NC),DIFV(3,NC)
++      DIMENSION SPIN(NAX,NSX),SPINROT(NAX,NSX)
+       DIMENSION CELDIM(6)
+ 
+       EQUIVALENCE (TNTRAN,EXIST)
+@@ -2545,6 +2547,11 @@
+             ENDDO
+             VEC(ISTART:ISTART+NA(IS)-1,:,ISP,IC)=WRK(1:NA(IS),:)
+          ENDDO
++! and SPIN as well
++         DO IA=1,NA(IS)
++            WRK(IA,1)=SPIN(ISTART+INDEX(IA)-1,ISP)
++         ENDDO
++         SPIN(ISTART:ISTART+NA(IS)-1,ISP)=WRK(1:NA(IS),1)
+     2 CONTINUE
+ ! Trivial case: There exists only one atom of species ISMIN. So we
+ ! have already given the primitive cell ... :
+@@ -2649,9 +2656,15 @@
+             DO IA=1,NA(IS)
+                VECROT(ISTART+IA-1,:,ISP,:)=VEC(ISTART+INDEX(IA)-1,:,ISP,:) 
+             ENDDO
++! and SPINROT as well
++            DO IA=1,NA(IS)
++               SPINROT(ISTART+IA-1,ISP)=SPIN(ISTART+INDEX(IA)-1,ISP)
++            ENDDO
+     4    CONTINUE
+ ! Now compare the two lattices 'one-by-one' whether they are identical:
+          TNTRAN=.TRUE.
++! logicals to keep track of spinflips
++         TMAYFLIP=.TRUE.; TFLIPPED=.FALSE.
+ ! For all atoms of the unit cell ... :
+          ISTART=1
+          DO 6 IS=1,NSP
+@@ -2679,6 +2692,13 @@
+                   DIFV(2,IC)=VEC(IA,2,ISP,IC)-VECROT(IA,2,ISP,IC)
+                   DIFV(3,IC)=VEC(IA,3,ISP,IC)-VECROT(IA,3,ISP,IC)
+                ENDDO
++! DIFM is the difference between the spins at the original and the
++! translated coordinates.
++               DIFM=SPIN(IA,ISP)-SPINROT(IA,ISP)
++! DIFP is the sum of the spins at the original and the translated
++! coordinates. This quantity is needed to include the possibilty of
++! spinflips.
++               DIFP=SPIN(IA,ISP)+SPINROT(IA,ISP)
+ ! If DIF and DIFV are not equal (0.,0.,0.) TNTRAN=TNTRAN.AND.FALSE and so it
+ ! remains FALSE forever ... (if only one position is not reproduced!).
+ ! Only if all DIFs are zero TNTRAN (starting with the value TRUE) will
+@@ -2692,6 +2712,23 @@
+      &                              .AND.(ABS(DIFV(2,IC))<TINY) &
+      &                                   .AND.(ABS(DIFV(3,IC))<TINY))
+                ENDDO
++! treatment of the spin lattice.
++               TSPIN=.FALSE.
++! when the spins are zero at the original and the translated coordinates:
++               IF ((ABS(DIFM)<TINY).AND.(ABS(DIFP)<TINY)) TSPIN=.TRUE.
++! when the spins at the original and translated coordinates are nonzero and equal,
++! and a spinflip was not already needed to connect two other sites of the lattices:
++               IF ((.NOT.TSPIN).AND.(ABS(DIFM)<TINY).AND.(.NOT.TFLIPPED)) THEN
++                  TSPIN=.TRUE.; TMAYFLIP=.FALSE.
++               ENDIF
++! when the spins at the original and translated coordinates are nonzero and a
++! spinflip is part of the translation and the spin may still be flipped or was
++! already flipped before:
++               IF ((.NOT.TSPIN).AND.(ABS(DIFP)<TINY).AND.(TMAYFLIP.OR.TFLIPPED)) THEN
++                  TSPIN=.TRUE.; TMAYFLIP=.FALSE.; TFLIPPED=.TRUE.
++               ENDIF
++! so finally considering spin yields:
++               TNTRAN=TNTRAN.AND.TSPIN              
+     5       CONTINUE
+     6    CONTINUE
+ ! Check was successful ... :
+diff -rupN '--exclude-from=/fs/home/mmars/bin/exl_pattern' vasp.5.4.1/src/main.F /fs/home/mmars/src/vasp/vasp.5.1/src/main.F
+--- vasp.5.4.1/src/main.F	2015-06-29 16:00:40.000000000 +0200
++++ /fs/home/mmars/src/vasp/vasp.5.1/src/main.F	2015-09-18 18:32:34.740840898 +0200
+@@ -819,7 +819,7 @@
+                      SYMM%PTRANS,SYMM%NROT,SYMM%NPTRANS,SYMM%ROTMAP, &
+                      SYMM%TAU,SYMM%TAUROT,SYMM%WRKROT, &
+                      SYMM%INDROT,T_INFO%ATOMOM,WDES%SAXIS,SYMM%MAGROT,NCDIJ,IO%IU6)
+-         IF (IO%NWRITE>=3) CALL WRTSYM(T_INFO%NIONS,NIOND,SYMM%PTRANS,SYMM%ROTMAP,IO%IU6)
++         IF (IO%NWRITE>=3) CALL WRTSYM(T_INFO%NIONS,NIOND,SYMM%PTRANS,SYMM%ROTMAP,SYMM%MAGROT,IO%IU6)
+       ELSE
+ ! ... so take nosymm!
+          CALL NOSYMM(LATT_CUR%A,T_INFO%NTYP,T_INFO%NITYP,NIOND,SYMM%PTRANS, &
+diff -rupN '--exclude-from=/fs/home/mmars/bin/exl_pattern' vasp.5.4.1/src/symlib.F /fs/home/mmars/src/vasp/vasp.5.1/src/symlib.F
+--- vasp.5.4.1/src/symlib.F	2015-06-29 16:00:45.000000000 +0200
++++ /fs/home/mmars/src/vasp/vasp.5.1/src/symlib.F	2015-09-18 18:32:37.460867533 +0200
+@@ -2944,7 +2944,7 @@ END MODULE
+ 
+ !***********************************************************************
+ !                                                                      *
+-      SUBROUTINE SETGRPV(S,SYMOP,GTRANS,NROT,NROTK,TAU,VEC,LATTYP,NOP, &
++      SUBROUTINE SETGRPV(S,SYMOP,GTRANS,NROT,NROTK,TAU,VEC,SPIN,LATTYP,NOP, &
+      &                         TAUROT,NSP,NSX,NA,NAX,NC,INDEX,WRK,PRCHAN)
+       USE prec
+ 
+@@ -3018,7 +3018,7 @@ END MODULE
+ 
+       DIMENSION S(3,3,48),GTRANS(3,48),SYMOP(3,3,48),NA(NSP)
+       DIMENSION TAU(NAX,3,NSX),TAUROT(NAX,3,NSX),WRK(NAX,3),INDEX(NAX)
+-      DIMENSION VEC(NAX,3,NSX,NC)
++      DIMENSION VEC(NAX,3,NSX,NC),SPIN(NAX,NSX)
+ 
+       SAVE INV,R6Z,R3D,R2HEX,R2TRI,R2YP,R4ZP,R4ZBC,R4ZFC,R2ZP,R2YBC
+       SAVE R2ZBC,R2YBAS,R2YFC,R2ZFC
+@@ -3146,7 +3146,7 @@ END MODULE
+      &        ' simple cubic supercell.'/)
+       END IF
+ ! Now select all symmetry operations which reproduce the lattice:
+-      CALL GETGRPV(S,GTRANS,NROT,NROTK,SYMOP,NOP,TAU,VEC, &
++      CALL GETGRPV(S,GTRANS,NROT,NROTK,SYMOP,NOP,TAU,VEC,SPIN, &
+      &                           TAUROT,NSP,NSX,NA,NAX,NC,INDEX,WRK,PRCHAN)
+       RETURN
+       END
+@@ -3154,7 +3154,7 @@ END MODULE
+ 
+ !***********************************************************************
+ !                                                                      *
+-      SUBROUTINE GETGRPV(S,GTRANS,NROT,NROTK,SYMOP,NOP,TAU,VEC, &
++      SUBROUTINE GETGRPV(S,GTRANS,NROT,NROTK,SYMOP,NOP,TAU,VEC,SPIN, &
+      &                         TAUROT,NSP,NSX,NA,NAX,NC,INDEX,WRK,PRCHAN)
+       USE prec
+       USE sym_prec
+@@ -3220,7 +3220,7 @@ END MODULE
+ 
+       DIMENSION S(3,3,48),GTRANS(3,48),SYMOP(3,3,48),TEMP(3,48),NA(NSP)
+       DIMENSION TAU(NAX,3,NSX),TAUROT(NAX,3,NSX),WRK(NAX,3),INDEX(NAX)
+-      DIMENSION VEC(NAX,3,NSX,NC)
++      DIMENSION VEC(NAX,3,NSX,NC),SPIN(NAX,NSX)
+ 
+       SAVE ZERO
+       DATA ZERO /0,0,0,0,0,0,0,0,0/
+@@ -3229,7 +3229,7 @@ END MODULE
+       NROTK=0
+ ! Check the operations of a 'pool' of all possible operations ... :
+       DO 1 I=1,NOP
+-         CALL CHKSYMV(SYMOP(1,1,I),GTRANS(1,I),TS,TAU,VEC,TAUROT, &
++         CALL CHKSYMV(SYMOP(1,1,I),GTRANS(1,I),TS,TAU,VEC,SPIN,TAUROT, &
+      &                                         NSP,NSX,NA,NAX,NC,INDEX,WRK)
+          IF (TS) THEN
+ ! Hurray! We found some symmetry operation in subroutine CHKSYM ... :
+@@ -3286,7 +3286,7 @@ END MODULE
+ 
+ !***********************************************************************
+ !                                                                      *
+-      SUBROUTINE CHKSYMV(S,GTRANS,TS,TAU,VEC,TAUROT,NSP,NSX,NA,NAX,NC,INDEX,WRK)
++      SUBROUTINE CHKSYMV(S,GTRANS,TS,TAU,VEC,SPIN,TAUROT,NSP,NSX,NA,NAX,NC,INDEX,WRK)
+       USE prec
+       USE sym_prec
+       IMPLICIT REAL(q) (A-H,O-Z)
+@@ -3378,11 +3378,13 @@ END MODULE
+ !***********************************************************************
+ 
+       LOGICAL TS,TNTRAN,TCONT
++      LOGICAL TSPIN,TMAYFLIP,TFLIPPED
+       INTEGER S
+ 
+       DIMENSION S(3,3),GTRANS(3),NA(NSP),TAU(NAX,3,NSX),TAUDIF(3)
+       DIMENSION TAUROT(NAX,3,NSX),WRK(NAX,3),INDEX(NAX),TAUSAV(3),TRA(3)
+       DIMENSION VEC(NAX,3,NSX,NC),VECROT(NAX,3,NSX,NC),VECDIF(3,NC)
++      DIMENSION SPIN(NAX,NSX),SPINROT(NAX,NSX)
+ 
+ ! Unfortunately one has always two possibilities for the book-keeping
+ ! of atomic coordinates, forces etc.: One can distinguish between the
+@@ -3442,6 +3444,11 @@ END MODULE
+             ENDDO
+             VEC(ISTART:ISTART+NA(IS)-1,:,ISP,IC)=WRK(1:NA(IS),:)
+          ENDDO
++! and SPIN as well
++         DO IA=1,NA(IS)
++            WRK(IA,1)=SPIN(ISTART+INDEX(IA)-1,ISP)
++         ENDDO
++         SPIN(ISTART:ISTART+NA(IS)-1,ISP)=WRK(1:NA(IS),1)
+ ! Rotate all coordinates ... :
+          DO 2 IA=ISTART,NA(IS)+ISTART-1
+             TAUROT(IA,1,ISP)=S(1,1)*TAU(IA,1,ISP)+ &
+@@ -3501,6 +3508,11 @@ END MODULE
+             ENDDO
+             VECROT(ISTART:ISTART+NA(IS)-1,:,ISP,IC)=WRK(1:NA(IS),:)
+          ENDDO
++! and SPINROT as well
++         DO IA=1,NA(IS)
++            WRK(IA,1)=SPIN(ISTART+INDEX(IA)-1,ISP)
++         ENDDO
++         SPINROT(ISTART:ISTART+NA(IS)-1,ISP)=WRK(1:NA(IS),1)
+     3 CONTINUE
+ ! Save the rotated coordinate of the first atom of species ISMIN:
+       IF (TCONT) THEN
+@@ -3573,10 +3585,17 @@ END MODULE
+                ENDDO
+                VECROT(ISTART:ISTART+NA(IS)-1,:,ISP,IC)=WRK(1:NA(IS),:)
+             ENDDO
++! and SPINROT as well
++            DO IA=1,NA(IS)
++               WRK(IA,1)=SPINROT(ISTART+INDEX(IA)-1,ISP)
++            ENDDO
++            SPINROT(ISTART:ISTART+NA(IS)-1,ISP)=WRK(1:NA(IS),1)
+     5    CONTINUE
+ ! Now compare the two lattices 'one-by-one' whether they are identical
+ ! (possibly differing by a translation vector GTRANS ...) or not ... .
+          TNTRAN=.TRUE.
++! logicals to keep track of spinflips
++         TMAYFLIP=.TRUE.; TFLIPPED=.FALSE.
+ ! For all atoms of the unit cell ... :
+          ISTART=1
+          DO 7 IS=1,NSP
+@@ -3604,6 +3623,13 @@ END MODULE
+                   VECDIF(2,IC)=VEC(IA,2,ISP,IC)-VECROT(IA,2,ISP,IC)
+                   VECDIF(3,IC)=VEC(IA,3,ISP,IC)-VECROT(IA,3,ISP,IC)
+                ENDDO
++! SPINDIFM is the difference between the spins at the original and the
++! translated coordinates.
++               SPINDIFM=SPIN(IA,ISP)-SPINROT(IA,ISP)
++! SPINDIFP is the sum of the spins at the original and the translated
++! coordinates. This quantity is needed to include the possibilty of
++! spinflips.
++               SPINDIFP=SPIN(IA,ISP)+SPINROT(IA,ISP)
+ ! If TAUDIF and VECDIF are not equal (0.,0.,0.) TNTRAN=TNTRAN.AND.FALSE
+ ! and so it remains FALSE forever ... (if only one position is not reproduced!).
+ ! Only if all TAUDIFs are zero TNTRAN (starting with the value TRUE)
+@@ -3617,6 +3643,23 @@ END MODULE
+      &                               .AND.(ABS(VECDIF(2,IC))<TINY) &
+      &                                       .AND.(ABS(VECDIF(3,IC))<TINY))
+                ENDDO
++! treatment of the spin lattice.
++               TSPIN=.FALSE.
++! when the spins are zero at the original and the translated coordinates:
++               IF ((ABS(SPINDIFM)<TINY).AND.(ABS(SPINDIFP)<TINY)) TSPIN=.TRUE.
++! when the spins at the original and translated coordinates are nonzero and equal,
++! and a spinflip was not already needed to connect two other sites of the lattices:
++               IF ((.NOT.TSPIN).AND.(ABS(SPINDIFM)<TINY).AND.(.NOT.TFLIPPED)) THEN
++                  TSPIN=.TRUE.; TMAYFLIP=.FALSE.
++               ENDIF
++! when the spins at the original and translated coordinates are nonzero and a
++! spinflip is part of the translation and the spin may still be flipped or was
++! already flipped before:
++               IF ((.NOT.TSPIN).AND.(ABS(SPINDIFP)<TINY).AND.(TMAYFLIP.OR.TFLIPPED)) THEN
++                  TSPIN=.TRUE.; TMAYFLIP=.FALSE.; TFLIPPED=.TRUE.
++               ENDIF
++! so finally considering spin yields:
++               TNTRAN=TNTRAN.AND.TSPIN 
+     6       CONTINUE
+     7    CONTINUE
+ ! Check was successful ... :
+diff -rupN '--exclude-from=/fs/home/mmars/bin/exl_pattern' vasp.5.4.1/src/symmetry.F /fs/home/mmars/src/vasp/vasp.5.1/src/symmetry.F
+--- vasp.5.4.1/src/symmetry.F	2015-06-29 16:00:45.000000000 +0200
++++ /fs/home/mmars/src/vasp/vasp.5.1/src/symmetry.F	2015-08-27 12:49:58.043551869 +0200
+@@ -410,7 +410,7 @@ MODULE msymmetry
+       DIMENSION A(3,3),POSION(3,NIOND),VEL(3,NIOND),NITYP(NTYP)
+       DIMENSION TAU(NIOND,3),TAUROT(NIOND,3),WRKROT(3*(NIOND+2))
+       DIMENSION PTRANS(NIOND+2,3),INDROT(NIOND+2),ATOMOM(3*NIOND)
+-      DIMENSION TMP(NIOND,3,5),VEC(NIOND,3,3)
++      DIMENSION TMP(NIOND,3,5),VEC(NIOND,3,3),SPIN(NIOND)
+ 
+       DIMENSION A1(3),A2(3),A3(3),IOPS(3,3,48),CELDIM(6),PDIM(6)
+       DIMENSION COO1(3),COO2(3),B1(3),B2(3),B3(3),P1(3),P2(3),P3(3)
+@@ -472,9 +472,9 @@ MODULE msymmetry
+      &   'Analysis of symmetry for initial positions (statically):', &
+      &   '====================================================================='
+ 
+-      TAU=TMP(:,:,1); VEC=0._q
++      TAU=TMP(:,:,1); VEC=0._q; SPIN=0._q
+ 
+-      CALL PRICELV(IBRAV,CELDIM,A(1,1),A(1,2),A(1,3),TAU,VEC,P1,P2,P3,PTRANS, &
++      CALL PRICELV(IBRAV,CELDIM,A(1,1),A(1,2),A(1,3),TAU,VEC,SPIN,P1,P2,P3,PTRANS, &
+      &    NPCELL,IPTYP,PDIM,NTYP,1,NITYP,NIOND,3,TAUROT,INDROT,WRKROT,IU6)
+ 
+       AP(1,1)=P1(1)
+@@ -490,10 +490,11 @@ MODULE msymmetry
+ !=======================================================================
+ ! Now try to find out which symmetry operations we have ... :
+ !=======================================================================
+-      TAU=TMP(:,:,2); VEC=0._q
++      TAU=TMP(:,:,2); VEC=0._q; SPIN=0._q
+ 
+-      CALL SETGRPV(ISYMOP,IOPS,GTRANS,NROT,NROTK,TAU,VEC,IBRAV,NOP, &
++      CALL SETGRPV(ISYMOP,IOPS,GTRANS,NROT,NROTK,TAU,VEC,SPIN,IBRAV,NOP, &
+      &                      TAUROT,NTYP,1,NITYP,NIOND,3,INDROT,WRKROT,IU6)
++
+       CALL PGROUP(ISYMOP,NROT,IPGIND,GRPNAM)
+       IF (IU6>0) &
+       WRITE(IU6,'(/4A)') 'The static configuration has the ', &
+@@ -525,7 +526,7 @@ MODULE msymmetry
+       TAU=TMP(:,:,1)
+       VEC(:,:,1)=TMP(:,:,3)
+ 
+-      CALL PRICELV(IBRAV,CELDIM,A(1,1),A(1,2),A(1,3),TAU,VEC,P1,P2,P3,PTRANS, &
++      CALL PRICELV(IBRAV,CELDIM,A(1,1),A(1,2),A(1,3),TAU,VEC,SPIN,P1,P2,P3,PTRANS, &
+      &    NPCELL,IPTYP,PDIM,NTYP,1,NITYP,NIOND,3,TAUROT,INDROT,WRKROT,IU6)
+ 
+       AP(1,1)=P1(1)
+@@ -544,7 +545,7 @@ MODULE msymmetry
+          CALL VECCON(VEC(IA,1:3,1),VEC(IA,1:3,1),1,A(1,1),A(1,2),A(1,3),A1,A2,A3)
+       ENDDO
+ 
+-      CALL SETGRPV(ISYMOP,IOPS,GTRANS,NROT,NROTK,TAU,VEC,IBRAV,NOP, &
++      CALL SETGRPV(ISYMOP,IOPS,GTRANS,NROT,NROTK,TAU,VEC,SPIN,IBRAV,NOP, &
+      &                      TAUROT,NTYP,1,NITYP,NIOND,3,INDROT,WRKROT,IU6)
+       CALL PGROUP(ISYMOP,NROT,IPGIND,GRPNAM)
+       IF (IU6>0) &
+@@ -599,7 +600,7 @@ MODULE msymmetry
+          TAU=TMP(:,:,1)
+          VEC(:,:,1)=TMP(:,:,3); VEC(:,:,2)=TMP(:,:,4)
+ 
+-         CALL PRICELV(IBRAV,CELDIM,A(1,1),A(1,2),A(1,3),TAU,VEC,P1,P2,P3,PTRANS, &
++         CALL PRICELV(IBRAV,CELDIM,A(1,1),A(1,2),A(1,3),TAU,VEC,SPIN,P1,P2,P3,PTRANS, &
+      &       NPCELL,IPTYP,PDIM,NTYP,1,NITYP,NIOND,3,TAUROT,INDROT,WRKROT,IU6)
+ 
+          AP(1,1)=P1(1)
+@@ -619,7 +620,7 @@ MODULE msymmetry
+             CALL VECCON(VEC(IA,1:3,2),VEC(IA,1:3,2),1,A(1,1),A(1,2),A(1,3),A1,A2,A3)
+          ENDDO
+ 
+-         CALL SETGRPV(ISYMOP,IOPS,GTRANS,NROT,NROTK,TAU,VEC,IBRAV,NOP, &
++         CALL SETGRPV(ISYMOP,IOPS,GTRANS,NROT,NROTK,TAU,VEC,SPIN,IBRAV,NOP, &
+      &                         TAUROT,NTYP,1,NITYP,NIOND,3,INDROT,WRKROT,IU6)
+          CALL PGROUP(ISYMOP,NROT,IPGIND,GRPNAM)
+          IF (IU6>0) &
+@@ -652,24 +653,21 @@ MODULE msymmetry
+       IF (ISPIN==2) THEN
+          IF (IU6>0) &
+          WRITE(IU6,'(/2(/A))') &
+-     &       'Analysis of magnetic symmetry:', &
++     &       'Analysis of structural, dynamic, and magnetic symmetry:', &
+      &       '====================================================================='
+ 
+          CALL RECIPS(1._q,A(1,1),A(1,2),A(1,3),B1,B2,B3)
+ ! Moments along cartesian z-axis, handling like non-collinear moments (see also
+ ! below); bring them to lattice coordinates and store in TMP(:,:,5)
+          DO IA=1,NATOMS
+-! ATOMOM(IA) takes over the role of ATOMOM_(3) for the non-collinear case,
+-! ATOMOM_(1)=ATOMOM_(2)=0 due to assumption that cartesian z-axis is SAXIS
+-            TMP(IA,1,5)=ATOMOM(IA)*B1(3)
+-            TMP(IA,2,5)=ATOMOM(IA)*B2(3)
+-            TMP(IA,3,5)=ATOMOM(IA)*B3(3)
++            TMP(IA,3,5)=ATOMOM(IA)
+          ENDDO
+  
+          TAU=TMP(:,:,1)
+-         VEC(:,:,1)=TMP(:,:,3); VEC(:,:,2)=TMP(:,:,4); VEC(:,:,3)=TMP(:,:,5)
++         VEC(:,:,1)=TMP(:,:,3); VEC(:,:,2)=TMP(:,:,4)
++         SPIN=TMP(:,3,5)
+ 
+-         CALL PRICELV(IBRAV,CELDIM,A(1,1),A(1,2),A(1,3),TAU,VEC,P1,P2,P3,PTRANS, &
++         CALL PRICELV(IBRAV,CELDIM,A(1,1),A(1,2),A(1,3),TAU,VEC,SPIN,P1,P2,P3,PTRANS, &
+         &    NPCELL,IPTYP,PDIM,NTYP,1,NITYP,NIOND,3,TAUROT,INDROT,WRKROT,IU6)
+ 
+          AP(1,1)=P1(1)
+@@ -682,8 +680,16 @@ MODULE msymmetry
+          AP(2,3)=P3(2)
+          AP(3,3)=P3(3)
+ 
+-         CALL MAGSYM(ATOMOM,MAGROT,ROTMAP,ISYMOP,GTRANS,NROTK,NROT,PTRANS, &
+-     &         NPCELL,1,NTYP,NIOND,NITYP,NIOND,TAUROT,WRKROT,INDROT,IU6)
++         TAU=TMP(:,:,2)
++         VEC(:,:,1)=TMP(:,:,3); VEC(:,:,2)=TMP(:,:,4)
++         DO IA=1,NATOMS
++            CALL VECCON(VEC(IA,1:3,1),VEC(IA,1:3,1),1,A(1,1),A(1,2),A(1,3),A1,A2,A3)
++            CALL VECCON(VEC(IA,1:3,2),VEC(IA,1:3,2),1,A(1,1),A(1,2),A(1,3),A1,A2,A3)
++         ENDDO
++         SPIN=TMP(:,3,5)
++
++         CALL SETGRPV(ISYMOP,IOPS,GTRANS,NROT,NROTK,TAU,VEC,SPIN,IBRAV,NOP, &
++     &                         TAUROT,NTYP,1,NITYP,NIOND,3,INDROT,WRKROT,IU6)
+          CALL PGROUP(ISYMOP,NROT,IPGIND,GRPNAM)
+          IF (IU6>0) &
+          WRITE(IU6,'(/4A)') 'The magnetic configuration has the ', &
+@@ -694,17 +700,28 @@ MODULE msymmetry
+             WRITE(IU6,*) 'The point group associated with ', &
+      &                             'its full space group is ',GRPNAM,'.'
+          END IF
+-         DO 11 IA=1,NATOMS
+-            TAU(IA,1)=POSION(1,IA)
+-            TAU(IA,2)=POSION(2,IA)
+-            TAU(IA,3)=POSION(3,IA)
+-   11    ENDDO
++
++         CALL SGRCON(ISYMOP,ISYMOP,NROTK,A1,A2,A3,A(1,1),A(1,2),A(1,3))
++         CALL VECCON(GTRANS,GTRANS,NROTK,A1,A2,A3,A(1,1),A(1,2),A(1,3))
++
++         TAU=TMP(:,:,1)
+          IF (ASSOCIATED(ROTMAP)) THEN
+             DEALLOCATE(ROTMAP)
+          ENDIF
+          ALLOCATE(ROTMAP(NIOND,NROTK,NPCELL))
+          CALL POSMAP(TAU,ISYMOP,GTRANS,NROTK,PTRANS,NPCELL,NIOND,1, &
+      &                                   NTYP,NIOND,NITYP,ROTMAP(1,1,1),TAUROT)
++
++         NROTKP=NROTK; NROTP=NROT; NPCELLP=NPCELL
++
++         CALL MAGSYM(ATOMOM,MAGROT,ROTMAP,ISYMOP,GTRANS,NROTKP,NROTP,PTRANS, &
++     &         NPCELL,1,NTYP,NIOND,NITYP,NIOND,TAUROT,WRKROT,INDROT,-1)
++
++         IF ((NROTKP/=NROTK).OR.(NROTP/=NROT).AND.(NPCELLP/=NPCELL)) THEN
++            WRITE(*,*) 'INISYM: ERROR: Unable to resolve symmetry ', &
++     &                             'of colinear magnetic degrees of freedom.'
++            STOP
++         ENDIF
+       ELSE IF (ISPIN==4) THEN
+          IF (IU6>0) &
+          WRITE(IU6,'(/2(/A))') &
+@@ -734,7 +751,7 @@ MODULE msymmetry
+          TAU=TMP(:,:,1)
+          VEC(:,:,1)=TMP(:,:,3); VEC(:,:,2)=TMP(:,:,4); VEC(:,:,3)=TMP(:,:,5)
+ 
+-         CALL PRICELV(IBRAV,CELDIM,A(1,1),A(1,2),A(1,3),TAU,VEC,P1,P2,P3,PTRANS, &
++         CALL PRICELV(IBRAV,CELDIM,A(1,1),A(1,2),A(1,3),TAU,VEC,SPIN,P1,P2,P3,PTRANS, &
+         &    NPCELL,IPTYP,PDIM,NTYP,1,NITYP,NIOND,3,TAUROT,INDROT,WRKROT,IU6)
+ 
+          AP(1,1)=P1(1)
+@@ -755,7 +772,7 @@ MODULE msymmetry
+             CALL VECCON(VEC(IA,1:3,3),VEC(IA,1:3,3),1,A(1,1),A(1,2),A(1,3),A1,A2,A3)
+          ENDDO
+ 
+-         CALL SETGRPV(ISYMOP,IOPS,GTRANS,NROT,NROTK,TAU,VEC,IBRAV,NOP, &
++         CALL SETGRPV(ISYMOP,IOPS,GTRANS,NROT,NROTK,TAU,VEC,SPIN,IBRAV,NOP, &
+      &                         TAUROT,NTYP,1,NITYP,NIOND,3,INDROT,WRKROT,IU6)
+          CALL PGROUP(ISYMOP,NROT,IPGIND,GRPNAM)
+          IF (IU6>0) &
+@@ -843,6 +860,11 @@ MODULE msymmetry
+       NPCLL=NPCELL
+ 
+ ! YEAH! It was a hard job, but now we got all we need ...
++      IF (IU6>0) WRITE(IU6,50) NROTK,NROT,NPCELL
++   50 FORMAT(//' Subroutine INISYM returns: Found ',I2, &
++     &         ' space group operations'/,' (whereof ',I2, &
++     &         ' operations are pure point group operations),'/, &
++     &         ' and found ',I5,' ''primitive'' translations'/)
+ 
+       RETURN
+     END SUBROUTINE INISYM
+@@ -852,11 +874,12 @@ MODULE msymmetry
+ !
+ !***********************************************************************
+ 
+-      SUBROUTINE WRTSYM(NATOMS,NIOND,PTRANS,ROTMAP,IU6)
++      SUBROUTINE WRTSYM(NATOMS,NIOND,PTRANS,ROTMAP,MAGROT,IU6)
+       USE prec
+       IMPLICIT REAL(q) (A-H,O-Z)
+ 
+       INTEGER, POINTER :: ROTMAP(:,:,:)
++      REAL(q), POINTER :: MAGROT(:,:)
+       DIMENSION PTRANS(NIOND+2,3),INDROT(NIOND+2)
+       COMMON /SYMM/ ISYMOP(3,3,48),NROT,IGRPOP(3,3,48),NROTK, &
+      &                            GTRANS(3,48),INVMAP(48),AP(3,3),NPCELL
+@@ -870,6 +893,7 @@ MODULE msymmetry
+             DO J=1,NPCELL
+ !              WRITE(IU6,'(/A,I4)') 'NP=',J
+                WRITE(IU6,'(/X,A,3F14.7)') 'ptrans:',PTRANS(J,:)
++               WRITE(IU6,'(/X,A,F14.7/)') 'magrot:',MAGROT(I,J)
+                DO IA=1,NATOMS
+                   INDROT(ROTMAP(IA,I,J))=IA
+                ENDDO
+diff -rupN '--exclude-from=/fs/home/mmars/bin/exl_pattern' vasp.5.4.1/src/vdwforcefield.F /fs/home/mmars/src/vasp/vasp.5.1/src/vdwforcefield.F
+--- vasp.5.4.1/src/vdwforcefield.F	2015-09-18 19:06:41.660919802 +0200
++++ /fs/home/mmars/src/vasp/vasp.5.1/src/vdwforcefield.F	2015-09-18 18:36:07.494924567 +0200
+@@ -4091,11 +4091,12 @@ MODULE vdwforcefield
+                        & T_INFO,LATT_CUR,counter,energy,vdw_f2,virialstress)
+               END DO
+             END DO
++#ifdef MPI
+             CALL M_sum_i(GRIDC%COMM, counter, 1)
+             CALL M_sum_d(GRIDC%COMM, energy, 1)
+             CALL M_sum_d(GRIDC%COMM, vdw_f2, 3*T_INFO%NIONS)
+             CALL M_sum_d(GRIDC%COMM, virialstress, 9)
+-
++#endif
+             TIFOR=TIFOR-vdw_f2
+             TSIF=TSIF+virialstress
+ 
+@@ -7317,9 +7318,9 @@ MODULE vdwforcefield
+             Hcfdm(3*qq-1,3*pp-2:3*pp)=tau(2,:)
+             Hcfdm(3*qq  ,3*pp-2:3*pp)=tau(3,:)  
+           ENDDO
+-   
++#ifdef MPI
+           CALL M_sum_d(GRIDC%COMM,Hcfdm ,9*nions*nions*totmulti*totmulti )
+-
++#endif
+           DO pp=1,nions*totmulti
+             pp_=MOD(pp,nions)
+             IF (pp_==0) pp_=nions

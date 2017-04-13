@@ -1,0 +1,278 @@
+--- makefile.linux_ifc_P4.orig	2017-03-17 11:27:51.301686712 +0800
++++ makefile.linux_ifc_P4	2017-03-17 11:27:38.025181000 +0800
+@@ -166,7 +166,7 @@
+ 
+ #-----------------------------------------------------------------------
+ 
+-LIB  = -L../vasp.5.lib -ldmy \
++LIB  = -L../vasp.5.lib -ldmy $(EBROOTLIBBEEF)/lib/libbeef.a \
+      ../vasp.5.lib/linpack_double.o $(LAPACK) \
+      $(BLAS)
+ 
+
+diff -r --unified=0 vasp.5.3.orig/main.F vasp.5.3.beef/main.F
+--- main.F.orig	2012-09-13 05:21:05.000000000 -0700
++++ main.F	2013-08-14 11:03:30.000000000 -0700
+@@ -302,0 +303,4 @@
++
++      LOGICAL    LBEEFENS       ! calculate BEEF-vdW ensemble XC energies
++      LOGICAL    LBEEFBAS       ! only print basis energies
++
+@@ -333,0 +338,4 @@
++
++      LOGICAL  LBEEFCALCBASIS
++      COMMON /BEEFENS/ LBEEFCALCBASIS,LBEEFBAS
++
+@@ -336,0 +345,3 @@
++
++      LBEEFCALCBASIS = .FALSE.
++
+@@ -511 +522 @@
+-          WDES%LNONCOLLINEAR,WDES%LSORBIT,WDES%SAXIS,INFO%LMETAGGA, &
++          WDES%LNONCOLLINEAR,WDES%LSORBIT,WDES%SAXIS,INFO%LMETAGGA,LBEEFENS,LBEEFBAS, &
+@@ -2786,0 +2798,3 @@
++!     trigger calculation of ensemble energies in next call to POTLOK
++      IF(LBEEFENS) LBEEFCALCBASIS = .TRUE.
++
+diff -r --unified=0 vasp.5.3.orig/pot.F vasp.5.3.beef/pot.F
+--- pot.F.orig	2012-09-13 05:21:05.000000000 -0700
++++ pot.F	2013-08-14 11:09:41.000000000 -0700
+@@ -40,0 +41 @@
++      USE main_mpi, ONLY: COMM
+@@ -63,0 +65,7 @@
++
++      LOGICAL LBEEFCALCBASIS, LBEEFBAS
++      COMMON /BEEFENS/ LBEEFCALCBASIS,LBEEFBAS
++      
++      real(q), allocatable, save :: beefxc(:), beenergies(:)
++      LOGICAL SAVELUSE_VDW
++      INTEGER BEEFCOUNTER
+@@ -78,0 +87,8 @@
++      
++      IF(LBEEFCALCBASIS) THEN
++         BEEFCOUNTER = 1
++         SAVELUSE_VDW = LUSE_VDW
++         LUSE_VDW = .FALSE.
++         IF(.NOT.ALLOCATED(beefxc)) ALLOCATE(beefxc(32))
++         IF(.NOT.ALLOCATED(beenergies)) ALLOCATE(beenergies(2000))
++      ENDIF
+@@ -92,0 +109,9 @@
++	
++ 4096	IF (LBEEFCALCBASIS) THEN
++           IF(BEEFCOUNTER.LT.31) THEN
++              CALL BEEFSETMODE(BEEFCOUNTER-1)
++           ELSE
++              CALL BEEFSETMODE(BEEFCOUNTER-34)
++           ENDIF
++        ENDIF
++	
+@@ -162,0 +188,46 @@
++       IF(LBEEFCALCBASIS) THEN
++          IF(BEEFCOUNTER.GT.0) THEN
++             IF(BEEFCOUNTER.LE.31) THEN
++                beefxc(BEEFCOUNTER) = EXCG
++                BEEFCOUNTER = BEEFCOUNTER + 1
++             ELSE
++                beefxc(32) = EXCG + beefxc(31)
++#if defined(MPI) || defined(MPI_CHAIN)
++                IF (COMM%NODE_ME==COMM%IONODE) THEN
++#endif
++                   IF(.NOT.LBEEFBAS) THEN
++                      CALL BEEFRANDINITDEF
++                      CALL BEEFENSEMBLE(beefxc, beenergies)
++                      WRITE(8,*) "BEEFens 2000 ensemble energies"
++                      DO BEEFCOUNTER = 1,2000
++                         WRITE(8,"(E35.15)") beenergies(BEEFCOUNTER)
++                      ENDDO
++                   ENDIF
++
++                   WRITE(8,*) "BEEF xc energy contributions"
++                   DO BEEFCOUNTER = 1,32
++                      WRITE(8,*), BEEFCOUNTER, ": ", beefxc(BEEFCOUNTER)
++                   ENDDO
++#if defined(MPI) || defined(MPI_CHAIN)
++                ENDIF
++#endif
++                LBEEFCALCBASIS = .FALSE.
++                BEEFCOUNTER = 0
++                LUSE_VDW = SAVELUSE_VDW
++                CALL BEEFSETMODE(-1)
++             ENDIF
++             EXC     =0
++             E%XCENC =0
++             E%EXCG  =0
++             E%CVZERO=0
++             XCSIF   =0
++             CVTOT   =0
++             EXCG    =0
++             XCENCG  =0
++             CVZERG  =0
++             TMPSIF  =0
++
++             GOTO 4096
++          ENDIF
++       ENDIF
++
+diff -r --unified=0 vasp.5.3.orig/reader.F vasp.5.3.beef/reader.F
+--- reader.F.orig	2012-09-13 05:21:05.000000000 -0700
++++ reader.F	2013-08-14 11:03:31.000000000 -0700
+@@ -19 +19 @@
+-     &        LNONCOLLINEAR,LSORBIT,SAXIS,LMETAGGA, &
++     &        LNONCOLLINEAR,LSORBIT,SAXIS,LMETAGGA,LBEEFENS,LBEEFBAS, &
+@@ -50,2 +50,2 @@
+-     &          LNONCOLLINEAR,LSORBIT,LMETAGGA,LPLANE_WISE,LASPH, & 
+-     &          INTERACTIVE,LORBITALREAL,LVCADER
++     &          LNONCOLLINEAR,LSORBIT,LMETAGGA,LBEEFENS,LBEEFBAS,LPLANE_WISE, &
++     &          LASPH,INTERACTIVE,LORBITALREAL,LVCADER
+@@ -1554,0 +1555,25 @@
++
++! read in flag LBEEFENS 
++      LBEEFENS=.FALSE.
++      CALL RDATAB(LOPEN,INCAR,IU5,'LBEEFENS','=','#',';','L', &
++     &            IDUM,RDUM,CDUM,LBEEFENS,CHARAC,N,1,IERR)
++      IF (((IERR/=0).AND.(IERR/=3)).OR. &
++     &                    ((IERR==0).AND.(N<1))) THEN
++         IF (IU0>=0) &
++         WRITE(IU0,*)'Error reading item ''LBEEFENS'' from file INCAR.'
++         GOTO 150
++      ENDIF
++      CALL XML_INCAR('LBEEFENS','L',IDUM,RDUM,CDUM,LBEEFENS,CHARAC,N)
++
++! read in flag LBEEFBAS
++      LBEEFBAS=.FALSE.
++      CALL RDATAB(LOPEN,INCAR,IU5,'LBEEFBAS','=','#',';','L', &
++     &            IDUM,RDUM,CDUM,LBEEFBAS,CHARAC,N,1,IERR)
++      IF (((IERR/=0).AND.(IERR/=3)).OR. &
++     &                    ((IERR==0).AND.(N<1))) THEN
++         IF (IU0>=0) &
++         WRITE(IU0,*)'Error reading item ''LBEEFBAS'' from file INCAR.'
++         GOTO 150
++      ENDIF
++      CALL XML_INCAR('LBEEFBAS','L',IDUM,RDUM,CDUM,LBEEFBAS,CHARAC,N)
++
+diff -r --unified=0 vasp.5.3.orig/xcgrad.F vasp.5.3.beef/xcgrad.F
+--- xcgrad.F.orig	2012-09-13 05:21:05.000000000 -0700
++++ xcgrad.F	2013-08-14 11:03:33.000000000 -0700
+@@ -34,0 +35 @@
++
+diff -r --unified=0 vasp.5.3.orig/xclib.F vasp.5.3.beef/xclib.F
+--- xclib.F.orig	2012-09-13 05:21:05.000000000 -0700
++++ xclib.F	2013-08-14 11:03:33.000000000 -0700
+@@ -13 +12,0 @@
+-     
+@@ -2120,0 +2120 @@
++      USE main_mpi
+@@ -2123,0 +2124,2 @@
++      logical, external :: beef_set_type
++
+@@ -2163,0 +2166,15 @@
++! BEEF XC
++	ELSE IF (CEXCH=='BF') THEN
++	  LEXCH=17
++#if defined(MPI) || defined(MPI_CHAIN)
++          IF (.not.beef_set_type(0, (COMM%NODE_ME==COMM%IONODE))) THEN
++             IF (COMM%NODE_ME==COMM%IONODE) THEN
++#else
++          IF (.not.beef_set_type(0, .true.)) THEN
++#endif
++             WRITE(*,*) 'error setting beef type 0'
++#if defined(MPI) || defined(MPI_CHAIN)
++             ENDIF
++#endif
++             STOP
++          ENDIF
+@@ -2473,0 +2491,3 @@
++!BEEF xc
++      ELSE IF (LEXCH==17) THEN
++        LEXCH_LDA=7
+@@ -3125 +3145 @@
+-      ELSE IF (LEXCH==8.OR.LEXCH==9.OR.LEXCH==13 .OR. LEXCH==14 .or. (LEXCH.ge.40 .and. LEXCH.le.50)) THEN
++      ELSE IF (LEXCH==8.OR.LEXCH==9.OR.LEXCH==13 .OR. LEXCH==14 .or. LEXCH==17 .or. (LEXCH.ge.40 .and. LEXCH.le.50)) THEN
+@@ -3328 +3348 @@
+-      ELSE IF (LEXCH==8 .OR. LEXCH==9 .OR. LEXCH==13 .OR. LEXCH==14 .or. (LEXCH.ge.40 .and. LEXCH.le.50)) THEN
++      ELSE IF (LEXCH==8 .OR. LEXCH==9 .OR. LEXCH==13 .OR. LEXCH==14 .or. LEXCH==17 .or. (LEXCH.ge.40 .and. LEXCH.le.50)) THEN
+diff -r --unified=0 vasp.5.3.orig/xclib_grad.F vasp.5.3.beef/xclib_grad.F
+--- xclib_grad.F.orig	2012-09-13 05:21:06.000000000 -0700
++++ xclib_grad.F	2013-08-14 11:03:33.000000000 -0700
+@@ -277,0 +278,17 @@
++
++! BEEF
++      ELSE IF (LEXCH==17) THEN
++        IF (D>1E-10_q) THEN
++	   DDSQ = DD*DD
++           CALL BEEFX(D, DDSQ, EXBEEF, EXBEEFD, EXBEEFDD, LLDA)
++	   CALL BEEFLOCALCORR(D, DDSQ, ECBEEF, ECBEEFD, ECBEEFDD, LLDA)
++	   EXC = 2._q*(EXBEEF + ECBEEF)/D
++	   EXCD = 2._q*(EXBEEFD + ECBEEFD)
++	   EXCDD = 2._q*(EXBEEFDD + ECBEEFDD)*DD
++	ELSE
++           EXC   = 0._q
++           EXCD  = 0._q
++           EXCDD = 0._q
++        ENDIF
++
++
+@@ -1427 +1444 @@
+-      ELSE IF (LEXCH==8 .OR. LEXCH==9 .OR. (LEXCH.ge.15 .AND. LEXCH.le.50)) THEN
++      ELSE IF (LEXCH==8 .OR. LEXCH==9 .OR. (LEXCH.ge.18 .AND. LEXCH.le.50)) THEN
+@@ -1785,0 +1803,48 @@
++
++!BEEF
++      ELSE IF (LEXCH==17) THEN
++	D = D1+D2
++	IF (D>1E-10_q) THEN
++           ZETA=(D1-D2)/D
++           ZETA=MIN(MAX(ZETA,-0.9999999999999_q),0.9999999999999_q)
++	   IF (D1>1E-10_q) THEN
++	    DDSQ = 4._q*DD1*DD1
++            CALL BEEFX(2._q*D1, DDSQ, EXBEEF1, EXBEEFD1, EXCQ1, LLDA)
++	    IF (DDSQ<1E-10_q) THEN
++	     EXBEEFD1 = 0._q
++	     EXCQ1 = 0._q
++	    END IF
++	   ELSE
++	    EXBEEF1 = 0._q
++	    EXBEEFD1 = 0._q
++	    EXCQ1 = 0._q
++	   END IF
++	   IF (D2>1E-10_q) THEN
++	    DDSQ = 4._q*DD2*DD2
++            CALL BEEFX(2._q*D2, DDSQ, EXBEEF2, EXBEEFD2, EXCQ2, LLDA)
++	    IF (DDSQ<1E-10_q) THEN
++	     EXBEEFD2 = 0._q
++	     EXCQ2 = 0._q
++	    END IF
++	   ELSE
++	    EXBEEF2 = 0._q
++	    EXBEEFD2 = 0._q
++	    EXCQ2 = 0._q
++	   END IF
++	   CALL BEEFLOCALCORRSPIN(D, ZETA, DDA*DDA, ECBEEF, ECBEEFD1, ECBEEFD2, ECQ, LLDA)
++	   
++	   EXC = (EXBEEF1 + EXBEEF2 + 2._q*ECBEEF)/D
++	   EXCD1 = 2._q*(EXBEEFD1 + ECBEEFD1)
++	   EXCD2 = 2._q*(EXBEEFD2 + ECBEEFD2)
++	   EXCQ1 = 4._q*EXCQ1*DD1
++	   EXCQ2 = 4._q*EXCQ2*DD2
++	   ECQ = 2._q*ECQ*DDA
++	ELSE
++	   EXC = 0._q
++	   EXCD1 = 0._q
++	   EXCD2 = 0._q
++	   EXCQ1 = 0._q
++	   EXCQ2 = 0._q
++	   ECQ = 0._q
++	END IF
++
+diff -r --unified=0 vasp.5.3.orig/xcspin.F vasp.5.3.beef/xcspin.F
+--- xcspin.F.orig	2012-09-13 05:21:06.000000000 -0700
++++ xcspin.F	2013-08-14 11:03:33.000000000 -0700
+@@ -155 +155 @@
+-      IF (LEXCH==8 .OR. LEXCH==9 .OR. LEXCH==14) THEN
++      IF (LEXCH==8 .OR. LEXCH==9 .OR. LEXCH==14 .OR. LEXCH==17) THEN
+@@ -587 +587 @@
+-      IF (LEXCH==8 .OR. LEXCH==9 .OR. LEXCH==14) THEN
++      IF (LEXCH==8 .OR. LEXCH==9 .OR. LEXCH==14 .OR. LEXCH==17) THEN
+@@ -1073 +1073 @@
+-      IF (LEXCH==8 .OR. LEXCH==9 .OR. LEXCH==14 .OR. ((LEXCH.ge.40) .AND. (LEXCH.le.50))) THEN
++      IF (LEXCH==8 .OR. LEXCH==9 .OR. LEXCH==14 .OR. LEXCH==17 .OR. ((LEXCH.ge.40) .AND. (LEXCH.le.50))) THEN
