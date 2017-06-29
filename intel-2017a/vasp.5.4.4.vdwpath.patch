@@ -1,0 +1,14 @@
+--- vasp.5.4.4/src/vdw_nl.F.orig	2017-03-07 17:21:02.117486000 +0800
++++ vasp.5.4.4/src/vdw_nl.F	2017-03-07 20:42:50.170020800 +0800
+@@ -419,9 +419,9 @@
+     integer :: nmesh, IOstatus
+     
+     !ok if the kernel table is here read it
+-    inquire( file='vdw_kernel.bindat', exist=lkern) 
++    inquire( file='/opt/apps/vasp/library/vdw_kernel.bindat', exist=lkern) 
+     IF (lkern) then
+-      open (unit=10, file='vdw_kernel.bindat', form='unformatted')
++      open (unit=10, file='/opt/apps/vasp/library/vdw_kernel.bindat', form='unformatted')
+       read(10,IOSTAT=IOstatus) nmesh
+       IF (nmesh .NE. nd) THEN
+         IF (IU0>=0) WRITE(IU0,*)  'nmesh ', nmesh

@@ -1,0 +1,43 @@
+--- VASP-5.4.1-intel-2017a.eb	2017-02-20 11:51:16.354545555 +0800
++++ VASP-5.4.4-intel-2017a.eb	2017-04-24 11:32:07.765889484 +0800
+@@ -1,7 +1,7 @@
+ easyblock = 'MakeCp'
+ 
+ name = 'VASP'
+-version = '5.4.1'
++version = '5.4.4'
+ 
+ homepage = 'http://www.vasp.at'
+ description = """The Vienna Ab initio Simulation Package (VASP) is a computer program for atomic scale
+@@ -12,20 +12,10 @@
+ toolchainopts = {'usempi': True}
+ 
+ # Vasp is proprietary software, see http://www.vasp.at/index.php/faqs on how to get access to the code
+-sources = [SOURCELOWER_TAR_GZ]
+-
+-# patches from http://cms.mpi.univie.ac.at/wiki/index.php/Installing_VASP
+-patches = [
+-    'vasp.5.4.1.08072015.patch',
+-    'vasp.5.4.1.27082015.patch',
+-    'vasp.5.4.1.06112015.patch',
+-]
++sources = ['%(namelower)s.%(version)s.tar.gz']
+ 
+ checksums = [
+-    '57c2b07d0f70987000033984e913f1a6',  # vasp.5.4.1.tar.gz
+-    'ee242452bba6bb37459745f4617649d7',  # vasp.5.4.1.08072015.patch
+-    'b137eb13804a60df382e77495dc738f9',  # vasp.5.4.1.27082015.patch
+-    'd64b8f0ae861db7a76e6e9c9ffa188a1',  # vasp.5.4.1.06112015.patch
++    '8ac646b108f974371eef398973373bf6',  # vasp.5.4.4.tar.gz
+ ]
+ 
+ prebuildopts = 'cp arch/makefile.include.linux_intel ./makefile.include && '
+@@ -34,7 +24,7 @@
+ prebuildopts += 'sed -i "s|\$(MKLROOT)/interfaces/fftw3xf|\$(FFTW_LIB_DIR)|" makefile.include && '
+ 
+ # remove mkl flag to prevent mixing dynamic libs with the static libs in LIBBLACS/SCALAPACK
+-prebuildopts += 'sed -i "s|-mkl||" makefile.include && '
++prebuildopts += 'sed -i "s|-mkl=sequential||" makefile.include && '
+ 
+ # VASP uses LIBS as a list of folders
+ prebuildopts += 'unset LIBS && '

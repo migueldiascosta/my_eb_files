@@ -1,0 +1,26 @@
+--- VASP-5.4.1-intel-2017a.eb	2017-02-20 11:51:16.354545555 +0800
++++ VASP-5.4.1-intel-2017a_vdw.eb	2017-03-07 20:43:47.688344706 +0800
+@@ -2,6 +2,7 @@
+ 
+ name = 'VASP'
+ version = '5.4.1'
++versionsuffix = '_vdw'
+ 
+ homepage = 'http://www.vasp.at'
+ description = """The Vienna Ab initio Simulation Package (VASP) is a computer program for atomic scale
+@@ -19,6 +20,7 @@
+     'vasp.5.4.1.08072015.patch',
+     'vasp.5.4.1.27082015.patch',
+     'vasp.5.4.1.06112015.patch',
++    'vasp.5.4.1.vdwpath.patch',
+ ]
+ 
+ checksums = [
+@@ -26,6 +28,7 @@
+     'ee242452bba6bb37459745f4617649d7',  # vasp.5.4.1.08072015.patch
+     'b137eb13804a60df382e77495dc738f9',  # vasp.5.4.1.27082015.patch
+     'd64b8f0ae861db7a76e6e9c9ffa188a1',  # vasp.5.4.1.06112015.patch
++    'f79f5472fcc5c5bef1b2dbb20b136067',  # vasp.5.4.1.vdwpath.patch
+ ]
+ 
+ prebuildopts = 'cp arch/makefile.include.linux_intel ./makefile.include && '
