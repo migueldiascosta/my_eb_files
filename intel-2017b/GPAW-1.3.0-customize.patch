@@ -1,0 +1,40 @@
+--- customize.py.orig	2017-01-06 17:52:59.000000000 +0800
++++ customize.py	2017-04-12 16:17:20.491069814 +0800
+@@ -28,19 +28,25 @@
+     libraries += ['somelib', 'otherlib']
+ """
+ 
++import os
++library_dirs = os.getenv('LD_LIBRARY_PATH').split(':')
++libraries = [libfile[3:-2] for libfile in os.getenv('LAPACK_STATIC_LIBS').split(',')]
++
+ # compiler = 'gcc'
+ # mpicompiler = 'mpicc'  # use None if you don't want to build a gpaw-python
+ # mpilinker = 'mpicc'
+ # platform_id = ''
+ # scalapack = False
++scalapack = True
+ 
+ # Use ScaLAPACK:
+ # Warning! At least scalapack 2.0.1 is required!
+ # See https://trac.fysik.dtu.dk/projects/gpaw/ticket/230
+ if scalapack:
+-    libraries += ['scalapack-openmpi',
+-                  'blacsCinit-openmpi',
+-                  'blacs-openmpi']
++    #libraries += ['scalapack-openmpi',
++    #              'blacsCinit-openmpi',
++    #              'blacs-openmpi']
++    mpi_libraries = [libfile[3:-2] for libfile in os.getenv('SCALAPACK_STATIC_LIBS').split(',')]
+     define_macros += [('GPAW_NO_UNDERSCORE_CBLACS', '1')]
+     define_macros += [('GPAW_NO_UNDERSCORE_CSCALAPACK', '1')]
+ 
+@@ -48,6 +54,8 @@
+ # In order to link libxc installed in a non-standard location
+ # (e.g.: configure --prefix=/home/user/libxc-2.0.1-1), use:
+ 
++libraries.append('xc')
++
+ # - static linking:
+ if 0:
+     include_dirs += ['/home/user/libxc-2.0.1-1/include']

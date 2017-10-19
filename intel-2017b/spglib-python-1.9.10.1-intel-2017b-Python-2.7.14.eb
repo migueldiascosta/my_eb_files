@@ -1,0 +1,27 @@
+easyblock = 'PythonPackage'
+
+name = 'spglib-python'
+version = '1.9.10.1'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://pypi.python.org/pypi/spglib'
+description = """Spglib for Python. Spglib is a library for finding and handling crystal symmetries written in C."""
+
+toolchain = {'name': 'intel', 'version': '2017b'}
+
+source_urls = ['https://pypi.python.org/packages/source/%(nameletter)s/spglib']
+sources = ['spglib-%(version)s.tar.gz']
+checksums = ['ea6a9a8b20fa6fdeff228867571e4ddb3ddd6dc7b580e64ebc78aa1986f0af3b']
+
+dependencies = [
+    ('Python', '2.7.14'),
+]
+
+options = {'modulename': 'spglib'}
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
+}
+
+moduleclass = 'chem'

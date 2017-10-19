@@ -1,0 +1,84 @@
+easyblock = 'Bundle'
+
+name = 'atomate'
+version = '0.6.5'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://pythonhosted.org/atomate/'
+description = """atomate has implementations of FireWorks workflows for Materials Science."""
+
+toolchain = {'name': 'intel', 'version': '2017b'}
+
+dependencies = [
+    ('Python', '2.7.14'),
+    ('PyYAML', '3.12', versionsuffix),
+    ('pymatgen', '2017.10.16', versionsuffix),
+]
+
+# this is a bundle of Python packages
+exts_defaultclass = 'PythonPackage'
+
+exts_list = [
+    ('Flask', '0.12.2', {
+        'source_urls': ['https://pypi.python.org/packages/source/F/Flask/'],
+        'checksums': [
+            '49f44461237b69ecd901cc7ce66feea0319b9158743dd27a2899962ab214dac1',  # Flask-0.12.2.tar.gz
+        ],
+    }),
+    ('Flask-paginate', '0.4.5', {
+        'modulename': 'flask_paginate',
+        'source_tmpl': 'flask-paginate-%(version)s.zip',
+        'source_urls': ['https://pypi.python.org/packages/source/F/Flask-paginate/'],
+        'checksums': [
+            'eb58636b98dc5349d4fe150614037a89bca46f24de924fe31a7ef70a7f25f368',  # flask-paginate-0.4.5.zip
+        ],
+    }),
+    ('Jinja2', '2.9.6', {
+        'source_urls': ['https://pypi.python.org/packages/source/J/Jinja2/'],
+        'checksums': [
+            'ddaa01a212cd6d641401cb01b605f4a4d9f37bfc93043d7f760ec70fb99ff9ff',  # Jinja2-2.9.6.tar.gz
+        ],
+    }),
+    ('Werkzeug', '0.12.1', {
+        'source_urls': ['https://pypi.python.org/packages/source/W/Werkzeug/'],
+        'checksums': [
+            '6716830febe9808bb7521fd26db3b398450cbed0886b2b4bea678b87340f534e',  # Werkzeug-0.12.1.tar.gz
+        ],
+    }),
+    ('custodian', '1.1.0', {
+        'source_urls': ['https://pypi.python.org/packages/source/p/custodian/'],
+        'checksums': [
+            '30bb40a3eaa7dbbbfe01de74434d38ad4cdf4b5898b123b00631e9dcb194b5fa',  # custodian-1.1.0.tar.gz
+        ],
+    }),
+    ('monty', '1.0.1', {
+        'source_urls': ['https://pypi.python.org/packages/source/m/monty/'],
+        'checksums': [
+            '86d9686ff92f0e97fffc74bc9d91c68d2b904915fe7976ff8673bee6fa961b17',  # monty-1.0.1.tar.gz
+        ],
+    }),
+    ('FireWorks', '1.5.3', {
+        'source_urls': ['https://pypi.python.org/packages/source/F/FireWorks/'],
+        'checksums': [
+            '5df8be65f127f482af7c0e289ee03dde172e9fab61d86ce5dfab191eb3cd6104',  # FireWorks-1.5.3.tar.gz
+        ],
+    }),
+    ('atomate', '0.6.5', {
+        'source_urls': ['https://pypi.python.org/packages/source/a/atomate/'],
+        'checksums': [
+            '60879eb46d5bbed7bbece59c4740742385133353c2138fde6b8e80d62bbff48e',  # atomate-0.6.5.tar.gz
+        ],
+    }),
+]
+
+# specify that Bundle easyblock should run a full sanity check, rather than just trying to load the module
+full_sanity_check = True
+
+modextrapaths = {'PYTHONPATH': ['lib/python%(pyshortver)s/site-packages']}
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
+}
+
+moduleclass = 'chem'
