@@ -1,0 +1,16 @@
+--- setup.py.orig	2017-06-18 21:15:14.000000000 +0800
++++ setup.py	2017-10-20 16:24:49.865134105 +0800
+@@ -91,10 +91,10 @@
+     extra_link_args_lapacke = ['/opt/local/lib/libopenblas.a']
+     include_dirs_lapacke = ['/opt/local/include']
+     library_dirs_lapacke = []
+-elif os.path.isfile('/usr/lib/liblapacke.so'):
++elif os.path.isfile('../lapack-3.6.1/liblapacke.a'):
+     # This is when lapacke is installed on system
+-    extra_link_args_lapacke = ['-llapacke', '-llapack', '-lblas']
+-    include_dirs_lapacke = []
++    extra_link_args_lapacke = ['../lapack-3.6.1/liblapacke.a', '../lapack-3.6.1/liblapack.a', '../lapack-3.6.1/librefblas.a', os.environ['EBROOTIFORT']+'/lib/intel64/libifcore_pic.a']
++    include_dirs_lapacke = ['../lapack-3.6.1/LAPACKE/include']
+     library_dirs_lapacke = []
+ else:
+     # For conda: Try dynamic link library of openblas

@@ -1,0 +1,11 @@
+--- configure.orig	2016-10-15 19:03:15.587298590 +0800
++++ configure	2016-10-15 19:01:25.510290803 +0800
+@@ -7551,7 +7551,7 @@
+ #
+ case "${CPP}" in
+  *icc* )
+-   if test -z "$CPPFLAGS"; then CPPFLAGS="-ansi"; fi
++   if test -z "$CPPFLAGS"; then CPPFLAGS="-traditional -ansi"; fi
+    ;;
+  *gcc* )
+    case "${host}" in

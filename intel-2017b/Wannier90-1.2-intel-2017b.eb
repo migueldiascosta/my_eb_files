@@ -1,0 +1,30 @@
+easyblock = 'MakeCp'
+
+name = 'Wannier90'
+version = '1.2'
+
+homepage = 'http://www.wannier.org'
+description = """A tool for obtaining maximally-localised Wannier functions"""
+
+toolchain = {'name': 'intel', 'version': '2017b'}
+toolchainopts = {'usempi': True}
+
+source_urls = ['http://www.wannier.org/code']
+sources = [SOURCELOWER_TAR_GZ]
+patches = ['Wannier90_1x_ignore_makesys.patch']
+checksums = [
+    'a76f88eef01c5a40aaa2c74ee393ede8a57bd9085f6b7f2ab656b50c1a30ece4',  # wannier90-1.2.tar.gz
+    '8d4c60cfba6722b7ddc0fad8f0d0e4028990162dca5ff5ffa894e7b11ca21a33',  # Wannier90_1x_ignore_makesys.patch
+]
+
+# build program and library
+buildopts = 'all F90=$MPIF90 FCOPTS="$FFLAGS" LDOPTS="$FFLAGS" LIBDIR="$LAPACK_LIB_DIR" LIBS="$LIBLAPACK" '
+
+files_to_copy = [(['wannier90.x'], 'bin'), (['libwannier.a'], 'lib')]
+
+sanity_check_paths = {
+    'files': ['bin/wannier90.x', 'lib/libwannier.a'],
+    'dirs': []
+}
+
+moduleclass = 'phys'

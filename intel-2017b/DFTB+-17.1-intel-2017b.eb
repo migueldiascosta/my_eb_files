@@ -29,7 +29,7 @@ prebuildopts += "cp sys/make.x86_64-linux-intel make.arch && "
 prebuildopts += "sed -i 's|LNOPT =  -static|#LNOPT =  -static|' make.arch && "
 prebuildopts += "sed -i 's|-O2|-O1|g' make.arch && "
 
-# runtest = 'test'
+runtest = 'test'
 
 sanity_check_paths = {
     'files': ['bin/dftb+'],

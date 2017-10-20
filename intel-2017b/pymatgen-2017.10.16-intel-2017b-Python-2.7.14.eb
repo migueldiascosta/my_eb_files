@@ -13,7 +13,7 @@ toolchain = {'name': 'intel', 'version': '2017b'}
 dependencies = [
     ('Python', '2.7.14'),
     ('PyYAML', '3.12', versionsuffix),
-    ('matplotlib', '2.0.2', versionsuffix),
+    ('matplotlib', '2.1.0', versionsuffix),
     ('spglib-python', '1.9.10.1', versionsuffix),
 ]
 

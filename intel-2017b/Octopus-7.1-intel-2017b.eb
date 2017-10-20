@@ -11,7 +11,7 @@ in time. Nuclei are described classically as point particles.
 Electron-nucleus interaction is described within the pseudopotential approximation."""
 
 toolchain = {'name': 'intel', 'version': '2017b'}
-toolchainopts = {'usempi': True, 'opt': True}
+toolchainopts = {'usempi': True}
 
 source_urls = ['http://www.tddft.org/programs/octopus/down.php?file=%(version)s/']
 sources = [SOURCELOWER_TAR_GZ]
@@ -19,7 +19,7 @@ checksums = ['3b0423f13f386ab1585493bd77e3ee6b4211585cb794ea5c7a0d7d6ae66ee02c']
 
 builddependencies = [
     ('Bison', '3.0.4'),
-    ('Perl', '5.24.1')
+    ('Perl', '5.26.0')
 ]
 
 dependencies = [
@@ -41,7 +41,7 @@ configopts += '--with-blas="$LIBBLAS" --with-blacs="$LIBBLACS" --with-scalapack=
 configopts += '--with-metis-prefix=$EBROOTMETIS --with-fftw-prefix=$EBROOTFFTW '
 # configopts += '--with-parmetis-prefix=$EBROOTPARMETIS '
 
-runtest = 'MPIEXEC=`which mpirun` check'
+# runtest = 'MPIEXEC=`which mpirun` check'
 
 sanity_check_paths = {
     'files': ["bin/octopus"],
