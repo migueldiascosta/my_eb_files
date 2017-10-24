@@ -14,9 +14,7 @@ toolchainopts = {'usempi': True}
 # Vasp is proprietary software, see http://www.vasp.at/index.php/faqs on how to get access to the code
 sources = ['%(namelower)s.%(version)s.tar.gz']
 
-checksums = [
-    '8ac646b108f974371eef398973373bf6',  # vasp.5.4.4.tar.gz
-]
+checksums = ['5bd2449462386f01e575f9adf629c08cb03a13142806ffb6a71309ca4431cfb3']
 
 prebuildopts = 'cp arch/makefile.include.linux_intel ./makefile.include && '
 
@@ -29,7 +27,7 @@ prebuildopts += 'sed -i "s|-mkl=sequential||" makefile.include && '
 # VASP uses LIBS as a list of folders
 prebuildopts += 'unset LIBS && '
 
-buildopts = 'all BLACS="$LIBBLACS" SCALAPACK="$LIBSCALAPACK"'
+buildopts = 'all OFLAG="$OPTFLAGS" BLACS="$LIBBLACS" SCALAPACK="$LIBSCALAPACK"'
 
 parallel = 1
 
