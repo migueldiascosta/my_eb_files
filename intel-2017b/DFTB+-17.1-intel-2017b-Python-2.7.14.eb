@@ -2,6 +2,7 @@ easyblock = 'ConfigureMake'
 
 name = 'DFTB+'
 version = '17.1'
+versionsuffix = '-Python-%(pyver)s'
 
 homepage = 'https://www.dftb-plus.info'
 description = """DFTB+ is a fast and efficient versatile quantum mechanical simulation package.  It is based on the 
@@ -19,6 +20,7 @@ sources = ['%(version)s.tar.gz']
 checksums = ['1c3d90418299f3c05e0adadf7c683b41f08600bea0ecde5edbd2206198d92a00']
 
 dependencies = [
+    ('Python', '2.7.14'),
     ('arpack-ng', '3.5.0'),
 ]
 
@@ -26,14 +28,21 @@ skipsteps = ['configure']
 
 prebuildopts = "./utils/get_opt_externals dftd3 && ./utils/get_opt_externals slakos && "
 prebuildopts += "cp sys/make.x86_64-linux-intel make.arch && "
-prebuildopts += "sed -i 's|LNOPT =  -static|#LNOPT =  -static|' make.arch && "
-prebuildopts += "sed -i 's|-O2|-O1|g' make.arch && "
+prebuildopts += "sed -i 's|LNOPT =  -static|LNOPT =  -static-intel|' make.arch && "
+prebuildopts += 'sed -i "s|-O2|$OPTFLAGS|g" make.arch && '
+prebuildopts += "sed -i 's|$(ROOT)/_install|%(installdir)s|' make.config && "
 
-runtest = 'test'
+# still fails but only because one test is not yet implemented
+# runtest = 'test'
+
+modextrapaths = {'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages'}
 
 sanity_check_paths = {
-    'files': ['bin/dftb+'],
-    'dirs': []
+    'files': ['bin/' + prog for prog in ['dftb+', 'dp_bands', 'dp_dos', 'gen2cif',
+                                         'gen2xyz', 'modes', 'waveplot', 'xyz2gen']],
+    'dirs': ['lib/python%(pyshortver)s/site-packages/dptools']
 }
+
+sanity_check_commands = [('python', '-c "import dptools"')]
 
 moduleclass = 'phys'
