@@ -1,0 +1,13 @@
+* unset LIBS to break circular dependency from make.inc
+Author: Miguel Dias Costa (National University of Singapore)
+--- qe-6.2/install/extlibs_makefile.orig	2017-10-31 10:51:41.839953000 +0800
++++ qe-6.2/install/extlibs_makefile	2017-10-31 12:01:24.046958365 +0800
+@@ -80,7 +80,7 @@
+ 	if test ! -d ../FoX; then \
+         mkdir ../FoX; \
+ 	(gzip -dc ../archive/fox.tgz | (cd ../FoX; tar -xvf -)); \
+-	cd ../FoX/fox/; export FC=$(F90); ./configure --prefix=$(TOPDIR)/FoX ;\
++	cd ../FoX/fox/; export FC=$(F90); LIBS="" ./configure --prefix=$(TOPDIR)/FoX ;\
+ 	$(MAKE) install; cd ../; rm -fr fox;fi
+ # ELPA
+ libelpa : libelpa_$(ELPA_LIBS_SWITCH)
