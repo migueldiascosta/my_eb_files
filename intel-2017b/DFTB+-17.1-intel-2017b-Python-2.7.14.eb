@@ -17,7 +17,11 @@ toolchainopts = {'lowopt': True, 'optarch': False}
 
 source_urls = ['https://github.com/dftbplus/dftbplus/archive/']
 sources = ['%(version)s.tar.gz']
-checksums = ['1c3d90418299f3c05e0adadf7c683b41f08600bea0ecde5edbd2206198d92a00']
+patches = ['DFTB+-%(version)s_test_dptools.patch']
+checksums = [
+    '1c3d90418299f3c05e0adadf7c683b41f08600bea0ecde5edbd2206198d92a00',  # 17.1.tar.gz
+    'ffbd4721a8a01326be11ef780cb392265d05631fac144a9ae6e76aceae935e2b',  # DFTB+-17.1_test_dptools.patch
+]
 
 dependencies = [
     ('Python', '2.7.14'),
@@ -28,19 +32,19 @@ skipsteps = ['configure']
 
 prebuildopts = "./utils/get_opt_externals dftd3 && ./utils/get_opt_externals slakos && "
 prebuildopts += "cp sys/make.x86_64-linux-intel make.arch && "
-prebuildopts += "sed -i 's|LNOPT =  -static|LNOPT =  -static-intel|' make.arch && "
 prebuildopts += 'sed -i "s|-O2|$OPTFLAGS|g" make.arch && '
 prebuildopts += "sed -i 's|$(ROOT)/_install|%(installdir)s|' make.config && "
 
-# still fails but only because one test is not yet implemented
-# runtest = 'test'
+buildopts = "LNOPT='-static-intel'"
+
+runtest = 'test'
 
 modextrapaths = {'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages'}
 
 sanity_check_paths = {
     'files': ['bin/' + prog for prog in ['dftb+', 'dp_bands', 'dp_dos', 'gen2cif',
                                          'gen2xyz', 'modes', 'waveplot', 'xyz2gen']],
-    'dirs': ['lib/python%(pyshortver)s/site-packages/dptools']
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
 }
 
 sanity_check_commands = [('python', '-c "import dptools"')]
