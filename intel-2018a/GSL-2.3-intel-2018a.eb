@@ -1,0 +1,22 @@
+easyblock = 'ConfigureMake'
+
+name = 'GSL'
+version = '2.3'
+
+homepage = 'http://www.gnu.org/software/gsl/'
+description = """The GNU Scientific Library (GSL) is a numerical library for C and C++ programmers.
+ The library provides a wide range of mathematical routines such as random number generators, special functions
+ and least-squares fitting."""
+
+toolchain = {'name': 'intel', 'version': '2018a'}
+toolchainopts = {'unroll': True, 'pic': True, 'noopt': True}
+
+source_urls = [GNU_SOURCE]
+sources = [SOURCELOWER_TAR_GZ]
+checksums = ['562500b789cd599b3a4f88547a7a3280538ab2ff4939504c8b4ac4ca25feadfb']
+
+configopts = "--with-pic"
+
+#runtest = 'check'
+
+moduleclass = 'numlib'

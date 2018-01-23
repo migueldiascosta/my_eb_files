@@ -1,0 +1,6 @@
+diff -urN test/prog/dftb+/sockets/H2O.orig/postrun.sh test/prog/dftb+/sockets/H2O/postrun.sh
+--- test/prog/dftb+/sockets/H2O.orig/postrun.sh	1970-01-01 07:30:00.000000000 +0730
++++ test/prog/dftb+/sockets/H2O/postrun.sh	2017-10-25 16:23:05.214804000 +0800
+@@ -0,0 +1,2 @@
++#!/bin/bash
++rm /tmp/ipi_dftb
