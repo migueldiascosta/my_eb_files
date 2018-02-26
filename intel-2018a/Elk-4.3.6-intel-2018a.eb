@@ -21,7 +21,6 @@ dependencies = [
     ('libxc', '2.2.3'),
 ]
 
-
 # make.inc file is generated interactively by "setup" command, creating it here
 prebuildopts = 'echo "F90_OPTS = $FFLAGS" > make.inc && '
 prebuildopts += 'echo "F77_OPTS = $FFLAGS" >> make.inc && '
