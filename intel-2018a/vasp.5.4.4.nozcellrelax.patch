@@ -1,0 +1,12 @@
+--- src/constr_cell_relax.F.orig	2017-06-29 10:16:16.700373000 +0800
++++ src/constr_cell_relax.F	2017-06-29 10:17:47.952759961 +0800
+@@ -38,6 +38,9 @@
+ !      FCELL=0   ! F90 style: set the whole array to zero
+ !      FCELL(3,3)=SAVE
+ 
++!     no relaxation in z direction
++      FCELL(3,3)=0
++
+       RETURN
+       END SUBROUTINE
+ 

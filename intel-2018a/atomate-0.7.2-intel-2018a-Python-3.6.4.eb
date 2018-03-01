@@ -1,0 +1,68 @@
+easyblock = 'Bundle'
+
+name = 'atomate'
+version = '0.7.2'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://pythonhosted.org/atomate/'
+description = """atomate has implementations of FireWorks workflows for Materials Science."""
+
+toolchain = {'name': 'intel', 'version': '2018a'}
+
+dependencies = [
+    ('Python', '3.6.4'),
+    ('PyYAML', '3.12', versionsuffix),
+    ('pymatgen', '2018.2.13', versionsuffix),
+]
+
+# this is a bundle of Python packages
+exts_defaultclass = 'PythonPackage'
+
+exts_list = [
+    ('Flask', '0.12.2', {
+        'source_urls': ['https://pypi.python.org/packages/source/F/Flask/'],
+        'checksums': ['49f44461237b69ecd901cc7ce66feea0319b9158743dd27a2899962ab214dac1'],
+    }),
+    ('Flask-paginate', '0.4.5', {
+        'modulename': 'flask_paginate',
+        'source_tmpl': 'flask-paginate-%(version)s.zip',
+        'source_urls': ['https://pypi.python.org/packages/source/F/Flask-paginate/'],
+        'checksums': ['eb58636b98dc5349d4fe150614037a89bca46f24de924fe31a7ef70a7f25f368'],
+    }),
+    ('Jinja2', '2.10', {
+        'source_urls': ['https://pypi.python.org/packages/source/J/Jinja2/'],
+        'checksums': ['f84be1bb0040caca4cea721fcbbbbd61f9be9464ca236387158b0feea01914a4'],
+    }),
+    ('Werkzeug', '0.12.1', {
+        'source_urls': ['https://pypi.python.org/packages/source/W/Werkzeug/'],
+        'checksums': ['6716830febe9808bb7521fd26db3b398450cbed0886b2b4bea678b87340f534e'],
+    }),
+    ('custodian', '2017.12.23', {
+        'source_urls': ['https://pypi.python.org/packages/source/p/custodian/'],
+        'checksums': ['e2816cab02ffdc0cf24bc56d62363f6be9bcdbc32bcfaa2c8968d2c9023f224f'],
+    }),
+    ('monty', '1.0.2', {
+        'source_urls': ['https://pypi.python.org/packages/source/m/monty/'],
+        'checksums': ['02aa70d1c31ac19890817ceb39dac08909d7595ea96b7b0179a1f113ebdaabfc'],
+    }),
+    ('FireWorks', '1.6.3', {
+        'source_urls': ['https://pypi.python.org/packages/source/F/FireWorks/'],
+        'checksums': ['3b78ea9e6b61dfaa3e3817cb2449a062fae09d08f1d3d5f6dac9b0e16d3bd70b'],
+    }),
+    (name, version, {
+        'source_urls': ['https://pypi.python.org/packages/source/a/atomate/'],
+        'checksums': ['80305c5bea2f6331a2583a3948bebd35867955e3b90a136910310c035b503d65'],
+    }),
+]
+
+# specify that Bundle easyblock should run a full sanity check, rather than just trying to load the module
+full_sanity_check = True
+
+modextrapaths = {'PYTHONPATH': ['lib/python%(pyshortver)s/site-packages']}
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
+}
+
+moduleclass = 'chem'
