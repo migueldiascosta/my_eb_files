@@ -19,15 +19,15 @@ checksums = ['f5589f14ff30d5a960af697fb4ab71daf4f3e2d19dd6e5229cd2b62f0eaeff0f']
 
 builddependencies = [
     ('Bison', '3.0.4'),
-    ('Perl', '5.26.0')
+    ('Perl', '5.26.1')
 ]
 
 dependencies = [
-    ('libxc', '3.0.0'),
-    ('netCDF', '4.4.1.1'),
+    ('libxc', '3.0.1'),
+    ('netCDF', '4.5.0'),
     ('netCDF-Fortran', '4.4.4'),
     ('GSL', '2.4'),
-    ('FFTW', '3.3.6'),
+    ('FFTW', '3.3.7'),
     ('METIS', '5.1.0'),
     # ('ParMETIS', '4.0.3')
 ]
