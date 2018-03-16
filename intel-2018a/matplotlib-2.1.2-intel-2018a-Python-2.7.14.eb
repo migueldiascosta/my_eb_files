@@ -14,10 +14,15 @@ toolchain = {'name': 'intel', 'version': '2018a'}
 # this is a bundle of Python packages
 exts_defaultclass = 'PythonPackage'
 
+builddependencies = [
+    ('pkg-config', '0.29.2'),
+]
+
 dependencies = [
     ('Python', '2.7.14'),
-    ('libpng', '1.6.32'),
-    ('freetype', '2.8.1'),
+    ('libpng', '1.6.34'),
+    ('freetype', '2.9'),
+#    ('Tkinter', '%(pyver)s', versionsuffix),
 ]
 
 exts_list = [
@@ -27,17 +32,11 @@ exts_list = [
         'source_urls': ['https://pypi.python.org/packages/source/C/Cycler'],
         'checksums': ['cd7b2d1018258d7247a71425e9f26463dfb444d411c39569972f4ce586b0c9d8'],
     }),
-    ('subprocess32', '3.2.7', {
-        'source_urls': ['https://pypi.python.org/packages/source/s/subprocess32'],
-        'checksums': ['1e450a4a4c53bf197ad6402c564b9f7a53539385918ef8f12bdf430a61036590'],
-    }),
-    ('backports.functools_lru_cache', '1.4', {
-        'source_urls': ['https://pypi.python.org/packages/source/b/backports.functools_lru_cache'],
-        'checksums': ['31f235852f88edc1558d428d890663c49eb4514ffec9f3650e7f3c9e4a12e36f'],
-    }),
     (name, version, {
         'source_urls': ['https://pypi.python.org/packages/source/m/matplotlib'],
         'checksums': ['725a3f12739d133adfa381e1b33bd70c6f64db453bfc536e148824816e568894'],
+        'prebuildopts': "export CPLUS_INCLUDE_PATH=$EBROOTFREETYPE/include/freetype2:${CPLUS_INCLUDE_PATH} && ",
+        'preinstallopts': "export CPLUS_INCLUDE_PATH=$EBROOTFREETYPE/include/freetype2:${CPLUS_INCLUDE_PATH} && ",
     }),
 ]
 
@@ -48,6 +47,8 @@ sanity_check_paths = {
     'files': [],
     'dirs': ['lib/python%(pyshortver)s/site-packages'],
 }
+
+#sanity_check_commands = ["""python -c 'import matplotlib; matplotlib.use("TkAgg"); import matplotlib.pyplot' """]
 
 modextrapaths = {'PYTHONPATH': ['lib/python%(pyshortver)s/site-packages']}
 

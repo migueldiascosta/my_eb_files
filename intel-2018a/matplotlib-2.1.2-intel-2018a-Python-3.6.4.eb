@@ -14,10 +14,15 @@ toolchain = {'name': 'intel', 'version': '2018a'}
 # this is a bundle of Python packages
 exts_defaultclass = 'PythonPackage'
 
+builddependencies = [
+    ('pkg-config', '0.29.2'),
+]
+
 dependencies = [
     ('Python', '3.6.4'),
-    ('libpng', '1.6.32'),
-    ('freetype', '2.8.1'),
+    ('libpng', '1.6.34'),
+    ('freetype', '2.9'),
+#    ('Tkinter', '%(pyver)s', versionsuffix),
 ]
 
 exts_list = [
@@ -30,6 +35,8 @@ exts_list = [
     (name, version, {
         'source_urls': ['https://pypi.python.org/packages/source/m/matplotlib'],
         'checksums': ['725a3f12739d133adfa381e1b33bd70c6f64db453bfc536e148824816e568894'],
+        'prebuildopts': "export CPLUS_INCLUDE_PATH=$EBROOTFREETYPE/include/freetype2:${CPLUS_INCLUDE_PATH} && ",
+        'preinstallopts': "export CPLUS_INCLUDE_PATH=$EBROOTFREETYPE/include/freetype2:${CPLUS_INCLUDE_PATH} && ",
     }),
 ]
 
@@ -40,6 +47,8 @@ sanity_check_paths = {
     'files': [],
     'dirs': ['lib/python%(pyshortver)s/site-packages'],
 }
+
+#sanity_check_commands = ["""python -c 'import matplotlib; matplotlib.use("TkAgg"); import matplotlib.pyplot' """]
 
 modextrapaths = {'PYTHONPATH': ['lib/python%(pyshortver)s/site-packages']}
 
