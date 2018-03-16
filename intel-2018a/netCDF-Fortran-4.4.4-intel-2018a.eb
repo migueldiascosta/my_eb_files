@@ -13,6 +13,6 @@ source_urls = ['https://github.com/Unidata/netcdf-fortran/archive/']
 sources = ['v%(version)s.tar.gz']
 checksums = ['44b1986c427989604df9925dcdbf6c1a977e4ecbde6dd459114bca20bf5e9e67']
 
-dependencies = [('netCDF', '4.5.0')]
+dependencies = [('netCDF', '4.6.0')]
 
 moduleclass = 'data'
