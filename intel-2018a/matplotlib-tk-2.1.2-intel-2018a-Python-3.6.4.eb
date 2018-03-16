@@ -1,0 +1,20 @@
+easyblock = 'Bundle'
+
+name = 'matplotlib-tk'
+version = '2.1.2'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'http://matplotlib.org'
+description = """matplotlib is a python 2D plotting library which produces publication quality figures in a variety of
+ hardcopy formats and interactive environments across platforms. matplotlib can be used in python scripts, the python
+ and ipython shell, web application servers, and six graphical user interface toolkits."""
+
+toolchain = {'name': 'intel', 'version': '2018a'}
+
+dependencies = [
+    ('Python', '3.6.4'),
+    ('matplotlib', '%(version)s', versionsuffix),
+    ('Tkinter', '%(pyver)s', versionsuffix),
+]
+
+moduleclass = 'vis'
