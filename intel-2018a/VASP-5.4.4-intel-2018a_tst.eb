@@ -13,7 +13,7 @@ toolchain = {'name': 'intel', 'version': '2018a'}
 toolchainopts = {'usempi': True}
 
 # Vasp is proprietary software, see http://www.vasp.at/index.php/faqs on how to get access to the code
-source_urls = ['http://theory.cm.utexas.edu/code/'] # for TST tools
+source_urls = ['http://theory.cm.utexas.edu/code/']  # for TST tools
 sources = [
     '%(namelower)s.%(version)s.tar.gz',
     'vtstcode.tgz',

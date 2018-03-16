@@ -15,7 +15,7 @@ source_urls = ['https://github.com/yambo-code/%(namelower)s/archive/']
 
 dependencies = [('netCDF-Fortran', '4.4.4')]
 
-#patches = ['Yambo-4.1.2_configure.patch']
+# patches = ['Yambo-4.1.2_configure.patch']
 
 with_configure = 'True'
 
@@ -29,7 +29,7 @@ buildopts = 'all'
 files_to_copy = [(['bin/*'], 'bin')]
 
 sanity_check_paths = {
-    'files': ['bin/'+prog for prog in ['a2y', 'iotk', 'iotk.x', 'p2y', 'yambo',
+    'files': ['bin/' + prog for prog in ['a2y', 'iotk', 'iotk.x', 'p2y', 'yambo',
               'yambo_kerr', 'yambo_ph', 'ypp', 'ypp_ph']],
     'dirs': []
 }

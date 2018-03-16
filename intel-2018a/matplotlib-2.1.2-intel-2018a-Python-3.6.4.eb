@@ -22,7 +22,7 @@ dependencies = [
     ('Python', '3.6.4'),
     ('libpng', '1.6.34'),
     ('freetype', '2.9'),
-#    ('Tkinter', '%(pyver)s', versionsuffix),
+    # ('Tkinter', '%(pyver)s', versionsuffix),
 ]
 
 exts_list = [
@@ -48,7 +48,7 @@ sanity_check_paths = {
     'dirs': ['lib/python%(pyshortver)s/site-packages'],
 }
 
-#sanity_check_commands = ["""python -c 'import matplotlib; matplotlib.use("TkAgg"); import matplotlib.pyplot' """]
+# sanity_check_commands = ["""python -c 'import matplotlib; matplotlib.use("TkAgg"); import matplotlib.pyplot' """]
 
 modextrapaths = {'PYTHONPATH': ['lib/python%(pyshortver)s/site-packages']}
 

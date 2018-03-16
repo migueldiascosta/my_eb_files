@@ -40,7 +40,7 @@ patches = [
     'QuantumESPRESSO-5.4.0_yambo-fixes.patch',
 ]
 
-dependencies = [('FoX', '4.1.2'),]
+dependencies = [('FoX', '4.1.2')]
 
 # source checksums
 checksums = [
@@ -55,7 +55,7 @@ checksums = [
 ]
 
 # add plumed and uncomment the lines in sources and checksums if the package is downloaded manually
-buildopts = 'all w90 epw xspectra'  # gipaw plumed want west yambo 
+buildopts = 'all w90 epw xspectra'  # gipaw plumed want west yambo
 
 # parallel build tends to fail
 parallel = 1

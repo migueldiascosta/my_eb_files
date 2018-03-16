@@ -20,7 +20,7 @@ builddependencies = [
 
 preconfigopts = 'autoreconf -fvi && '
 
-#runtest = 'check'
+# runtest = 'check'
 
 sanity_check_paths = {
     'files': ['lib/libfgsl.%s' % SHLIB_EXT, 'lib/libfgsl.a'],

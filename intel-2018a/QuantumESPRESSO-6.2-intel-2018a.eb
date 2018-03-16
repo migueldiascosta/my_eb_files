@@ -40,7 +40,7 @@ patches = [
     'QuantumESPRESSO-5.4.0_yambo-fixes.patch',
 ]
 
-dependencies = [('FoX', '4.1.2'),]
+dependencies = [('FoX', '4.1.2')]
 
 # source checksums
 checksums = [
