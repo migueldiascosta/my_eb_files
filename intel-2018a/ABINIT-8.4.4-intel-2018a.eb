@@ -18,7 +18,7 @@ checksums = ['ebf63b842810c65d83939cf04058d7bdedc9874ee662f59af45cb29de41e2a8c']
 
 dependencies = [
     ('libxc', '3.0.0'),
-    ('netCDF', '4.5.0'),
+    ('netCDF', '4.6.0'),
     ('netCDF-Fortran', '4.4.4'),
 ]
 

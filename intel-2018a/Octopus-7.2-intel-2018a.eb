@@ -24,7 +24,7 @@ builddependencies = [
 
 dependencies = [
     ('libxc', '3.0.1'),
-    ('netCDF', '4.5.0'),
+    ('netCDF', '4.6.0'),
     ('netCDF-Fortran', '4.4.4'),
     ('GSL', '2.4'),
     ('FFTW', '3.3.7'),
