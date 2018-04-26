@@ -2,6 +2,7 @@ easyblock = 'ConfigureMake'
 
 name = 'BerkeleyGW'
 version = '1.2.0'
+versionsuffix = '_debug'
 
 homepage = 'http://www.berkeleygw.org'
 description = """The BerkeleyGW Package is a set of computer codes that calculates the quasiparticle
@@ -9,7 +10,7 @@ description = """The BerkeleyGW Package is a set of computer codes that calculat
  nanostructures such as slabs, wires and molecules."""
 
 toolchain = {'name': 'intel', 'version': '2018a'}
-toolchainopts = {'usempi': True, 'openmp': True}
+toolchainopts = {'usempi': True, 'openmp': True, 'debug': True}
 
 source_urls = ['http://www.berkeleygw.org/releases/']  # requires registration
 sources = ['BGW-%(version)s.tar.gz']
@@ -25,8 +26,8 @@ skipsteps = ['configure']
 prebuildopts = 'cp config/generic.mpi.linux.mk arch.mk && '
 
 buildopts = 'all-flavors COMPFLAG=-DINTEL PARAFLAG="-DMPI -DOMP" DEBUGFLAG="" F90free="$MPIF90 -free" LINK="$MPIF90" '
-buildopts += 'FOPTS="$FFLAGS" MOD_OPT="-module " C_PARAFLAG="$PARAFLAG" CC_COMP="$MPICXX" C_COMP="$MPICC" '
-buildopts += 'FCPP="cpp -C -P -ffreestanding" C_LINK="$MPICXX" C_OPTS="$CFLAGS" MKLPATH="$MKLROOT" '
+buildopts += 'FOPTS="$FFLAGS -traceback" MOD_OPT="-module " C_PARAFLAG="$PARAFLAG" CC_COMP="$MPICXX" C_COMP="$MPICC" '
+buildopts += 'FCPP="cpp -C -P -ffreestanding" C_LINK="$MPICXX" C_OPTS="$CFLAGS -traceback" MKLPATH="$MKLROOT" '
 buildopts += 'LAPACKLIB="$LIBLAPACK" BLACSDIR="$BLACS_LIB_DIR" BLACS="$LIBBLACS" SCALAPACKLIB="$LIBSCALAPACK" '
 buildopts += 'FFTWINCLUDE="$FFTW_INC_DIR" FFTWLIB="$MKLROOT/lib/intel64/libfftw2xf_double_intel.a" '
 
