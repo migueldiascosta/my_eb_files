@@ -1,0 +1,78 @@
+# Built with EasyBuild version 3.6.0.dev0-r90bff94c1eaa20ca0e22cde6585b64ca1a79b18a on 2018-04-24_13-01-45
+##
+# This file is an EasyBuild reciPY as per https://github.com/easybuilders/easybuild
+#
+# Authors::   Inge Gutheil <i.gutheil@fz-juelich.de>, Alan O'Cais <a.ocais@fz-juelich.de>
+# License::   MIT/GPL
+# $Id$
+#
+##
+
+easyblock = 'ConfigureMake'
+
+name = 'ELPA'
+version = '2015.02.002'
+
+homepage = 'http://elpa.rzg.mpg.de'
+description = """Eigenvalue SoLvers for Petaflop-Applications ."""
+
+toolchain = {'name': 'intel', 'version': '2018a'}
+toolchainopts = {'usempi': True}
+
+source_urls = ['http://elpa.mpcdf.mpg.de/html/Releases/%(version)s/']
+sources = [SOURCELOWER_TAR_GZ]
+
+builddependencies = [
+    ('Autotools', '20170619'),
+]
+
+preconfigopts = 'autoreconf && '
+
+common_configopts = 'FCFLAGS="-I$EBROOTIMKL/mkl/include/intel64/lp64 -nofor_main $FCFLAGS" '
+common_configopts += 'LIBS="$LIBSCALAPACK" '
+
+configopts = [
+    common_configopts + '--enable-openmp ',
+    common_configopts,  # Default version last, so we can get the normal config.h/config-f90.h installed afterwards.
+]
+
+buildopts = ' V=1 '
+
+postinstallcmds = [
+    'cp config.h config-f90.h %(installdir)s/share/doc/elpa/examples',
+]
+
+sanity_check_paths = {
+    'files': ['lib/libelpa.a', 'lib/libelpa.%s' % SHLIB_EXT, 'lib/libelpa_openmp.a',
+              'lib/libelpa_openmp.%s' % SHLIB_EXT, 'share/doc/elpa/examples/config.h',
+              'share/doc/elpa/examples/config-f90.h'],
+    'dirs': ['bin', 'include/elpa-%(version)s/elpa', 'include/elpa-%(version)s/modules', 'lib/pkgconfig'],
+}
+
+moduleclass = 'math'
+
+# Build statistics
+buildstats = [{
+    "build_time": 406.21,
+    "command_line": ["--buildpath='/dev/shm/build'", '--debug', '--force', "--from-pr='6215'", "--git-working-dirs-path='/home/easybuild/git-working-dirs'", "--github-user='migueldiascosta'", "--installpath='/opt/apps/util/easybuild'", "--packagepath='/opt/apps/util/easybuild/packages'", "--prefix='/opt/apps/util/easybuild'", "--repositorypath='/opt/apps/util/easybuild/ebfiles_repo'", "--robot='/home/easybuild/github/easybuilders/easybuild-easyconfigs/easybuild/easyconfigs'", "--sourcepath='/opt/apps/util/easybuild/sources'", "--tmpdir='/dev/shm/tmp'", '--upload-test-report'],
+    "core_count": 24,
+    "cpu_model": "Intel(R) Xeon(R) CPU E5-2640 0 @ 2.50GHz",
+    "cpu_speed": 2501.0,
+    "cpu_vendor": "Intel",
+    "easybuild-easyblocks_version": "3.6.0.dev0-ra953db249dd1b83b6781d2a8bf4f5d11ea110253",
+    "easybuild-framework_version": "3.6.0.dev0-r90bff94c1eaa20ca0e22cde6585b64ca1a79b18a",
+    "gcc_version": "Using built-in specs.; COLLECT_GCC=gcc; COLLECT_LTO_WRAPPER=/gpfs0/shared/apps/util/easybuild/software/GCCcore/6.4.0/bin/../libexec/gcc/x86_64-pc-linux-gnu/6.4.0/lto-wrapper; Target: x86_64-pc-linux-gnu; Configured with: ../configure --enable-languages=c,c++,fortran --enable-lto --enable-checking=release --disable-multilib --enable-shared=yes --enable-static=yes --enable-threads=posix --enable-gold=default --enable-plugins --enable-ld --with-plugin-ld=ld.gold --prefix=/opt/apps/util/easybuild/software/GCCcore/6.4.0 --with-local-prefix=/opt/apps/util/easybuild/software/GCCcore/6.4.0 --enable-bootstrap --with-isl=/dev/shm/GCCcore/6.4.0/dummy-/gcc-6.4.0/stage2_stuff; Thread model: posix; gcc version 6.4.0 (GCC) ; ",
+    "glibc_version": "2.12",
+    "hostname": "grc-cluster1",
+    "install_size": 17455895,
+    "modules_tool": ('Lmod', '/opt/apps/util/lmod/6.6/libexec/lmod', '6.6'),
+    "os_name": "centos",
+    "os_type": "Linux",
+    "os_version": "6.9",
+    "platform_name": "x86_64-unknown-linux",
+    "python_version": "2.7.14 (default, Feb 13 2018, 13:42:39) ; [GCC 4.4.7 20120313 (Red Hat 4.4.7-18)]",
+    "system_gcc_path": "/opt/apps/util/easybuild/software/GCCcore/6.4.0/bin/gcc",
+    "system_python_path": "/usr/bin/python",
+    "timestamp": 1524546105,
+    "total_memory": 32083,
+}]
