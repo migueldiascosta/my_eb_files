@@ -1,4 +1,3 @@
-# Built with EasyBuild version 3.6.1.dev0 on 2018-05-14_15-53-36
 easyblock = 'PythonPackage'
 
 name = 'pkgconfig'
@@ -26,29 +25,3 @@ sanity_check_paths = {
 }
 
 moduleclass = 'devel'
-
-# Build statistics
-buildstats = [{
-    "build_time": 13.05,
-    "command_line": ["--buildpath='/dev/shm/build'", "--containerpath='/opt/apps/util/easybuild/containers'", '--debug', '--force', "--git-working-dirs-path='/home/easybuild/git-working-dirs'", "--github-user='migueldiascosta'", "--installpath='/opt/apps/util/easybuild'", "--packagepath='/opt/apps/util/easybuild/packages'", "--prefix='/opt/apps/util/easybuild'", "--repositorypath='/opt/apps/util/easybuild/ebfiles_repo'", "--robot='/home/easybuild/github/easybuilders/easybuild-easyconfigs/easybuild/easyconfigs'", "--sourcepath='/opt/apps/util/easybuild/sources'", "--tmpdir='/dev/shm/tmp'", 'Keras-2.1.6-intel-2018a-Python-3.6.4.eb'],
-    "core_count": 32,
-    "cpu_model": "Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz",
-    "cpu_speed": 2401.0,
-    "cpu_vendor": "Intel",
-    "easybuild-easyblocks_version": "3.6.1.dev0",
-    "easybuild-framework_version": "3.6.1.dev0",
-    "gcc_version": "Using built-in specs.; COLLECT_GCC=gcc; COLLECT_LTO_WRAPPER=/gpfs0/shared/apps/util/easybuild/software/GCCcore/6.4.0/bin/../libexec/gcc/x86_64-pc-linux-gnu/6.4.0/lto-wrapper; Target: x86_64-pc-linux-gnu; Configured with: ../configure --enable-languages=c,c++,fortran --enable-lto --enable-checking=release --disable-multilib --enable-shared=yes --enable-static=yes --enable-threads=posix --enable-gold=default --enable-plugins --enable-ld --with-plugin-ld=ld.gold --prefix=/opt/apps/util/easybuild/software/GCCcore/6.4.0 --with-local-prefix=/opt/apps/util/easybuild/software/GCCcore/6.4.0 --enable-bootstrap --with-isl=/dev/shm/GCCcore/6.4.0/dummy-/gcc-6.4.0/stage2_stuff; Thread model: posix; gcc version 6.4.0 (GCC) ; ",
-    "glibc_version": "2.12",
-    "hostname": "grc-s05",
-    "install_size": 39776,
-    "modules_tool": ('Lmod', '/opt/apps/util/lmod/6.6/libexec/lmod', '6.6'),
-    "os_name": "centos",
-    "os_type": "Linux",
-    "os_version": "6.9",
-    "platform_name": "x86_64-unknown-linux",
-    "python_version": "2.6.6 (r266:84292, Aug 18 2016, 15:13:37) ; [GCC 4.4.7 20120313 (Red Hat 4.4.7-17)]",
-    "system_gcc_path": "/opt/apps/util/easybuild/software/GCCcore/6.4.0/bin/gcc",
-    "system_python_path": "/opt/apps/util/easybuild/software/Python/3.6.4-intel-2018a/bin/python",
-    "timestamp": 1526284416,
-    "total_memory": 387569,
-}]
