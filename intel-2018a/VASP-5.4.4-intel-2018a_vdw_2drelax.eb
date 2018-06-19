@@ -2,7 +2,7 @@ easyblock = 'MakeCp'
 
 name = 'VASP'
 version = '5.4.4'
-versionsuffix = '_vdw_nozcellrelax'
+versionsuffix = '_vdw_2drelax'
 
 homepage = 'http://www.vasp.at'
 description = """The Vienna Ab initio Simulation Package (VASP) is a computer program for atomic scale
@@ -14,14 +14,16 @@ toolchainopts = {'usempi': True}
 
 # Vasp is proprietary software, see http://www.vasp.at/index.php/faqs on how to get access to the code
 sources = ['%(namelower)s.%(version)s.tar.gz']
+
 patches = [
     'vasp.5.4.4.vdwpath.patch',
-    'vasp.5.4.4.nozcellrelax.patch',
+    'vasp.5.4.4.2drelax.patch',
 ]
+
 checksums = [
     '5bd2449462386f01e575f9adf629c08cb03a13142806ffb6a71309ca4431cfb3',  # vasp.5.4.4.tar.gz
     '40062938bf61cbb8b93fa7f34f3c4ce87c91d99750bda6621a218d99d5505b94',  # vasp.5.4.4.vdwpath.patch
-    '9df2199992d8a00715b121a58c07b2aa00579ed835b4692c0f6eb3ee113ced7f',  # vasp.5.4.4.nozcellrelax.patch
+    '0508cb9ff06e8102e3f212f5e3ece0b32097d32e310d9a2c3ac3a15f683be1d2',  # vasp.5.4.4.2drelax.patch
 ]
 
 prebuildopts = 'cp arch/makefile.include.linux_intel ./makefile.include && '
