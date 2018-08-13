@@ -216,12 +216,17 @@ class EB_WIEN2k(EasyBlock):
 
             libxcroot = get_software_root('libxc')
             libxcquestion = 'LIBXC (that you have installed%s)? (y,N):' % \
-                            (' before' if LooseVersion(self.version) < LooseVersion("17") else '')
+                (' before' if LooseVersion(self.version) < LooseVersion("17") else '')
+            libxcrootdirquestion = 'Please enter the %sdirectory of your LIBXC-installation!:' % \
+                ('' if LooseVersion(self.version) < LooseVersion("18.2") else 'root-')
+            libxclibdirquestion = 'Please enter the lib-directory of your LIBXC-installation (usually lib or lib64!:'
+
             if libxcroot:
                 qanda.update({
                     libxcquestion: 'y',
                     'Do you want to automatically search for LIBXC installations? (Y,n):': 'n',
-                    'Please enter the directory of your LIBXC-installation!:': libxcroot,
+                    libxcrootdirquestion: libxcroot,
+                    libxclibdirquestion: 'lib',
                 })
             else:
                 qanda.update({libxcquestion: ''})
