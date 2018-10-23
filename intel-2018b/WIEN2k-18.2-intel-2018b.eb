@@ -13,7 +13,8 @@ sources = ['%(name)s_%(version)s.tar']
 checksums = ['4d048ef228a342dd456074b4a910a87b01673a51a0e2d569d50faed338ada152']
 
 dependencies = [
-#    ('ELPA', '2015.02.002'),
+    ('DFT-D3', '3.2.0'),
+    ('ELPA', '2015.02.002'),
     ('FFTW', '3.3.8'),
     ('libxc', '4.2.3'),
 ]
