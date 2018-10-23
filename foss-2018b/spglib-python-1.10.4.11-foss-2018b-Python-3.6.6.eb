@@ -1,0 +1,27 @@
+easyblock = 'PythonPackage'
+
+name = 'spglib-python'
+version = '1.10.4.11'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://pypi.python.org/pypi/spglib'
+description = """Spglib for Python. Spglib is a library for finding and handling crystal symmetries written in C."""
+
+toolchain = {'name': 'foss', 'version': '2018b'}
+
+source_urls = ['https://pypi.python.org/packages/source/%(nameletter)s/spglib']
+sources = ['spglib-%(version)s.tar.gz']
+checksums = ['13b0a227d2dc4079fe36d5bcce4e672400c7c5dfc5d3cd25ccb9521ef592d93e']
+
+dependencies = [
+    ('Python', '3.6.6'),
+]
+
+options = {'modulename': 'spglib'}
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
+}
+
+moduleclass = 'chem'

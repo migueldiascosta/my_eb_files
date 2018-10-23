@@ -1,0 +1,30 @@
+easyblock = 'MakeCp'
+
+name = 'BoltzTraP'
+version = '1.2.5'
+
+homepage = 'http://www.icams.de/content/research/software-development/boltztrap/'
+description = """Boltzmann Transport Properties (BoltzTraP) is a program for calculating the semi-classic transport
+ coefficients. The code uses a mesh of self-consistent band energies and is interfaced to the WIEN2k, AB-INIT, SIESTA,
+ VASP and QuantumEspresso programs."""
+
+toolchain = {'name': 'foss', 'version': '2018b'}
+
+# download from http://www.icams.de/content/uploads/boltztrap/BoltzTraP.tar.bz2, and rename to include version
+sources = [SOURCE_TAR_BZ2]
+checksums = ['6623d4393bce2e178b073f75f283eee6']
+
+skipsteps = ['configure']
+
+start_dir = 'src'
+parallel = 1
+buildopts = 'FC="${FC}" FOPT="$FFLAGS" LIBS="$LIBLAPACK"'
+
+files_to_copy = [(['BoltzTraP'], 'bin')]
+
+sanity_check_paths = {
+    'files': ['bin/BoltzTraP'],
+    'dirs': [],
+}
+
+moduleclass = 'chem'

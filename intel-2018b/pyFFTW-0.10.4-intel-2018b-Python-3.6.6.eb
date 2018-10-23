@@ -1,0 +1,29 @@
+easyblock = 'PythonPackage'
+
+name = 'pyFFTW'
+version = '0.10.4'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'http://hgomersall.github.com/pyFFTW/'
+description = """pyFFTW is a pythonic wrapper around FFTW."""
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+
+source_urls = [PYPI_SOURCE]
+sources = [SOURCE_TAR_GZ]
+checksums = ['739b436b7c0aeddf99a48749380260364d2dc027cf1d5f63dafb5f50068ede1a']
+
+download_dep_fail = True
+use_pip = True
+
+dependencies = [
+    ('Python', '3.6.6'),
+    ('FFTW', '3.3.8'),
+]
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
+}
+
+moduleclass = 'math'
