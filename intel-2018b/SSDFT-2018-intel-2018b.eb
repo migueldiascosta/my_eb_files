@@ -1,0 +1,15 @@
+name = 'SSDFT'
+version = '20180305'
+
+homepage = 'https://2dmaterials.nus.edu.sg/feng/research/method-development/'
+description = """Steady State Density Functional Theory for Electronic and Transport Properties of Molecular Junctions.
+ Modified from TranSIESTA by S. Liu and C. Zhang at NUS."""
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+toolchainopts = {'usempi': True}
+
+sources = [SOURCE_TGZ]
+
+parallel = 1
+
+moduleclass = 'phys'

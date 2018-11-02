@@ -1,0 +1,31 @@
+easyblock = 'PythonPackage'
+
+name = 'phono3py'
+version = '1.13.3.27'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'http://atztogo.github.io/phono3py/'
+description = "phono3py calculates phonon-phonon interaction and related properties using the supercell approach."
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+
+source_urls = [PYPI_SOURCE]
+sources = [SOURCE_TAR_GZ]
+checksums = ['f03cec828b135365bd945cd846dd60b181dc0145792cc07f186b99c9c411a8e4']
+
+dependencies = [
+    ('Python', '3.6.6'),
+    ('phonopy', '1.13.2.107', versionsuffix),
+]
+
+prebuildopts = 'echo "import os" > mkl.py && '
+prebuildopts += 'echo "mkl_extra_link_args_lapacke = os.environ[\'LIBLAPACK_MT\'].split(\' \')" >> mkl.py && '
+prebuildopts += 'echo "mkl_library_dirs_lapacke = []" >> mkl.py && '
+prebuildopts += 'echo "mkl_include_dirs_lapacke = []" >> mkl.py && '
+
+sanity_check_paths = {
+    'files': ['bin/phono3py'],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+moduleclass = 'chem'
