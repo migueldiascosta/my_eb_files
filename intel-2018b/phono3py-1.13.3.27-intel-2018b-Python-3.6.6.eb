@@ -8,6 +8,7 @@ homepage = 'http://atztogo.github.io/phono3py/'
 description = "phono3py calculates phonon-phonon interaction and related properties using the supercell approach."
 
 toolchain = {'name': 'intel', 'version': '2018b'}
+toolchainopts = {'openmp': True}
 
 source_urls = [PYPI_SOURCE]
 sources = [SOURCE_TAR_GZ]
