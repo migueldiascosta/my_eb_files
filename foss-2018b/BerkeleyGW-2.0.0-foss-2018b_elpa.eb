@@ -23,7 +23,6 @@ checksums = [
 ]
 
 dependencies = [
-    ('zlib', '1.2.11'),
     ('ELPA', '2018.05.001'),
     ('HDF5', '1.10.2'),
 ]
@@ -39,7 +38,8 @@ buildopts += 'FCPP="cpp -C -nostdinc " C_LINK="$MPICXX" C_OPTS="$CFLAGS" '
 buildopts += 'MATHFLAG="-DUSESCALAPACK -DUNPACKED -DUSEFFTW3 -DHDF5 -DUSEELPA" '
 buildopts += 'LAPACKLIB="$LIBLAPACK" BLACSDIR="$BLACS_LIB_DIR" BLACS="$LIBBLACS" SCALAPACKLIB="$LIBSCALAPACK" '
 buildopts += 'FFTWINCLUDE="$FFTW_INC_DIR" FFTWLIB="-lfftw3_omp -lfftw3" '
-buildopts += 'HDF5INCLUDE="$EBROOTHDF5/include" HDF5LIB="-lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 -lz" '
+buildopts += 'HDF5INCLUDE="$EBROOTHDF5/include" '
+buildopts += 'HDF5LIB="-L$EBROOTHDF5/lib -lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 -lz" '
 buildopts += 'ELPALIB="$EBROOTELPA/lib/libelpa_openmp.a" '
 buildopts += 'ELPAINCLUDE="$EBROOTELPA/include/elpa_openmp-$EBVERSIONELPA/modules" '
 

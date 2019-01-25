@@ -1,0 +1,35 @@
+easyblock = 'PythonBundle'
+
+name = 'QuSpin'
+commit = '05ff14c9ec890dbe69a52c4ff3c98060baf52875'
+version = '%s' % commit[0:7]
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://weinbe58.github.io/QuSpin'
+description = """QuSpin is an open-source Python package for exact diagonalization and quantum dynamics of
+ arbitrary boson, fermion and spin many-body systems."""
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+
+dependencies = [
+    ('Python', '3.6.6'),
+    ('matplotlib', '3.0.0', versionsuffix),
+]
+
+exts_list = [
+    ('dill', '0.2.8.2', {
+        'source_urls': ['https://pypi.python.org/packages/source/d/dill'],
+        'checksums': ['624dc244b94371bb2d6e7f40084228a2edfff02373fe20e018bef1ee92fdd5b3'],
+    }),
+    ('joblib', '0.13.0', {
+        'source_urls': ['https://pypi.python.org/packages/source/j/joblib'],
+        'checksums': ['651fdd4888cdefa39f65c942e33ba1a610d395acd9c1d787adbda1a6beb22218'],
+    }),
+    (name, version, {
+        'source_tmpl': '05ff14c9ec890dbe69a52c4ff3c98060baf52875.zip',
+        'source_urls': ['https://github.com/weinbe58/QuSpin/archive/'],
+        'checksums': ['52e66e5459086047bbfe6fa96a9ad4c72654b42310f90822200cf93722eddf66'],
+    }),
+]
+
+moduleclass = 'phys'

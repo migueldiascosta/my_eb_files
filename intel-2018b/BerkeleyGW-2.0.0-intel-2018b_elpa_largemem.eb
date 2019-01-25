@@ -1,0 +1,87 @@
+# Built with EasyBuild version 3.7.2.dev0-r03583e74280c8fd325b6712422fbb02f1bf6d6ad on 2018-12-04_12-04-09
+easyblock = 'ConfigureMake'
+
+name = 'BerkeleyGW'
+version = '2.0.0'
+versionsuffix = '_elpa_largemem'
+
+homepage = 'http://www.berkeleygw.org'
+description = """The BerkeleyGW Package is a set of computer codes that calculates the quasiparticle
+ properties and the optical responses of a large variety of materials from bulk periodic crystals to
+ nanostructures such as slabs, wires and molecules."""
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+toolchainopts = {'usempi': True, 'openmp': True}
+
+source_urls = ['https://berkeley.box.com/shared/static/']
+sources = [{'download_filename': 'wkqu37wu77tll53r8t1soe6ozqja67yy.gz', 'filename': SOURCE_TAR_GZ}]
+patches = [
+    'BerkeleyGW-1.2.0_fix_intent.patch',
+    'BerkeleyGW-2.0.0_fix_path.patch',
+    'BerkeleyGW-2.0.0_largemem.patch',
+]
+checksums = [
+    '887146cc6598a509a6d2a7b5044d12ebc5a4a2c7b028513f247fe62cf0861563',  # BerkeleyGW-2.0.0.tar.gz
+    '7bd3cc229693a1bd5fe6547f55046bee68c8c50f29f8ca6945f443b04ce2ca38',  # BerkeleyGW-1.2.0_fix_intent.patch
+    '132c02d41a3269e00a69b5e5cfc5d6b7954ad4ce142e34f8e57b7c475033cce4',  # BerkeleyGW-2.0.0_fix_path.patch
+]
+
+dependencies = [
+    ('ELPA', '2018.05.001'),
+    ('HDF5', '1.10.2'),
+]
+
+skipsteps = ['configure']
+
+prebuildopts = 'cp config/generic.mpi.linux.mk arch.mk && '
+
+buildopts = 'all-flavors COMPFLAG=-DINTEL PARAFLAG="-DMPI -DOMP" DEBUGFLAG="" '
+buildopts += 'F90free="$MPIF90 -free" LINK="$MPIF90" '
+buildopts += 'FOPTS="$FFLAGS" MOD_OPT="-module " C_PARAFLAG="$PARAFLAG" CC_COMP="$MPICXX" C_COMP="$MPICC" '
+buildopts += 'FCPP="cpp -C -P -ffreestanding" C_LINK="$MPICXX" C_OPTS="$CFLAGS" MKLPATH="$MKLROOT" '
+buildopts += 'MATHFLAG="-DUSESCALAPACK -DUNPACKED -DUSEFFTW3 -DHDF5 -DUSEELPA" '
+buildopts += 'LAPACKLIB="$LIBLAPACK" BLACSDIR="$BLACS_LIB_DIR" BLACS="$LIBBLACS" SCALAPACKLIB="$LIBSCALAPACK" '
+buildopts += 'FFTWINCLUDE="$FFTW_INC_DIR" FFTWLIB="$MKLROOT/lib/intel64/libfftw3xf_intel.a" '
+buildopts += 'HDF5INCLUDE="$EBROOTHDF5/include" HDF5LIB="-lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 -lz" '
+buildopts += 'ELPALIB="$EBROOTELPA/lib/libelpa_openmp.a" '
+buildopts += 'ELPAINCLUDE="$EBROOTELPA/include/elpa_openmp-$EBVERSIONELPA/modules" '
+
+# "all-flavors" cleans and compiles everything again
+preinstallopts = 'sed -i "s/install: all-flavors/install: all/" Makefile && '
+
+installopts = 'INSTDIR=%(installdir)s'
+
+sanity_check_paths = {
+    'files': ['bin/' + prog + '.' + flavor + '.x'
+              for prog in ['epsilon', 'sigma', 'kernel', 'absorption', 'nonlinearoptics', 'parabands']
+              for flavor in ['real', 'cplx']],
+    'dirs': []
+}
+
+moduleclass = 'phys'
+
+# Build statistics
+buildstats = [{
+    "build_time": 385.87,
+    "command_line": ["--buildpath='/dev/shm/build'", "--containerpath='/opt/apps/util/easybuild/containers'", '--debug', "--from-pr='7233'", "--git-working-dirs-path='/home/easybuild/git-working-dirs'", "--github-user='migueldiascosta'", "--installpath='/opt/apps/util/easybuild'", "--optarch='{\\'GCC\\': \\'march=native -g\\', \\'Intel\\': \\'xHost -g -traceback\\'}'", "--packagepath='/opt/apps/util/easybuild/packages'", "--parallel='4'", "--prefix='/opt/apps/util/easybuild'", '--rebuild', "--repositorypath='/opt/apps/util/easybuild/ebfiles_repo'", "--robot='/home/easybuild/github/easybuilders/easybuild-easyconfigs/easybuild/easyconfigs:/usr/local/easybuild/easyconfigs'", "--sourcepath='/opt/apps/util/easybuild/sources'", "--test-report-env-filter='^SSH|USER|HOSTNAME|UID|CATALINA|EGO|GUI|PCM|PERF|LSF|.*COOKIE.*'", "--tmpdir='/dev/shm/tmp'", '--upload-test-report'],
+    "core_count": 24,
+    "cpu_model": "Intel(R) Xeon(R) CPU E5-2640 0 @ 2.50GHz",
+    "cpu_speed": 2501.0,
+    "cpu_vendor": "Intel",
+    "easybuild-easyblocks_version": "3.7.2.dev0-rb75b56485867e3286220f3b2ff06db10f5182646",
+    "easybuild-framework_version": "3.7.2.dev0-r03583e74280c8fd325b6712422fbb02f1bf6d6ad",
+    "gcc_version": "Using built-in specs.; COLLECT_GCC=gcc; COLLECT_LTO_WRAPPER=/gpfs0/shared/apps/util/easybuild/software/GCCcore/7.3.0/bin/../libexec/gcc/x86_64-pc-linux-gnu/7.3.0/lto-wrapper; Target: x86_64-pc-linux-gnu; Configured with: ../configure --enable-languages=c,c++,fortran --enable-lto --enable-checking=release --disable-multilib --enable-shared=yes --enable-static=yes --enable-threads=posix --enable-gold=default --enable-plugins --enable-ld --with-plugin-ld=ld.gold --prefix=/opt/apps/util/easybuild/software/GCCcore/7.3.0 --with-local-prefix=/opt/apps/util/easybuild/software/GCCcore/7.3.0 --enable-bootstrap --with-isl=/dev/shm/build/GCCcore/7.3.0/dummy-/gcc-7.3.0/stage2_stuff; Thread model: posix; gcc version 7.3.0 (GCC) ; ",
+    "glibc_version": "2.12",
+    "hostname": "grc-cluster1",
+    "install_size": 2317790778,
+    "modules_tool": ('Lmod', '/opt/apps/util/lmod/lmod/libexec/lmod', '7.8.4'),
+    "os_name": "centos",
+    "os_type": "Linux",
+    "os_version": "6.10",
+    "platform_name": "x86_64-unknown-linux",
+    "python_version": "2.7.14 (default, Feb 13 2018, 13:42:39) ; [GCC 4.4.7 20120313 (Red Hat 4.4.7-18)]",
+    "system_gcc_path": "/opt/apps/util/easybuild/software/GCCcore/7.3.0/bin/gcc",
+    "system_python_path": "/usr/local/bin/python",
+    "timestamp": 1543896249,
+    "total_memory": 32082,
+}]

@@ -1,0 +1,27 @@
+easyblock = 'ConfigureMake'
+
+name = 'h5check'
+version = '2.0.1'
+
+homepage = 'http://support.hdfgroup.org/products/hdf5_tools/h5check.html'
+description = "The HDF5 Format Checker is a validation tool for verifying that an HDF5 file is encoded according to the HDF File Format Specification. Its purpose is to ensure data model integrity and long-term compatibility between evolving versions of the HDF5 library."
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+
+source_urls = ['https://support.hdfgroup.org/ftp/HDF5/tools/%(name)s/src']
+sources = [SOURCE_TAR_GZ]
+checksums = ['72a6c2d19dea09962af0ac97277293b58d2119ea9f04fbfa6a2a7dc89734a7be']
+
+preconfigopts = 'export H5CC=h5pcc && '
+
+dependencies = [
+    ('HDF5', '1.10.2'),
+]
+
+
+sanity_check_paths = {
+    'files': ['bin/%(name)s'],
+    'dirs': [],
+}
+
+moduleclass = 'data'
