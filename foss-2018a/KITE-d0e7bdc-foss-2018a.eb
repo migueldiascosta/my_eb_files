@@ -1,0 +1,48 @@
+easyblock = 'MakeCp'
+
+name = 'KITE'
+
+# no releases/tags (yet?), using commit to get reproducible builds
+commit = 'd0e7bdca1922a134f18e4b49608c51bcd7664599'
+
+version = commit[:8]
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'http://quantum-kite.com'
+description = """KITE quantum transport software is a general-purpose, open-source code for accurate tight-binding
+ calculations of electronic structure and transport properties of large-scale molecular and condensed systems with
+ up to tens of billions of atomic orbitals."""
+
+toolchain = {'name': 'foss', 'version': '2018a'}
+toolchainopts = {'openmp': True}
+
+sources = ['%s.zip' % commit]
+source_urls = ['https://github.com/quantum-kite/kite/archive/']
+
+dependencies = [
+    ('Python', '3.6.4'),
+    ('Eigen', '3.3.5', '', True),
+    ('HDF5', '1.10.1'),
+    ('h5py', '2.7.1', versionsuffix),
+    ('pybinding', '0.9.4', versionsuffix),
+]
+
+# Makefiles have a lot of hardcoded stuff, works with foss toolchain will need to be patched for intel
+patches = []
+
+buildopts = ' && cd tools && make' 
+
+files_to_copy = [
+	      (['KITEx', 'tools/KITE-tools'], 'bin'),
+	      (['kite.py'], 'lib/python%(pyshortver)s/site-packages'),
+	      (['docs', 'examples'], 'share'),
+]
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ["."]
+}
+
+modextrapaths = {'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages'}
+
+moduleclass = 'phys'
