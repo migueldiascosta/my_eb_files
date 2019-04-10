@@ -1,0 +1,11 @@
+--- utils/get_opt_externals.orig	2018-03-01 21:40:58.000000000 +0800
++++ utils/get_opt_externals	2018-03-28 10:22:40.173553999 +0800
+@@ -146,7 +146,7 @@
+         shutil.rmtree(unpackname)
+     if os.path.exists(targetname):
+         shutil.rmtree(targetname)
+-    if query_download_confirmation('dftd3', False):
++    if True:
+         download_file(url, fname)
+         unpack_file(fname)
+         os.remove(fname)

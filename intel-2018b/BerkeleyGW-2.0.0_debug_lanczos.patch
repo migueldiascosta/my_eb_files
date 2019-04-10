@@ -1,0 +1,36 @@
+--- BSE/absp_lanczos.f90.orig	2019-01-30 11:35:39.219807000 +0800
++++ BSE/absp_lanczos.f90	2019-01-30 15:01:13.538744957 +0800
+@@ -225,11 +225,11 @@
+ 
+   SAFE_ALLOCATE(hbse_a_bl, (lld_h*max(1,scal_h%npc)))
+   hbse_a_bl(:) = ZERO
+-  if (.not.xct%tda) then
+-    SAFE_ALLOCATE(hbse_b_bl, (lld_h*max(1,scal_h%npc)))
+-  else
+-    SAFE_ALLOCATE(hbse_b_bl, (1))
+-  endif
++  !if (.not.xct%tda) then
++  SAFE_ALLOCATE(hbse_b_bl, (lld_h*max(1,scal_h%npc)))
++  !else
++  !  SAFE_ALLOCATE(hbse_b_bl, (1))
++  !endif
+   hbse_b_bl(:) = ZERO
+   SAFE_ALLOCATE(x_bl, (lld_x*max(1,scal_x%npc)))
+   x_bl(:) = ZERO
+@@ -444,11 +444,11 @@
+ 
+   SAFE_ALLOCATE(hbse_a_bl, (lld_h*max(1,scal_h%npc)))
+   hbse_a_bl(:) = ZERO
+-  if (.not.xct%tda) then
+-    SAFE_ALLOCATE(hbse_b_bl, (lld_h*max(1,scal_h%npc)))
+-  else
+-    SAFE_ALLOCATE(hbse_b_bl, (1))
+-  endif
++  !if (.not.xct%tda) then
++  SAFE_ALLOCATE(hbse_b_bl, (lld_h*max(1,scal_h%npc)))
++  !else
++  !  SAFE_ALLOCATE(hbse_b_bl, (1))
++  !endif
+   hbse_b_bl(:) = ZERO
+   SAFE_ALLOCATE(x_bl, (lld_x*max(1,scal_x%npc)))
+   x_bl(:) = ZERO

@@ -5,7 +5,7 @@ name = 'KITE'
 # no releases/tags (yet?), using commit to get reproducible builds
 commit = 'd0e7bdca1922a134f18e4b49608c51bcd7664599'
 
-version = commit[:8]
+version = commit[:7]
 versionsuffix = '-Python-%(pyver)s'
 
 homepage = 'http://quantum-kite.com'
@@ -27,7 +27,7 @@ dependencies = [
     ('pybinding', '0.9.4', versionsuffix),
 ]
 
-# Makefiles have a lot of hardcoded stuff, works with foss toolchain will need to be patched for intel
+# Makefiles have a lot of hardcoded stuff, works with foss toolchain but will need to be patched for intel
 patches = []
 
 buildopts = ' && cd tools && make' 

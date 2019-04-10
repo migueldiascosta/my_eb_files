@@ -1,7 +1,8 @@
 easyblock = 'ConfigureMake'
 
 name = 'DFTB+'
-version = '18.2'
+version = 'devel_20190301'
+commit = 'ea95658'
 versionsuffix = '-Python-%(pyver)s'
 
 homepage = 'https://www.dftb-plus.info'
@@ -17,13 +18,24 @@ toolchainopts = {'lowopt': True, 'optarch': False}
 
 source_urls = [
     'https://github.com/dftbplus/dftbplus/archive/',
+    'https://github.com/dftbplus/mpifx/archive/',
+    'https://github.com/dftbplus/scalapackfx/archive/',
+    'https://bitbucket.org/pecchia/libnegf/get/',
 ]
 sources = [
-    '%(version)s.tar.gz',
+    '%s.tar.gz' % commit,
+# these have to be dowloaded manualy because they have the same download filename...
+    {'download_filename': 'dftbplus-18.1.tar.gz', 'filename': 'mpifx-dftbplus-18.1.tar.gz'},
+    {'download_filename': 'dftbplus-18.1.tar.gz', 'filename': 'scalapackfx-dftbplus-18.1.tar.gz'},
+    {'download_filename': 'ver0.3.2.tar.gz', 'filename': 'libnegf-ver0.3.2.tar.gz'},
+
 ]
-patches = ['%(name)s-%(version)s_no_query.patch']
+patches = ['%(name)s-18.2_no_query.patch']
 checksums = [
-    '21846f0866cc8ca40d80776d2786c41aac3b05d759e8137c10490b677ab93e6c',  # 18.2.tar.gz
+    '310a89a4638be692bc6ecce31d2365eeec43d4751c6d688f1cda29e4e76cbcd4',  # ea95658.tar.gz
+    '83e93a9825dfb79d4b767a472c970996ef5f7ff3086cff261eed87f04ef82fe6',  # mpifx-dftbplus-18.1.tar.gz
+    '28dd4853a3382793f8db10c754f51126cbd2338f9a5aee8f4267144d122a37d8',  # scalapackfx-dftbplus-18.1.tar.gz
+    'e87b79ab9561f39f5498f54e9e2c3a5f4a303e6b3df30cffb762a86fc5b644b5',  # libnegf-ver0.3.2.tar.gz
     '18ccffa9f9bb2cbb1695a2cc3227c05a5cc2cc15e416ffbad71189863bb2300c',  # DFTB+-18.2_no_query.patch
 ]
 
@@ -36,8 +48,16 @@ skipsteps = ['configure']
 
 prebuildopts = "./utils/get_opt_externals ALL && "
 prebuildopts += "cp sys/make.x86_64-linux-intel make.arch && "
-prebuildopts += 'sed -i "s|-O2|$OPTFLAGS|g" make.arch && '
+# prebuildiots +- "sed -i 's|mpifort|mpiifort|' make.arch && "
+prebuildopts += "sed -i 's|-O2|$OPTFLAGS|g' make.arch && "
 prebuildopts += "sed -i 's|$(ROOT)/_install|%(installdir)s|' make.config && "
+# prebuildopts += "sed -i 's|WITH_MPI := 0|WITH_MPI := 1|' make.config && "
+# prebuildopts += "sed -i 's|WITH_TRANSPORT := 0|WITH_TRANSPORT := 1|' make.config && "
+
+# there are three git submodules, downloaded then and moving them here
+prebuildopts += "mv ../pecchia-libnegf-8a2b6aa1dedd/* external/libnegf/origin/ && "
+prebuildopts += "mv ../mpifx-dftbplus-18.1/* external/mpifx/origin/ && "
+prebuildopts += "mv ../scalapackfx-dftbplus-18.1/* external/scalapackfx/origin/ && "
 
 buildopts = "LNOPT='-static-intel'"
 

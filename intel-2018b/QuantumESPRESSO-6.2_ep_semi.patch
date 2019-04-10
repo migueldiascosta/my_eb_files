@@ -1,0 +1,473 @@
+patch for calculating the electron-phonon interaction in semiconductors provided by Juefan from a web tutorial
+--- qe-6.2/PHonon/PH/do_phonon.f90.orig	2017-10-24 01:27:44.000000000 +0800
++++ qe-6.2/PHonon/PH/do_phonon.f90	2019-01-31 17:32:59.953830000 +0800
+@@ -112,22 +112,23 @@
+            !
+         END IF
+         !
+-        IF ( elph_mat ) THEN
+-           CALL elphsum_wannier(iq)
+-        ELSEIF( elph_simple ) THEN
+-           CALL elphsum_simple()
+-        ELSEIF( elph_yambo ) THEN
+-           CALL elph_yambo_eval_and_IO()
+-        ELSEIF(elph_tetra == 1) THEN
+-           CALL elph_tetra_lambda()
+-        ELSEIF(elph_tetra == 2) THEN
+-           CALL elph_tetra_gamma()
+-        ELSEIF(elph_tetra == 3) THEN
+-           CALL elph_scdft()
+-        ELSE 
+-           CALL elphsum()
+-        END IF
+-        !
++!        IF ( elph_mat ) THEN
++!           CALL elphsum_wannier(iq)
++!        ELSEIF( elph_simple ) THEN
++!           CALL elphsum_simple()
++!        ELSEIF( elph_yambo ) THEN
++!           CALL elph_yambo_eval_and_IO()
++!        ELSEIF(elph_tetra == 1) THEN
++!           CALL elph_tetra_lambda()
++!        ELSEIF(elph_tetra == 2) THEN
++!           CALL elph_tetra_gamma()
++!        ELSEIF(elph_tetra == 3) THEN
++!           CALL elph_scdft()
++!        ELSE 
++!           !CALL elphsum()
++         CALL elphsum2()
++!        END IF
++!        !
+      END IF
+      !
+      ! ... cleanup of the variables for the next q point
+--- qe-6.2/PHonon/PH/elphon.f90.orig	2017-10-24 01:27:44.000000000 +0800
++++ qe-6.2/PHonon/PH/elphon.f90	2019-01-31 17:32:59.966151000 +0800
+@@ -18,6 +18,7 @@
+   USE ions_base, ONLY : nat, ntyp => nsp, ityp, tau, amass
+   USE gvecs, ONLY: doublegrid
+   USE fft_base, ONLY : dfftp, dffts
++  USE fft_interfaces, ONLY : fft_interpolate
+   USE noncollin_module, ONLY : nspin_mag, noncolin, m_loc
+   USE lsda_mod, ONLY : nspin
+   USE uspp,  ONLY: okvan
+@@ -87,7 +88,7 @@
+         ALLOCATE (dvscfins (dffts%nnr, nspin_mag , npert(irr)) )
+         DO is = 1, nspin_mag
+            DO ipert = 1, npe
+-              CALL cinterpolate (dvscfin(1,is,ipert),dvscfins(1,is,ipert),-1)
++              CALL fft_interpolate (dfftp, dvscfin(:,is,ipert), dffts, dvscfins(:,is,ipert))
+            ENDDO
+         ENDDO
+      ELSE
+@@ -203,6 +204,12 @@
+   IF ( ntyp.NE.ntyp_ .OR. nat.NE.nat_ .OR.ibrav_.NE.ibrav .OR. &
+        ABS ( celldm_ (1) - celldm (1) ) > 1.0d-5) &
+           CALL errore ('readmat', 'inconsistent data', 1)
++  IF ( ibrav_ == 0 ) THEN
++     READ (iudyn, '(a)') line
++     READ (iudyn, '(a)') line
++     READ (iudyn, '(a)') line
++     READ (iudyn, '(a)') line
++  END IF
+   DO nt = 1, ntyp
+      READ (iudyn, * ) i, atm, amass_
+      IF ( nt.NE.i .OR. ABS (amass_ - amu_ry*amass (nt) ) > 1.0d-5) &
+@@ -327,7 +334,7 @@
+   el_ph_mat_rec=(0.0_DP,0.0_DP)
+   ALLOCATE (aux2(npwx*npol, nbnd))
+   incr=1
+-  IF ( dffts%have_task_groups ) THEN
++  IF ( dffts%has_task_groups ) THEN
+      !
+      v_siz =  dffts%nnr_tg
+      ALLOCATE( tg_dv   ( v_siz, nspin_mag ) )
+@@ -379,7 +386,7 @@
+         !
+         ! calculate dvscf_q*psi_k
+         !
+-        IF ( dffts%have_task_groups ) THEN
++        IF ( dffts%has_task_groups ) THEN
+            IF (noncolin) THEN
+               CALL tg_cgather( dffts, dvscfins(:,1,ipert), tg_dv(:,1))
+               IF (domag) THEN
+@@ -393,7 +400,7 @@
+         ENDIF
+         aux2=(0.0_DP,0.0_DP)
+         DO ibnd = ibnd_fst, ibnd_lst, incr
+-           IF ( dffts%have_task_groups ) THEN
++           IF ( dffts%has_task_groups ) THEN
+               CALL cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, nbnd )
+               CALL apply_dpot(v_siz, tg_psic, tg_dv, 1)
+               CALL cft_wave_tg (ik, aux2, tg_psic, -1, v_siz, ibnd, nbnd)
+@@ -450,7 +457,7 @@
+   DEALLOCATE (elphmat)
+   DEALLOCATE (aux1)
+   DEALLOCATE (aux2)
+-  IF ( dffts%have_task_groups ) THEN
++  IF ( dffts%has_task_groups ) THEN
+      DEALLOCATE( tg_dv )
+      DEALLOCATE( tg_psic )
+   ENDIF
+@@ -924,7 +931,233 @@
+   !
+   RETURN
+ END SUBROUTINE elphsum
+-
++!
++!
++!-----------------------------------------------------------------------
++subroutine elphsum2
++  !-----------------------------------------------------------------------
++  !
++  !      Sum over BZ of the electron-phonon matrix elements el_ph_mat
++  !      Original routine written by Francesco Mauri
++  !      Routine to symmetrize and print gkk (C. Verdi and S. Ponce)
++  !
++!#include "f_defs.h"
++  USE ions_base, ONLY : nat, ntyp => nsp, ityp, tau
++  USE cell_base,   ONLY : at, bg
++  use pwcom
++  USE symm_base, ONLY : s, irt, nsym, invs
++  USE kinds, only : DP
++  use klist, only : xk
++  use phcom
++  use el_phon
++  USE lr_symm_base, ONLY : rtau, nsymq, irotmq, minus_q
++  USE io_global, ONLY : stdout
++  USE control_lr, ONLY: lgamma
++  USE qpoint, ONLY : xq
++  !
++  implicit none
++  integer :: n, ik, ikk, ikq, pbnd, ibnd, jbnd, ipert, jpert, nu, mu, vu
++  complex(kind=DP) :: el_ph_sum (3*nat,3*nat)
++  real(kind=DP) :: g2, gamma, w, epc(nbnd,nbnd,3*nat), w_1, w_2, epc_sym(nbnd,nbnd,3*nat)
++  real(kind=DP), parameter :: ryd2ev = 13.6058, ryd2mev = 13605.8, eps = 0.01/ryd2mev
++  !
++  ! now read the eigenvalues and eigenvectors of the dynamical matrix
++  ! (already done in elphon subr)
++  !call readmat (iudyn, ibrav, celldm, nat, ntyp, ityp, omega, amass, tau, xq,
++  !w2, dyn)
++  !
++  write(6,*) 
++  write(6,*) 'We here write only the matrix elements for k=Gamma in the first proc:'
++  write(6,*) 
++  !
++  ! consider only initial state k=0
++  ik = 1
++  WRITE(6,'(a,3f10.6)') 'xk ', (xk(n,ik),n=1,3)
++  write(6,*) ' ibnd  jbnd  imode   eig_i (eV)    eig_j (eV)   omega_nu (meV)    |g| (meV)'
++  !
++  !
++  if (lgamma) then
++     ikk = ik
++     ikq = ik
++  else
++     ikk = 2 * ik - 1
++     ikq = ikk + 1
++  endif
++  !
++  do ibnd = 1, nbnd
++     do jbnd = 1, nbnd
++        !
++        do jpert = 1, 3 * nat
++           do ipert = 1, 3 * nat
++              el_ph_sum (ipert, jpert) = conjg (el_ph_mat (jbnd, ibnd, ik,ipert) ) * &
++                                         el_ph_mat (jbnd, ibnd, ik, jpert)
++           enddo
++        enddo
++        !
++        ! from pert to cart
++        !
++        call symdyn_munu2    (el_ph_sum, u, xq, s, invs, rtau, irt, at, &
++           bg, nsymq, nat, irotmq, minus_q)
++        !
++        do nu = 1, nmodes
++          gamma = 0.0
++          do mu = 1, 3 * nat
++           do vu = 1, 3 * nat
++               gamma = gamma + real (conjg (dyn (mu, nu) ) * el_ph_sum (mu,vu) &
++                 * dyn (vu, nu) )
++           enddo
++          enddo
++          gamma = gamma / 2.d0
++          !
++          ! the factor 2 comes from the factor sqrt(hbar/2/M/omega) that
++          ! appears
++          ! in the definition of the electron-phonon matrix element g
++          ! The sqrt(1/M) factor is actually hidden into the normal modes
++          ! we still need to divide by the phonon frequency in Ry
++          !
++          if (w2(nu).gt.0.d0) then
++            w = sqrt(w2(nu))
++            gamma = gamma / w
++          else
++            w = sqrt(-w2(nu))
++            gamma = 0.d0
++          endif
++          !
++          if (gamma.lt.0.d0) gamma = 0.d0
++          gamma = sqrt(gamma)
++          !
++          ! gamma = |g| [Ry]
++          !
++          epc(ibnd,jbnd,nu) = gamma
++          !
++        enddo
++        !
++     enddo
++  enddo
++  !
++  !  HERE WE "SYMMETRIZE": actually we simply take the averages over
++  !  degenerate states, it is only a convention because g is gauge-dependent!
++  !
++  ! first the phonons 
++  !
++  do ibnd = 1, nbnd
++  do jbnd = 1, nbnd
++    !
++    do nu = 1, nmodes
++      !
++      w_1 = sqrt(abs(w2(nu)))
++      g2 = 0.d0
++      n  = 0
++      !
++      do mu = 1, nmodes
++        !
++        w_2 = sqrt(abs(w2(mu)))
++        !
++        if ( abs(w_2-w_1).lt.eps ) then
++           n = n + 1
++           g2 = g2 + epc(ibnd,jbnd,mu)*epc(ibnd,jbnd,mu)
++        endif
++        !
++      enddo 
++      !
++      g2 = g2 / float(n)
++      epc_sym (ibnd, jbnd, nu) = sqrt (g2)
++      !
++    enddo
++    !
++  enddo
++  enddo
++  epc = epc_sym
++  !
++  ! then the k electrons
++  !
++  do nu   = 1, nmodes
++  do jbnd = 1, nbnd
++    !
++    do ibnd = 1, nbnd
++      !
++      w_1 = et (ibnd, ikk)
++      g2 = 0.d0
++      n  = 0
++      !
++      do pbnd = 1, nbnd
++        !
++        w_2 = et(pbnd, ikk)
++        !
++        if ( abs(w_2-w_1).lt.eps ) then
++           n = n + 1
++           g2 = g2 + epc(pbnd,jbnd,nu)*epc(pbnd,jbnd,nu)
++        endif
++        !
++      enddo 
++      !
++      g2 = g2 / float(n)
++      epc_sym (ibnd, jbnd, nu) = sqrt (g2)
++      !
++    enddo
++    !
++  enddo
++  enddo
++  epc = epc_sym
++  !
++  ! and finally the k+q electrons
++  !
++  do nu   = 1, nmodes
++  do ibnd = 1, nbnd
++    !
++    do jbnd = 1, nbnd
++      !
++      w_1 = et (jbnd, ikq)
++      g2 = 0.d0
++      n  = 0
++      !
++      do pbnd = 1, nbnd
++        !
++        w_2 = et(pbnd, ikq)
++        !
++        if ( abs(w_2-w_1).lt.eps ) then
++           n = n + 1
++           g2 = g2 + epc(ibnd,pbnd,nu)*epc(ibnd,pbnd,nu)
++        endif
++        !
++      enddo 
++      !
++      g2 = g2 / float(n)
++      epc_sym (ibnd, jbnd, nu) = sqrt (g2)
++      !
++    enddo
++    !
++  enddo
++  enddo
++  epc = epc_sym
++  !
++  !if (my_pool_id.eq.0) then
++    !
++    do ibnd = 1, nbnd
++      do jbnd = 1, nbnd
++        do nu = 1, nmodes
++          !
++          if (w2(nu).gt.0.d0) then
++            w = sqrt( w2(nu))
++          else
++            w = sqrt(-w2(nu))
++          endif
++          !
++          write(stdout,'(3i5,4f15.6)') ibnd, jbnd, nu, &
++             ryd2ev * et (ibnd, ikk), ryd2ev * et (jbnd, ikq), &
++             ryd2mev * w, ryd2mev * epc(ibnd,jbnd,nu)
++          !
++        enddo
++      enddo
++    enddo
++    !
++  !endif
++  !
++  !
++  return
++end subroutine elphsum2
++! 
++!
+ !-----------------------------------------------------------------------
+ SUBROUTINE elphsum_simple
+   !-----------------------------------------------------------------------
+--- qe-6.2/PHonon/PH/phq_readin.f90.orig	2017-10-24 01:27:44.000000000 +0800
++++ qe-6.2/PHonon/PH/phq_readin.f90	2019-01-31 17:32:59.984115000 +0800
+@@ -783,8 +783,8 @@
+      CALL errore('phq_readin','phonon with arbitrary occupations not tested',1)
+   !
+   !YAMBO >
+-  IF (elph.AND..NOT.(lgauss .or. ltetra).and..NOT.elph_yambo) CALL errore ('phq_readin', 'Electron-&
+-       &phonon only for metals', 1)
++  !IF (elph.AND..NOT.(lgauss .or. ltetra).and..NOT.elph_yambo) CALL errore ('phq_readin', 'Electron-&
++  !     &phonon only for metals', 1)
+   !YAMBO <
+   IF (elph.AND.fildvscf.EQ.' ') CALL errore ('phq_readin', 'El-ph needs &
+        &a DeltaVscf file', 1)
+--- qe-6.2/PHonon/PH/symdyn_munu.f90.orig	2017-10-24 01:27:44.000000000 +0800
++++ qe-6.2/PHonon/PH/symdyn_munu.f90	2019-01-31 17:32:59.995752000 +0800
+@@ -84,3 +84,111 @@
+ 
+   return
+ end subroutine symdyn_munu_new
++
++!
++!-----------------------------------------------------------------------
++subroutine symdyn_munu2 (dyn, u, xq, s, invs, rtau, irt, at, &
++     bg, nsymq, nat, irotmq, minus_q)
++  !-----------------------------------------------------------------------
++  !
++  !    This routine symmetrize the dynamical matrix written in the basis
++  !    of the modes
++  !
++  !
++!#include "f_defs.h"
++  USE kinds, only : DP
++  implicit none
++  integer :: nat, s (3, 3, 48), irt (48, nat), invs (48), &
++       nsymq, irotmq
++  ! input: the number of atoms
++  ! input: the symmetry matrices
++  ! input: the rotated of each atom
++  ! input: the small group of q
++  ! input: the inverse of each matrix
++  ! input: the order of the small gro
++  ! input: the symmetry q -> -q+G
++
++  real(kind=DP) :: xq (3), rtau (3, 48, nat), at (3, 3), bg (3, 3)
++  ! input: the coordinates of q
++  ! input: the R associated at each r
++  ! input: direct lattice vectors
++  ! input: reciprocal lattice vectors
++
++  logical :: minus_q
++  ! input: if true symmetry sends q->
++
++  complex(kind=DP) :: dyn (3 * nat, 3 * nat), u (3 * nat, 3 * nat)
++  ! inp/out: matrix to symmetrize
++  ! input: the patterns
++
++  integer :: i, j, icart, jcart, na, nb, mu, nu
++  ! counter on modes
++  ! counter on modes
++  ! counter on cartesian coordinates
++  ! counter on cartesian coordinates
++  ! counter on atoms
++  ! counter on atoms
++  ! counter on modes
++  ! counter on modes
++
++  complex(kind=DP) :: work, wrk (3, 3), phi (3, 3, nat, nat)
++  ! auxiliary variable
++  ! auxiliary variable
++  ! the dynamical matrix
++  !
++  ! First we transform in the cartesian coordinates
++  !
++  do i = 1, 3 * nat
++     na = (i - 1) / 3 + 1
++     icart = i - 3 * (na - 1)
++     do j = 1, 3 * nat
++        nb = (j - 1) / 3 + 1
++        jcart = j - 3 * (nb - 1)
++        work = (0.d0, 0.d0)
++        do mu = 1, 3 * nat
++           do nu = 1, 3 * nat
++              work = work + u (i, mu) * dyn (mu, nu) * conjg (u (j, nu) )
++           enddo
++        enddo
++        phi (icart, jcart, na, nb) = work
++     enddo
++  enddo
++  !
++!@  ! Then we transform to the crystal axis
++!@  !
++!@  do na = 1, nat
++!@     do nb = 1, nat
++!@        call trntnsc (phi (1, 1, na, nb), at, bg, - 1)
++!@     enddo
++!@  enddo
++!@  !
++!@  !   And we symmetrize in this basis
++!@  !
++!@  call symdynph_gq (xq, phi, s, invs, rtau, irt, irgq, nsymq, nat, &
++!@       irotmq, minus_q)
++!@  !
++!@  !  Back to cartesian coordinates
++!@  !
++!@  do na = 1, nat
++!@     do nb = 1, nat
++!@        call trntnsc (phi (1, 1, na, nb), at, bg, + 1)
++!@     enddo
++!@  enddo
++  !
++  !  rewrite the dynamical matrix on the array dyn with dimension 3nat x 3
++  !
++  do i = 1, 3 * nat
++     na = (i - 1) / 3 + 1
++     icart = i - 3 * (na - 1)
++     do j = 1, 3 * nat
++        nb = (j - 1) / 3 + 1
++        jcart = j - 3 * (nb - 1)
++        dyn (i, j) = phi (icart, jcart, na, nb)
++     enddo
++
++  enddo
++  return
++end subroutine symdyn_munu2
++
++
++

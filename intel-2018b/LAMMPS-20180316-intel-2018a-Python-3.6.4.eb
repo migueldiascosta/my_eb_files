@@ -1,0 +1,89 @@
+# Built with EasyBuild version 3.6.0.dev0-rada96e599bec619d86009988397199fec3139325 on 2018-04-26_09-13-04
+easyblock = 'MakeCp'
+
+name = 'LAMMPS'
+version = '20180316'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'http://lammps.sandia.gov/'
+description = """LAMMPS is a classical molecular dynamics code,
+and an acronym for Large-scale Atomic/Molecular Massively Parallel Simulator."""
+
+toolchain = {'name': 'intel', 'version': '2018a'}
+toolchainopts = {'pic': True}
+
+source_urls = ['https://github.com/lammps/lammps/archive/']
+sources = ['stable_16Mar2018.tar.gz']
+checksums = ['03f91d69f472c37a4008611dee13fad91b6bedc66dbf0393416cdacc751b57ff']
+
+dependencies = [
+    ('FFTW', '3.3.7'),
+    ('Python', '3.6.4'),
+    ('libpng', '1.6.34'),
+    ('libjpeg-turbo', '1.5.3'),
+    ('PCRE', '8.41'),
+    ('libxml2', '2.9.7'),
+    ('zlib', '1.2.11'),
+    ('gzip', '1.8'),
+    ('FFmpeg', '3.4.2'),
+]
+
+prebuildopts = "cd src &&"
+
+makevars = 'LMP_INC="-DLAMMPS_GZIP -DLAMMPS_MEMALIGN=64 -DLAMMPS_JPG -DLAMMPS_PNG -DLAMMPS_FFMPEG" '
+makevars += 'MPI_INC="-I${MPI_INC_DIR}" MPI_PATH="-L${MPI_LIB_DIR}" MPI_LIB="-lmpi -lpthread" '
+makevars += 'FFT_INC="-DFFT_FFTW3" FFT_PATH="-L${EBROOTFFTW}/lib" FFT_LIB="-lfftw3" '
+makevars += 'JPG_INC="-I${EBROOTLIBJPEGMINTURBO}/include -I${EBROOTLIBPNG}/include" '
+makevars += 'JPG_PATH="-L${EBROOTLIBJPEGMINTURBO}/lib -L${EBROOTLIBPNG}/lib" JPG_LIB="-ljpeg -lpng" '
+buildopts = "mpi %s && " % makevars
+
+# also build & install Python bindings
+buildopts += "make mpi mode=shlib %s && " % makevars
+buildopts += "cd ../python && mkdir site-packages && python install.py site-packages"
+
+keepsymlinks = 'true'
+
+files_to_copy = [
+    'lib',  # must be copied first
+    (['src/lmp_mpi'], 'bin'),
+    (['python/site-packages'], 'lib/python%(pyshortver)s'),
+    'bench', 'doc', 'examples', 'LICENSE',
+    'potentials', 'python', 'README', 'src', 'tools',
+]
+
+modextrapaths = {'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages'}
+
+sanity_check_paths = {
+    'files': ['bin/lmp_mpi'],
+    'dirs': ['bench', 'doc', 'lib/python%(pyshortver)s/site-packages', 'python', 'tools'],
+}
+
+sanity_check_commands = ["python -c 'from lammps import lammps; lmp = lammps()'"]
+
+moduleclass = 'chem'
+
+# Build statistics
+buildstats = [{
+    "build_time": 755.17,
+    "command_line": ["--buildpath='/dev/shm/build'", "--containerpath='/opt/apps/util/easybuild/containers'", '--debug', '--force', "--git-working-dirs-path='/home/easybuild/git-working-dirs'", "--github-user='migueldiascosta'", "--installpath='/opt/apps/util/easybuild'", "--packagepath='/opt/apps/util/easybuild/packages'", "--prefix='/opt/apps/util/easybuild'", "--repositorypath='/opt/apps/util/easybuild/ebfiles_repo'", "--robot='/home/easybuild/github/easybuilders/easybuild-easyconfigs/easybuild/easyconfigs'", "--sourcepath='/opt/apps/util/easybuild/sources'", "--tmpdir='/dev/shm/tmp'", 'LAMMPS-20180316-intel-2018a-Python-3.6.4.eb'],
+    "core_count": 24,
+    "cpu_model": "Intel(R) Xeon(R) CPU E5-2640 0 @ 2.50GHz",
+    "cpu_speed": 2501.0,
+    "cpu_vendor": "Intel",
+    "easybuild-easyblocks_version": "3.6.0.dev0-rd28352ee51811fea234b76563aaed342e6a4159e",
+    "easybuild-framework_version": "3.6.0.dev0-rada96e599bec619d86009988397199fec3139325",
+    "gcc_version": "Using built-in specs.; COLLECT_GCC=gcc; COLLECT_LTO_WRAPPER=/gpfs0/shared/apps/util/easybuild/software/GCCcore/6.4.0/bin/../libexec/gcc/x86_64-pc-linux-gnu/6.4.0/lto-wrapper; Target: x86_64-pc-linux-gnu; Configured with: ../configure --enable-languages=c,c++,fortran --enable-lto --enable-checking=release --disable-multilib --enable-shared=yes --enable-static=yes --enable-threads=posix --enable-gold=default --enable-plugins --enable-ld --with-plugin-ld=ld.gold --prefix=/opt/apps/util/easybuild/software/GCCcore/6.4.0 --with-local-prefix=/opt/apps/util/easybuild/software/GCCcore/6.4.0 --enable-bootstrap --with-isl=/dev/shm/GCCcore/6.4.0/dummy-/gcc-6.4.0/stage2_stuff; Thread model: posix; gcc version 6.4.0 (GCC) ; ",
+    "glibc_version": "2.12",
+    "hostname": "grc-cluster1",
+    "install_size": 484863108,
+    "modules_tool": ('Lmod', '/opt/apps/util/lmod/6.6/libexec/lmod', '6.6'),
+    "os_name": "centos",
+    "os_type": "Linux",
+    "os_version": "6.9",
+    "platform_name": "x86_64-unknown-linux",
+    "python_version": "2.7.14 (default, Feb 13 2018, 13:42:39) ; [GCC 4.4.7 20120313 (Red Hat 4.4.7-18)]",
+    "system_gcc_path": "/opt/apps/util/easybuild/software/GCCcore/6.4.0/bin/gcc",
+    "system_python_path": "/opt/apps/util/easybuild/software/Python/3.6.4-intel-2018a/bin/python",
+    "timestamp": 1524705178,
+    "total_memory": 32083,
+}]

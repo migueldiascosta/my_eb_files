@@ -1,0 +1,221 @@
+--- Common/eqpcor.f90.orig	2012-02-08 13:09:57.000000000 +0800
++++ Common/eqpcor.f90	2017-03-21 22:56:06.886897610 +0800
+@@ -35,6 +35,7 @@
+   implicit none
+ 
+   public :: eqpcor
++  public :: eqpcor2
+ 
+ contains
+ 
+@@ -214,4 +215,181 @@
+   
+ end subroutine eqpcor
+ 
++
++subroutine eqpcor2(fn,inode,npes,kp,nb,nbmin,nbmax, &
++  nbv,nbvnum,nbc,nbcnum,eqp,eqpv,eqpc,irydflag,ivalflag,dont_write)
++
++  character(len=32), intent(in) :: fn
++  integer, intent(in) :: inode,npes
++  type(kpoints), intent(in) :: kp !< however, usually kp%el will be passed to eqp, eqpv, eqpc
++  integer, intent(in) :: nb,nbmin,nbmax,nbv,nbvnum,nbc,nbcnum
++  real(DP), intent(inout) :: eqp(:,:,:)      !< (nb,  kp%nrk, kp%nspin)
++  real(DP), intent(inout) :: eqpv(:,:,:)     !< (nbv, kp%nrk, kp%nspin)
++  real(DP), intent(inout) :: eqpc(:,:,:)     !< (nbc, kp%nrk, kp%nspin)
++  integer, intent(in) :: irydflag,ivalflag
++  logical, optional, intent(in) :: dont_write !< silence output
++
++  integer :: iflag,jflag,eof,ik,jk,kk,is,ib,isb,nsb, &
++    nbvmin,nbvmax,nbcmin,nbcmax,corsmin,corsmax,corbmin,corbmax
++  real(DP) :: dummydft,dummyqp,k(3),dk(3)
++  character(100) :: errmsg
++  logical :: dowrite
++  
++  PUSH_SUB(eqpcor2)
++
++  dowrite = .true.
++  if(present(dont_write)) dowrite = .not. dont_write
++  
++  if (inode.eq.0) then
++    iflag=0
++    write(6,901) trim(fn)
++    call open_file(9,file=trim(fn),form='formatted',status='old')
++
++    if (ivalflag.eq.2) then
++      if(dowrite) write(6,922)
++    else
++      if(dowrite) write(6,902)
++    endif
++    corsmin=kp%nspin+1
++    corsmax=0
++    corbmin=nb+1
++    corbmax=0
++    do ik=1,kp%nrk  ! mjain should change the upper bound here
++      read(9,*,iostat=eof)k(:),nsb
++      if (eof.eq.0) then
++        jflag=0
++        do jk=1,kp%nrk
++          dk(:)=k(:)-kp%rk(:,jk)
++          if (all(abs(dk(1:3)-dble(nint(dk(1:3)))).lt.TOL_Small)) then
++            jflag=1
++            kk = jk
++            exit
++          endif
++        enddo
++        if (jflag.eq.0) then
++          iflag=3
++          kk=0
++        endif
++        do isb=1,nsb
++          read(9,*,iostat=eof)is,ib,dummydft,dummyqp
++          if (ivalflag.eq.2) then
++            dummyqp=dummyqp-dummydft
++          endif
++          nbvmin=kp%ifmax(kk,is)-nbvnum+1
++          nbvmax=kp%ifmax(kk,is)
++          nbcmin=kp%ifmax(kk,is)+1
++          nbcmax=kp%ifmax(kk,is)+nbcnum
++          if (eof.eq.0) then
++            if (is.lt.corsmin) corsmin=is
++            if (is.gt.corsmax) corsmax=is
++            if (ib.lt.corbmin) corbmin=ib
++            if (ib.gt.corbmax) corbmax=ib
++            if (ib.ge.nbmin.and.ib.le.nbmax) then
++              if (kk.gt.0) then
++                if (irydflag.eq.0) then
++                  if(dowrite) write(6,903)ib,kk,is,eqp(ib,kk,is),dummyqp
++                  eqp(ib,kk,is)=dummydft
++                else
++                  if(dowrite) write(6,903)ib,kk,is,eqp(ib,kk,is)*RYD,dummyqp
++                  eqp(ib,kk,is)=dummydft/RYD
++                endif
++              endif
++            endif
++            if (ib.ge.nbvmin.and.ib.le.nbvmax) then
++              if (kk.gt.0) then
++                if (irydflag.eq.0) then
++                  if(dowrite) write(6,904)ib,kk,is,eqpv(nbvmax-ib+1,kk,is),dummyqp
++                  eqpv(nbvmax-ib+1,kk,is)=dummydft
++                else
++                  if(dowrite) write(6,904)ib,kk,is,eqpv(nbvmax-ib+1,kk,is)*RYD,dummyqp
++                  eqpv(nbvmax-ib+1,kk,is)=dummydft/RYD
++                endif
++              endif
++            endif
++            if (ib.ge.nbcmin.and.ib.le.nbcmax) then
++              if (kk.gt.0) then
++                if (irydflag.eq.0) then
++                  if(dowrite) write(6,905)ib,kk,is,eqpc(ib-nbcmin+1,kk,is),dummyqp
++                  eqpc(ib-nbcmin+1,kk,is)=dummydft
++                else
++                  if(dowrite) write(6,905)ib,kk,is,eqpc(ib-nbcmin+1,kk,is)*RYD,dummyqp
++                  eqpc(ib-nbcmin+1,kk,is)=dummydft/RYD
++                endif
++              endif
++            endif
++          else
++            iflag=2
++          endif
++        enddo
++      else
++        iflag=1
++      endif
++    enddo
++    nbvmin=minval(kp%ifmax(:,:))-nbvnum+1
++    nbvmax=maxval(kp%ifmax(:,:))
++    nbcmin=minval(kp%ifmax(:,:))+1
++    nbcmax=maxval(kp%ifmax(:,:))+nbcnum
++    if (corsmin.gt.1.or.corsmax.lt.kp%nspin) iflag=4
++    if (nbmin.ne.0.and.nbmax.ne.0) then
++      if (corbmin.gt.nbmin.or.corbmax.lt.nbmax) iflag=5
++    endif
++    if (nbvnum.ne.0) then
++      if (corbmin.gt.nbvmin.or.corbmax.lt.nbvmax) iflag=6
++    endif
++    if (nbcnum.ne.0) then
++      if (corbmin.gt.nbcmin.or.corbmax.lt.nbcmax) iflag=7
++    endif
++    call close_file(9)
++    if(dowrite) write(6,*)
++  endif
++
++#ifdef MPI
++  if (npes.gt.1) then
++    call MPI_Bcast(iflag,1,MPI_INTEGER,0,MPI_COMM_WORLD,mpierr)
++  endif
++#endif
++  if (iflag.gt.0) then
++    if (iflag.eq.1) write(errmsg,801) trim(fn)
++    if (iflag.eq.2) write(errmsg,802) trim(fn)
++    if (iflag.eq.3) write(errmsg,803) trim(fn)
++    if (iflag.eq.4) write(errmsg,804) trim(fn)
++    if (iflag.eq.5) write(errmsg,805) trim(fn)
++    if (iflag.eq.6) write(errmsg,806) trim(fn)
++    if (iflag.eq.7) write(errmsg,807) trim(fn)
++801 format(1x,"insufficient number of k-point blocks in file ", a)
++802 format(1x,"wrong contents of k-point blocks in file ", a)
++803 format(1x,"missing k-points in file ", a)
++804 format(1x,"missing spins in file ", a)
++805 format(1x,"missing bands in file ", a)
++806 format(1x,"missing valence bands in file ", a)
++807 format(1x,"missing conduction bands in file ", a)
++    call die(errmsg, only_root_writes = .true.)
++  endif
++
++#ifdef MPI
++  if (iflag.eq.0.and.npes.gt.1) then
++    if (nbmin.ne.0.and.nbmax.ne.0) then
++      call MPI_Bcast(eqp(1,1,1),kp%nrk*kp%nspin*nb,MPI_REAL_DP,0,MPI_COMM_WORLD,mpierr)
++    endif
++    if (nbvnum.ne.0) then
++      call MPI_Bcast(eqpv(1,1,1),kp%nrk*kp%nspin*nbv,MPI_REAL_DP,0,MPI_COMM_WORLD,mpierr)
++    endif
++    if (nbcnum.ne.0) then
++      call MPI_Bcast(eqpc(1,1,1),kp%nrk*kp%nspin*nbc,MPI_REAL_DP,0,MPI_COMM_WORLD,mpierr)
++    endif
++  endif
++#endif
++  
++  POP_SUB(eqpcor2) 
++  return
++  
++901 format(/,1x,"Reading elda column data from",1x,a)
++902 format(/,6x,"band",3x,"k-point",6x,"spin",7x,"Elda[eV]",8x,"Eqp[eV]")
++922 format(/,6x,"band",3x,"k-point",6x,"spin",4x,"DeltaElda[eV]",3x,"DeltaEqp[eV]")
++903 format(3i10,2f15.5)
++904 format("v",i9,2i10,2f15.5)
++905 format("c",i9,2i10,2f15.5)
++  
++end subroutine eqpcor2
++
+ end module eqpcor_m
+--- Sigma/input_outer.f90.orig	2012-03-27 05:08:30.000000000 +0800
++++ Sigma/input_outer.f90	2017-03-21 22:56:12.900210743 +0800
+@@ -70,12 +70,12 @@
+   iflavor = 0
+   call read_binary_header_type(25, sheader, iflavor, kp_outer, gvec_outer, syms_outer, crys_outer, warn = .false.)
+ 
+-  call check_header('WFN_inner', kp, gvec, syms, crys, 'WFN_outer', kp_outer, gvec_outer, syms_outer, crys_outer, is_wfn = .true.)
++!  call check_header('WFN_inner', kp, gvec, syms, crys, 'WFN_outer', kp_outer, gvec_outer, syms_outer, crys_outer, is_wfn = .true.)
+ 
+   ! DAS: there is no fundamental reason for the condition below, but seems to be assumed in the code
+   ! and it would require some rewriting to make that kp_outer need only contain the kpts in sig%kpt (the ones in the input file).
+-  if(kp_outer%nrk /= kp%nrk) call die('different number of k-points in WFN_outer')
+-  if(kp_outer%mnband < maxval(sig%diag)) call die('not enough bands in WFN_outer')
++!  if(kp_outer%nrk /= kp%nrk) call die('different number of k-points in WFN_outer')
++!  if(kp_outer%mnband < maxval(sig%diag)) call die('not enough bands in WFN_outer')
+ 
+   ntband_outer = min(kp_outer%mnband, sig%ntband)
+ 
+@@ -109,6 +109,10 @@
+       kp_outer,kp_outer%mnband,nbnmin,nbnmax, &
+       kp_outer%mnband,0,kp_outer%mnband,0,kp_outer%el,kp_outer%el,kp_outer%el,0,0)
+     ! note: want in eV since we converted above
++    ! Below: Readin the elda data into kp_outer%elda
++    call eqpcor2(fncor,peinf%inode,peinf%npes, &
++      kp_outer,kp_outer%mnband,nbnmin,nbnmax, &
++      kp_outer%mnband,0,kp_outer%mnband,0,kp_outer%elda,kp_outer%elda,kp_outer%elda,0,0)
+   endif
+ 
+ !-------------------
