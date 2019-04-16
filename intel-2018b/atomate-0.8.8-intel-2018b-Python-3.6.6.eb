@@ -1,0 +1,74 @@
+easyblock = 'PythonBundle'
+
+name = 'atomate'
+version = '0.8.8'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://pythonhosted.org/atomate/'
+description = """atomate has implementations of FireWorks workflows for Materials Science."""
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+
+dependencies = [
+    ('Python', '3.6.6'),
+    ('PyYAML', '3.13', versionsuffix),
+    ('pymatgen', '2019.4.11', versionsuffix),
+]
+
+exts_list = [
+    ('MarkupSafe', '1.1.0', {
+        'source_urls': ['https://pypi.python.org/packages/source/m/markupsafe/'],
+        'checksums': ['4e97332c9ce444b0c2c38dd22ddc61c743eb208d916e4265a2a3b575bdccb1d3'],
+    }),
+    ('Jinja2', '2.10', {
+        'source_urls': ['https://pypi.python.org/packages/source/J/Jinja2/'],
+        'checksums': ['f84be1bb0040caca4cea721fcbbbbd61f9be9464ca236387158b0feea01914a4'],
+    }),
+    ('Werkzeug', '0.14.1', {
+        'source_urls': ['https://pypi.python.org/packages/source/W/Werkzeug/'],
+        'checksums': ['c3fd7a7d41976d9f44db327260e263132466836cef6f91512889ed60ad26557c'],
+    }),
+    ('click', '7.0', {
+        'source_tmpl': 'Click-%(version)s.tar.gz',
+        'source_urls': ['https://pypi.python.org/packages/source/c/click/'],
+        'checksums': ['5b94b49521f6456670fdb30cd82a4eca9412788a93fa6dd6df72c94d5a8ff2d7'],
+    }),
+    ('itsdangerous', '1.1.0', {
+        'source_urls': ['https://pypi.python.org/packages/source/i/itsdangerous/'],
+        'checksums': ['321b033d07f2a4136d3ec762eac9f16a10ccd60f53c0c91af90217ace7ba1f19'],
+    }),
+    ('Flask', '1.0.2', {
+        'source_urls': ['https://pypi.python.org/packages/source/F/Flask/'],
+        'checksums': ['2271c0070dbcb5275fad4a82e29f23ab92682dc45f9dfbc22c02ba9b9322ce48'],
+    }),
+    ('Flask-paginate', '0.5.1', {
+        'modulename': 'flask_paginate',
+        'source_tmpl': 'flask-paginate-%(version)s.tar.gz',
+        'source_urls': ['https://pypi.python.org/packages/source/F/Flask-paginate/'],
+        'checksums': ['b68e8d7664419ad53728514139811bce9c3f2e56199a6c057ef4c08f9f35f35d'],
+    }),
+    ('custodian', '2019.2.10', {
+        'source_urls': ['https://pypi.python.org/packages/source/p/custodian/'],
+        'checksums': ['18864727dcc279e5634d300940e3440df17a5151e426b9451f923c3246416973'],
+    }),
+    ('pydash', '4.7.3', {
+        'source_urls': ['https://pypi.python.org/packages/source/p/pydash/'],
+        'checksums': ['b3dd58cce1beafb1885592c2067061d9aa9b3a65b9ef8019c169d2645c2e7b7c'],
+    }),
+    ('tqdm', '4.31.1', {
+        'source_urls': ['https://pypi.python.org/packages/source/t/tqdm/'],
+        'checksums': ['e22977e3ebe961f72362f6ddfb9197cc531c9737aaf5f607ef09740c849ecd05'],
+    }),
+    ('FireWorks', '1.8.9', {
+        'source_urls': ['https://pypi.python.org/packages/source/F/FireWorks/'],
+        'checksums': ['e788917f6bbb9eeb3ab480d9c4bb00aae3bf7b689b38a479e03092379f5d7a6c'],
+    }),
+    (name, version, {
+        'source_urls': ['https://pypi.python.org/packages/source/a/atomate/'],
+        'checksums': ['5d8d568d1d06bfa5e96037141d4ca95484777b27db12be2e478e26d473792028'],
+    }),
+]
+
+use_pip = True
+
+moduleclass = 'chem'
