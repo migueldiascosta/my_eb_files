@@ -1,0 +1,51 @@
+# Built with EasyBuild version 3.6.3.dev0-rd741217e3de0959c5a0d6e2a12f242f7d491022b on 2018-07-18_11-27-14
+easyblock = 'Bundle'
+
+name = 'Autotools'
+version = '20170619'  # date of the most recent change
+
+homepage = 'http://autotools.io'
+
+description = """
+ This bundle collect the standard GNU build tools: Autoconf, Automake
+ and libtool
+"""
+
+toolchain = {'name': 'GCCcore', 'version': '7.3.0'}
+
+dependencies = [
+    ('Autoconf', '2.69'),    # 20120424
+    ('Automake', '1.15.1'),  # 20170619
+    ('libtool', '2.4.6'),    # 20150215
+]
+
+# Pure bundle -- no need to specify 'binutils' used when building GCCcore
+# toolchain as build dependency
+
+moduleclass = 'devel'
+
+# Build statistics
+buildstats = [{
+    "build_time": 7.8,
+    "command_line": ["--buildpath='/dev/shm/build'", "--containerpath='/opt/apps/util/easybuild/containers'", '--debug', '--force', "--from-pr='6593'", "--git-working-dirs-path='/home/easybuild/git-working-dirs'", "--github-user='migueldiascosta'", "--include-easyblocks='./quantumespresso.py'", "--installpath='/opt/apps/util/easybuild'", "--packagepath='/opt/apps/util/easybuild/packages'", "--parallel='4'", "--prefix='/opt/apps/util/easybuild'", "--repositorypath='/opt/apps/util/easybuild/ebfiles_repo'", "--robot='/home/easybuild/github/easybuilders/easybuild-easyconfigs/easybuild/easyconfigs'", "--sourcepath='/opt/apps/util/easybuild/sources'", "--tmpdir='/dev/shm/tmp'", '--upload-test-report'],
+    "core_count": 24,
+    "cpu_model": "Intel(R) Xeon(R) CPU E5-2640 0 @ 2.50GHz",
+    "cpu_speed": 2501.0,
+    "cpu_vendor": "Intel",
+    "easybuild-easyblocks_version": "3.6.3.dev0-r006e5f80c896d5a78e6f7d6f61ff4b46d62e12ae",
+    "easybuild-framework_version": "3.6.3.dev0-rd741217e3de0959c5a0d6e2a12f242f7d491022b",
+    "gcc_version": "Using built-in specs.; COLLECT_GCC=gcc; COLLECT_LTO_WRAPPER=/gpfs0/shared/apps/util/easybuild/software/GCCcore/7.3.0/bin/../libexec/gcc/x86_64-pc-linux-gnu/7.3.0/lto-wrapper; Target: x86_64-pc-linux-gnu; Configured with: ../configure --enable-languages=c,c++,fortran --enable-lto --enable-checking=release --disable-multilib --enable-shared=yes --enable-static=yes --enable-threads=posix --enable-gold=default --enable-plugins --enable-ld --with-plugin-ld=ld.gold --prefix=/opt/apps/util/easybuild/software/GCCcore/7.3.0 --with-local-prefix=/opt/apps/util/easybuild/software/GCCcore/7.3.0 --enable-bootstrap --with-isl=/dev/shm/build/GCCcore/7.3.0/dummy-/gcc-7.3.0/stage2_stuff; Thread model: posix; gcc version 7.3.0 (GCC) ; ",
+    "glibc_version": "2.12",
+    "hostname": "grc-cluster1",
+    "install_size": 7116,
+    "modules_tool": ('Lmod', '/opt/apps/util/lmod/6.6/libexec/lmod', '6.6'),
+    "os_name": "centos",
+    "os_type": "Linux",
+    "os_version": "6.9",
+    "platform_name": "x86_64-unknown-linux",
+    "python_version": "2.7.14 (default, Feb 13 2018, 13:42:39) ; [GCC 4.4.7 20120313 (Red Hat 4.4.7-18)]",
+    "system_gcc_path": "/opt/apps/util/easybuild/software/GCCcore/7.3.0/bin/gcc",
+    "system_python_path": "/usr/bin/python",
+    "timestamp": 1531884434,
+    "total_memory": 32083,
+}]

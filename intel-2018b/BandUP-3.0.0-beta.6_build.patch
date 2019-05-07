@@ -1,0 +1,20 @@
+--- ./src/python_interface/bandupy/build.py.orig	2019-04-29 11:44:05.256291000 +0800
++++ ./src/python_interface/bandupy/build.py	2019-04-29 11:44:33.930119219 +0800
+@@ -52,7 +52,7 @@
+ def compatible_omp_flags(fortcomp):
+     fcflag, cflag = "", ""
+     if('ifort' in fortcomp):
+-        fcflag, cflag = '-openmp', '-openmp'
++        fcflag, cflag = '-qopenmp', '-qopenmp'
+     elif('gfortran' in fortcomp):
+         fcflag, cflag = '-fopenmp', '-fopenmp'
+     elif('nagfor' in fortcomp):
+@@ -79,7 +79,7 @@
+     return args
+ 
+ def castep_interface_available(calling_from_build_script=False):
+-    ret = False
++    return False # override check for castep
+     if(calling_from_build_script):
+         check2xsf_dir = os.path.join(BANDUP_SRC_DIR, 'external', 
+                                      'check2xsf2_modules_for_BandUP')
