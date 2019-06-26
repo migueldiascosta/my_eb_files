@@ -1,0 +1,76 @@
+easyblock = 'PythonBundle'
+
+name = 'qmpy'
+version = '1.2.0'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://pypi.org/project/qmpy'
+description = """A toolkit for storing crystal structure data, automating calculations,
+ handing computational resources and performing thermodynamic analysis."""
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+
+dependencies = [
+    ('Python', '2.7.15'),
+    ('ASE', '3.17.0', versionsuffix),
+    ('PyYAML', '3.13', versionsuffix),
+    ('scikit-learn', '0.20.0', versionsuffix),
+    # ('spglib-python', '1.12.2', versionsuffix),
+]
+
+osdependencies = [('mysql-devel')]
+
+use_pip = True
+
+exts_default_options = {'source_urls': [PYPI_SOURCE]}
+
+exts_list = [
+    ('Django', '1.6.11', {
+        'checksums': ['7e50e573e484435873b3515d7982d80093b2695aba17fd0ff024307454dc3a56'],
+    }),
+    ('PuLP', '1.6.10', {
+        'source_tmpl': '%(name)s-%(version)s.zip',
+        'checksums': ['dd2ba8afbf12a811e03a0e87f248539a5b9500e27600abfc0684eb827b7d7a32'],
+    }),
+    ('MySQL-python', '1.2.5', {
+        'modulename': 'MySQLdb',
+        'source_tmpl': '%(name)s-%(version)s.zip',
+        'checksums': ['811040b647e5d5686f84db415efd697e6250008b112b6909ba77ac059e140c74'],
+    }),
+    ('packaging', '19.0', {
+        'checksums': ['0c98a5d0be38ed775798ece1b9727178c4469d9c3b4ada66e8e6b7849f8732af'],
+    }),
+    ('bokeh', '0.12.15', {
+        'checksums': ['2891b883b30107dc610a7e963a21222f1fd096844d157c09db115179cfab6513'],
+    }),
+    ('PyCifRW', '4.4.1', {
+        'modulename': 'CifFile',
+        'checksums': ['cef7662f475e0eb78a55c2d55774d474e888c96b0539e5f08550afa902cdc4e1'],
+    }),
+    ('lxml', '4.3.3', {
+        'checksums': ['4a03dd682f8e35a10234904e0b9508d705ff98cf962c5851ed052e9340df3d90'],
+    }),
+    ('networkx', '2.2', {
+        'source_tmpl': '%(name)s-%(version)s.zip',
+        'checksums': ['45e56f7ab6fe81652fb4bc9f44faddb0e9025f469f602df14e3b2551c2ea5c8b'],
+    }),
+    ('ptyprocess', '0.6.0', {
+        'checksums': ['923f299cc5ad920c68f2bc0bc98b75b9f838b93b599941a6b63ddbc2476394c0'],
+    }),
+    ('pexpect', '4.7.0', {
+        'checksums': ['9e2c1fd0e6ee3a49b28f95d4b33bc389c89b20af6a1255906e90ff1262ce62eb'],
+    }),
+    ('pyspglib', '1.8.3.1', {
+        'checksums': ['6a34ce7459a7ad2e0d3dcc89658763d97c079511fe02a67660b0f7f460e55a6c'],
+    }),
+    (name, version, {
+        'checksums': ['d2967bf262ef4c54a18fcbba778e5957f83c76a891206b6db32bdc1c53b3e457'],
+    }),
+]
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+moduleclass = 'chem'
