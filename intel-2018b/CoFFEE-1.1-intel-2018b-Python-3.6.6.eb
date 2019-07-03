@@ -1,0 +1,31 @@
+easyblock = 'PythonPackage'
+
+name = 'CoFFEE'
+version = '1.1'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'http://www.physics.iisc.ernet.in/~mjain/pages/software.html'
+description = "Corrections For Formation Energy and Eigenvalues for charged defect simulations"
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+toolchainopts = {'openmp': True}
+
+source_urls = ['http://www.physics.iisc.ernet.in/~mjain/images/Software/']
+sources = ['%(name)s_%(version)s.tar.gz']
+checksums = ['bf7047d83998935f599b06206aa991059b64541421f6718b37f5b5ed6668d806']
+
+dependencies = [
+    ('Python', '3.6.6'),
+    ('matplotlib', '3.0.1', versionsuffix),
+]
+
+buildcmd = 'build_ext'
+buildopts = '-b PoissonSolver'
+
+sanity_check_paths = {
+    'files': ['PoissonSolver/'+lib+'cpython-36m-x86_64-linux-gnu.so'
+	       for lib in ['matvec1D', 'matvec2D', 'ps3d']],
+    'dirs': [''],
+}
+
+moduleclass = 'chem'

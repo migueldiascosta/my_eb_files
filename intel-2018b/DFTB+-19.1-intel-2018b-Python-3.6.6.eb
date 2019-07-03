@@ -1,0 +1,78 @@
+easyblock = 'ConfigureMake'
+
+name = 'DFTB+'
+version = '19.1'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://www.dftb-plus.info'
+description = """DFTB+ is a fast and efficient versatile quantum mechanical simulation package.  It is based on the 
+ Density Functional Tight Binding (DFTB) method, containing almost all of the useful extensions which have been
+ developed for the DFTB framework so far.  Using DFTB+ you can carry out quantum mechanical simulations like with
+ ab-initio density functional theory based packages, but in an approximate way gaining typically around two order of
+ magnitude in speed."""
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+# some tests, e.g. spinorbit, fail with more aggressive optimization
+toolchainopts = {'lowopt': True, 'optarch': False, 'usempi': True}
+
+source_urls = [
+    'https://github.com/dftbplus/dftbplus/archive/',
+    'https://github.com/dftbplus/mpifx/archive/',
+    'https://github.com/dftbplus/scalapackfx/archive/',
+    'https://bitbucket.org/pecchia/libnegf/get/',
+]
+sources = [
+    '%(version)s.tar.gz',
+# these have to be dowloaded manualy because they have the same download filename...
+    {'download_filename': 'dftbplus-%(version)s.tar.gz', 'filename': 'mpifx-dftbplus-%(version)s.tar.gz'},
+    {'download_filename': 'dftbplus-%(version)s.tar.gz', 'filename': 'scalapackfx-dftbplus-%(version)s.tar.gz'},
+    {'download_filename': 'master.tar.gz', 'filename': 'libnegf-0a428d7.tar.gz'},
+]
+patches = ['%(name)s-18.2_no_query.patch']
+checksums = [
+    '4d07f5c6102f06999d8cfdb1d17f5b59f9f2b804697f14b3bc562e3ea094b8a8',  # 19.1.tar.gz
+    '06f1809da36571d90d0d86dd9e1a697c8a43572a732127b55a400fb5780ef296',  # mpifx-dftbplus-19.1.tar.gz
+    '858ac0e84aa32f227e7e7240d0f62f4cb349996d7a9332cf3483fb066b25b90c',  # scalapackfx-dftbplus-19.1.tar.gz
+    '75aae0c828a039620233770fc30bb34482ad3923db4e49937edbf97d934d1f7d',  # libnegf-0a428d7.tar.gz
+    '18ccffa9f9bb2cbb1695a2cc3227c05a5cc2cc15e416ffbad71189863bb2300c',  # DFTB+-18.2_no_query.patch
+]
+
+dependencies = [
+    ('Python', '3.6.6'),
+    ('arpack-ng', '3.6.2'),
+]
+
+skipsteps = ['configure']
+
+prebuildopts = "./utils/get_opt_externals ALL && "
+prebuildopts += "cp sys/make.x86_64-linux-intel make.arch && "
+prebuildopts += "sed -i 's|mpifort|mpiifort|' make.arch && "
+prebuildopts += 'sed -i "s|-O2|$OPTFLAGS|g" make.arch && '
+prebuildopts += "sed -i 's|$(ROOT)/_install|%(installdir)s|' make.config && "
+prebuildopts += "sed -i 's|WITH_MPI := 0|WITH_MPI := 1|' make.config && "
+prebuildopts += "sed -i 's|WITH_TRANSPORT := 0|WITH_TRANSPORT := 1|' make.config && "
+
+# there are three git submodules, downloaded then and moving them here
+prebuildopts += "mv ../pecchia-libnegf-0a428d7d943d/* external/libnegf/origin/ && "
+prebuildopts += "mv ../mpifx-dftbplus-%(version)s/* external/mpifx/origin/ && "
+prebuildopts += "mv ../scalapackfx-dftbplus-%(version)s/* external/scalapackfx/origin/ && "
+
+buildopts = "LNOPT='-static-intel'"
+
+#runtest = 'test &&'
+#runtest += 'make test TEST_OMP_THREADS=2 && '
+#runtest += 'make test TEST_MPI_PROCS=2 && '
+#runtest += 'make test TEST_MPI_PROCS=2 TEST_OMP_THREADS=2'
+
+modextrapaths = {'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages'}
+
+sanity_check_paths = {
+    'files': ['bin/' + prog for prog in ['dftb+', 'dp_bands', 'dp_dos', 'gen2cif',
+                                         'gen2xyz', 'makecube', 'modes', 'repeatgen',
+                                         'straingen', 'waveplot', 'xyz2gen']],
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
+}
+
+sanity_check_commands = [('python', '-c "import dptools"')]
+
+moduleclass = 'phys'

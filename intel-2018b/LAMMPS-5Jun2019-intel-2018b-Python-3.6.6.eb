@@ -39,7 +39,10 @@ dependencies = [
     ('tbb', '2018_U5'),
 ]
 
-# patches = ['KOKKOS_EPYC.patch']
+patches = [
+#    'KOKKOS_EPYC.patch',
+    'LAMMPS-5Jun2019_qeq_shielded.patch',
+]
 
 separate_build_dir = True
 
