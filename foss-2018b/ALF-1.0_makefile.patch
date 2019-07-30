@@ -1,0 +1,43 @@
+* use environment variables set by easybuild
+* define check target
+--- Makefile.orig	2018-09-06 11:58:01.729508000 +0800
++++ Makefile	2018-09-06 12:33:59.096980585 +0800
+@@ -6,11 +6,9 @@
+ # Recommendation:  just use the -DMPI flag if you want to run in parallel or leave it empy for serial jobs.  
+ # The default stabilization, no flag, is generically the best. 
+ PROGRAMCONFIGURATION = -DMPI 
+-PROGRAMCONFIGURATION = 
+-f90 = gfortran
++f90 = ${MPIF90}
+ export f90
+-F90OPTFLAGS = -O3 -Wconversion  -fcheck=all
+-F90OPTFLAGS = -O3
++F90OPTFLAGS = ${FFLAGS}
+ export F90OPTFLAGS
+ F90USEFULFLAGS = -cpp -std=f2003
+ F90USEFULFLAGS = -cpp
+@@ -21,7 +19,7 @@
+ export DIR
+ Libs = ${DIR}/Libraries/
+ export Libs
+-LIB_BLAS_LAPACK = -llapack -lblas
++LIB_BLAS_LAPACK = ${LIBLAPACK_MT}
+ export LIB_BLAS_LAPACK
+ 
+ .PHONY: all lib ana program
+@@ -34,7 +32,7 @@
+ program: lib
+ 	cd Prog && $(MAKE)
+ 
+-.PHONY: clean cleanall cleanprog cleanlib cleanana help
++.PHONY: clean cleanall cleanprog cleanlib cleanana help check
+ clean: cleanall
+ cleanall: cleanprog cleanlib cleanana
+ cleanprog:
+@@ -46,3 +44,5 @@
+ help:
+ 	@echo "The following are some of the valid targets of this Makefile"
+ 	@echo "all, program, lib, ana, clean, cleanall, cleanprog, cleanlib, cleanana"
++check: all
++	cd testsuite && mkdir tests && cd tests && export FC=${MPIF90} && cmake .. && make && make test
+

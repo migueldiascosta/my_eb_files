@@ -1,0 +1,52 @@
+--- MeanField/ParaBands/wfn_io.f90.orig	2018-12-11 16:12:10.177142000 +0800
++++ MeanField/ParaBands/wfn_io.f90	2018-12-12 11:17:25.811443293 +0800
+@@ -168,6 +168,7 @@
+   integer(8) :: clock_count
+   real(DP) :: clock_inv_rate, t0, t1
+   integer :: is
++  integer :: info
+ 
+   if (iter_data%is_working_leader) then
+     write(params%kpp%iunit,'(1x,3a)') &
+@@ -182,7 +183,10 @@
+   if (iter_data%is_working) then
+ #ifdef MPI
+     call h5pcreate_f(H5P_FILE_ACCESS_F, plist_id, error)
+-    call h5pset_fapl_mpio_f(plist_id, iter_data%working_comm, MPI_INFO_NULL, mpierr)
++    call MPI_Info_create(info, mpierr)
++    call MPI_Info_set(info, "romio_ds_read", "disable", mpierr)
++    call MPI_Info_set(info, "romio_ds_write", "disable", mpierr)
++    call h5pset_fapl_mpio_f(plist_id, iter_data%working_comm, info, mpierr)
+     call h5fopen_f(TRUNC(params%fname_wfn_out), H5F_ACC_RDWR_F, file_id, &
+       error, access_prp=plist_id)
+     call h5pclose_f(plist_id, error)
+@@ -210,9 +214,12 @@
+       wfn_d2(1,:,is,:) = dble(wfn_d(:,:,is))
+ #ifdef CPLX
+       wfn_d2(2,:,is,:) = IMAG(wfn_d(:,:,is))
++      write (*,*) wfn_d2(1,:,is,:), wfn_d2(1,:,is,:)
+ #endif
+     enddo
+ 
++
++
+ #ifdef MPI
+     call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
+     if (params%wfn_io_mpiio_mode==0) then
+@@ -251,7 +258,7 @@
+   if (iter_data%is_working_leader) then
+ #ifdef MPI
+     call h5pcreate_f(H5P_FILE_ACCESS_F, plist_id, error)
+-    call h5pset_fapl_mpio_f(plist_id, iter_data%leader_comm, MPI_INFO_NULL, mpierr)
++    call h5pset_fapl_mpio_f(plist_id, iter_data%leader_comm, info, mpierr)
+     call h5fopen_f(TRUNC(params%fname_wfn_out), H5F_ACC_RDWR_F, file_id, &
+       error, access_prp=plist_id)
+     call h5pclose_f(plist_id, error)
+@@ -280,6 +287,7 @@
+     call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, en(:,:), &
+       count(1:3), error, memspace, filespace, xfer_prp=plist_id)
+     call h5pclose_f(plist_id, error)
++    call MPI_Info_free(info, mpierr)
+ #else
+     call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, en(:,:), &
+       count(1:3), error, memspace, filespace)
