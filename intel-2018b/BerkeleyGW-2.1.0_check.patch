@@ -1,0 +1,27 @@
+--- Makefile.orig	2019-07-23 17:40:16.489733901 +0800
++++ Makefile	2019-07-23 17:40:33.656497133 +0800
+@@ -157,7 +157,7 @@
+ endif
+ 
+ check: all
+-	cd testsuite && $(MAKE) check
++	cd testsuite && $(MAKE) check && $(MAKE) check-parallel
+ 
+ check-save: all
+ 	cd testsuite && $(MAKE) check-save
+--- testsuite/run_testsuite.sh.orig	2019-07-25 14:48:12.000000000 +0800
++++ testsuite/run_testsuite.sh	2019-07-25 14:47:50.000000000 +0800
+@@ -1,4 +1,4 @@
+-#!/bin/bash -l
++#!/bin/bash
+ #
+ # Copyright (C) 2005-2009 Heiko Appel, David Strubbe
+ #
+--- MeanField/Utilities/mf_convert_wrapper.sh.orig	2019-07-26 09:52:27.648341000 +0800
++++ MeanField/Utilities/mf_convert_wrapper.sh	2019-07-26 09:52:39.922114228 +0800
+@@ -1,4 +1,4 @@
+-#!/bin/bash -l
++#!/bin/bash
+ 
+ # David Strubbe, October 2010
+ # Wrapper for mf_convert.x

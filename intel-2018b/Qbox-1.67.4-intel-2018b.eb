@@ -1,0 +1,38 @@
+easyblock = 'MakeCp'
+
+name = 'Qbox'
+version = '1.67.4'
+
+homepage = 'http://qboxcode.org'
+description = """Qbox is a C++/MPI scalable parallel implementation of first-principles molecular dynamics (FPMD)
+ based on the plane-wave, pseudopotential formalism."""
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+toolchainopts = {'openmp': True}
+
+sources = ['rel%s.tar.gz' % version.replace('.', '_')]
+source_urls = ['https://github.com/qboxcode/qbox-public/archive/']
+
+patches = ['Qbox-1.67.4_intel.patch']
+
+dependencies = [
+    ('FFTW', '3.3.8'),
+    ('Xerces-C++', '3.2.0'),
+]
+
+prebuildopts = "cd src && ln -s ../build/icc_mkl.mk && "
+
+buildopts = "TARGET='icc_mkl'"
+
+files_to_copy = [
+    (['src/qb'], 'bin'),
+    (['test'], ''),
+    (['util', 'xml'], 'share'),
+]
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ["."]
+}
+
+moduleclass = 'phys'

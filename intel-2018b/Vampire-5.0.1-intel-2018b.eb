@@ -1,0 +1,27 @@
+easyblock = 'ConfigureMake'
+
+name = 'Vampire'
+version = '5.0.1'
+
+homepage = 'https://vampire.york.ac.uk'
+description = """Atomistic simulation of magnetic materials"""
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+
+sources = ['%(version)s.tar.gz']
+source_urls = ['https://github.com/richard-evans/vampire/archive/']
+
+patches = ['Vampire-5.0.1_makefile.patch']
+
+dependencies = []
+
+skipsteps = ['configure']
+
+buildopts = 'serial-intel parallel-intel vdc'
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ["."]
+}
+
+moduleclass = 'phys'

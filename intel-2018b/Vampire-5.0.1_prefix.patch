@@ -1,0 +1,22 @@
+--- makefile.orig	2019-01-26 01:14:55.000000000 +0800
++++ makefile	2019-07-25 10:39:15.956678027 +0800
+@@ -4,6 +4,8 @@
+ #
+ #===================================================================
+ 
++prefix ?= /opt/vampire
++
+ # Specify compiler for MPI compilation with openmpi
+ export OMPI_CXX=g++ -std=c++0x
+ 
+@@ -334,8 +336,8 @@
+ 	mkdir vampire.pkg/examples
+ 	cp input vampire.pkg/examples/
+ 	cp Co.mat vampire.pkg/examples/
+-	sudo mv -f vampire.pkg /opt/vampire
+-	sudo echo "/opt/vampire/bin" > /etc/paths.d/vampire_path
++	mv -f vampire.pkg/* $(prefix)/
++	#sudo echo "/opt/vampire/bin" > /etc/paths.d/vampire_path
+ 
+ uninstall:
+ 	rm -rf /opt/vampire

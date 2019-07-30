@@ -1,0 +1,37 @@
+From df7c56d88160add5ce3492c1f5b9e757b34ebace Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Fri, 28 Jun 2019 05:28:54 -0400
+Subject: [PATCH] use suffix compatible pair style matching when looking for
+ ReaxFF pair style
+
+---
+ src/QEQ/fix_qeq_shielded.cpp    | 2 +-
+ src/USER-REAXC/fix_qeq_reax.cpp | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/QEQ/fix_qeq_shielded.cpp b/src/QEQ/fix_qeq_shielded.cpp
+index a74eee7d29..6367feacc5 100644
+--- a/src/QEQ/fix_qeq_shielded.cpp
++++ b/src/QEQ/fix_qeq_shielded.cpp
+@@ -80,7 +80,7 @@ void FixQEqShielded::init()
+ 
+ void FixQEqShielded::extract_reax()
+ {
+-  Pair *pair = force->pair_match("reax/c",1);
++  Pair *pair = force->pair_match("^reax/c",0);
+   if (pair == NULL) error->all(FLERR,"No pair reax/c for fix qeq/shielded");
+   int tmp;
+   chi = (double *) pair->extract("chi",tmp);
+diff --git a/src/USER-REAXC/fix_qeq_reax.cpp b/src/USER-REAXC/fix_qeq_reax.cpp
+index b37c8fff83..faa0632608 100644
+--- a/src/USER-REAXC/fix_qeq_reax.cpp
++++ b/src/USER-REAXC/fix_qeq_reax.cpp
+@@ -124,7 +124,7 @@ FixQEqReax::FixQEqReax(LAMMPS *lmp, int narg, char **arg) :
+   // register with Atom class
+ 
+   reaxc = NULL;
+-  reaxc = (PairReaxC *) force->pair_match("reax/c",0);
++  reaxc = (PairReaxC *) force->pair_match("^reax/c",0);
+ 
+   s_hist = t_hist = NULL;
+   grow_arrays(atom->nmax);

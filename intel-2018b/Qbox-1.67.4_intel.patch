@@ -1,0 +1,56 @@
+--- build/icc_mkl.mk.orig	2019-07-26 11:11:10.761886000 +0800
++++ build/icc_mkl.mk	2019-07-26 11:27:35.103273955 +0800
+@@ -6,8 +6,8 @@
+ #
+  PLT=x86_64
+ #-------------------------------------------------------------------------------
+- MPIDIR=/opt/openmpi
+- XERCESCDIR=/share/apps/xerces/xerces-c-src_2_8_0
++ MPIDIR=$(EBROOTIMPI)
++ XERCESCDIR=$(EBROOTXERCESMINCPLUSPLUS)
+  PLTOBJECTS = readTSC.o
+  INCLUDE = -I$(MKLROOT)/include
+ 
+@@ -19,7 +19,7 @@
+              -DAPP_NO_THREADS -DXML_USE_NO_THREADS -DUSE_XERCES
+ 
+ # FFT must be FFTW2, FFTW3, ESSL or NOLIB
+-  FFT=FFTW2
++  FFT=FFTW3
+ 
+ ifeq ($(FFT),FFTW2)
+  PLTFLAGS += -DUSE_FFTW2
+@@ -37,7 +37,7 @@
+  PLTFLAGS += -DFFTWMEASURE
+ #PLTFLAGS += -DFFTW_TRANSPOSE
+  PLTFLAGS += -DFFTW3_2D
+- FFTWDIR=$(HOME)/software/fftw/fftw-3.3.4
++ FFTWDIR=$(EBROOTFFTW)
+  FFTWINCLUDEDIR=$(FFTWDIR)/api
+  FFTWLIBDIR=$(FFTWDIR)/.libs
+  INCLUDE += -I$(FFTWINCLUDEDIR)
+@@ -56,20 +56,18 @@
+ 
+  INCLUDE += -I$(MPIDIR)/include -I$(XERCESCDIR)/include 
+ 
+- CXXFLAGS=  -g -O3 -vec-report1 -D$(PLT) $(INCLUDE) $(PLTFLAGS) $(DFLAGS)
++ CXXFLAGS=  $(CFLAGS) -D$(PLT) $(INCLUDE) $(PLTFLAGS) $(DFLAGS)
+ 
+  LIBPATH += -L$(MPIDIR)/lib64 \
+             -L$(MKLDIR)/lib/intel64  \
+             -L$(XERCESCDIR)/lib
+ 
+  LIBS +=  $(PLIBS) \
+-          -lmkl_intel_lp64 \
+-          -lmkl_lapack95_lp64 -lmkl_sequential -lmkl_core \
+-          -lirc -lifcore -lsvml \
+-          -luuid $(XERCESCDIR)/lib/libxerces-c.a -lpthread 
++	  $(LIBLAPACK) \
++          -luuid $(XERCESCDIR)/lib/libxerces-c.a -lcurl -lssl -lcrypto -lpthread 
+ 
+ # Parallel libraries
+- PLIBS = -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64
++ PLIBS = $(LIBSCALAPACK)
+ 
+  LDFLAGS = $(LIBPATH) $(LIBS)
+ #-------------------------------------------------------------------------------
