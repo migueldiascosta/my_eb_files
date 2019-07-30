@@ -40,7 +40,7 @@ dependencies = [
 ]
 
 patches = [
-#    'KOKKOS_EPYC.patch',
+    'KOKKOS_EPYC.patch',
     'LAMMPS-5Jun2019_qeq_shielded.patch',
 ]
 
@@ -89,7 +89,7 @@ configopts = packages_opts + ' ' + other_opts + ' ' + specific_opts
 # kokkos options
 # configopts += ' -DKOKKOS_ENABLE_OPENMP=yes -DKOKKOS_ARCH="HSW"'
 # configopts += ' -DKOKKOS_ENABLE_OPENMP=yes -DKOKKOS_ENABLE_CUDA=yes -DKOKKOS_ARCH="HSW;Kepler37"'
-configopts += ' -DKOKKOS_ENABLE_OPENMP=yes -DKOKKOS_ARCH="SNB"'
+configopts += ' -DKOKKOS_ENABLE_OPENMP=yes -DKOKKOS_ARCH="EPYC"'
 configopts += ' -DKOKKOS_ENABLE_OPENMP=yes -DKOKKOS_ENABLE_CUDA=no'
 
 pythonpath = 'lib/python%(pyshortver)s/site-packages'
