@@ -1,0 +1,41 @@
+easyblock = 'MakeCp'
+
+name = 'ALF'
+version = '1.0'
+
+# no releases/tags, using commit to get reproducible builds
+commit = '5e6d5eaa4123b0b7787802f70f7e83f7b8d9db94'
+versionsuffix = '_%s' % commit[:8]
+
+homepage = 'https://alf.physik.uni-wuerzburg.de'
+description = """Algorithms for Lattice Fermions package provides a general code for the finite temperature 
+ auxiliary field Quantum Monte Carlo algorithm."""
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+toolchainopts = {'usempi': True, 'openmp': True}
+
+source_urls = ['https://git.physik.uni-wuerzburg.de/ALF/ALF_code/-/archive/%s/' % commit]
+sources = ['%%(name)s_code-%s.tar.gz' % commit]
+patches = ['ALF-1.0_makefile.patch']
+checksums = [
+    # ALF_code-5e6d5eaa4123b0b7787802f70f7e83f7b8d9db94.tar.gz
+    '43d14c697525f81885fae6506d47f600a0d9d9acd05d6789e58520ed04176d81',
+    '466a327585351ed3a3a35f3e422568c1e23a5910611317db1fb0f632cbcb7ca4',  # ALF-1.0_makefile.patch
+]
+
+unpack_options = '--strip-components=1'
+
+prebuildopts = ". ./setenv.sh && "
+
+files_to_copy = [(['Analysis/cov_%s.out' % var for var in ['tau', 'scal', 'eq']] + ['Prog/Examples.out'], 'bin')]
+
+runtest = 'check'
+
+parallel = 1
+
+sanity_check_paths = {
+    'files': ['bin/cov_%s.out' % var for var in ['tau', 'scal', 'eq']] + ['bin/Examples.out'],
+    'dirs': ["."]
+}
+
+moduleclass = 'phys'
