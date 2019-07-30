@@ -1,0 +1,33 @@
+easyblock = 'PythonBundle'
+
+name = 'atomistica'
+version = '0.8.0'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://www.atomistica.org'
+description = """Atomistica is a library of interatomic potentials that is compatible with ASE and LAMMPS"""
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+
+dependencies = [
+    ('ASE', '3.17.0', '-Python-%(pyver)s'),
+    ('Python', '3.6.6'),
+    ('LAMMPS', '5Jun2019', '-Python-%(pyver)s'),
+    ('matplotlib', '3.0.0', '-Python-%(pyver)s'),
+]
+
+use_pip = True
+
+exts_list = [
+    (name, version, {
+        'source_urls': ['https://pypi.python.org/packages/source/%(nameletter)s/%(name)s'],
+        'checksums': ['8f32910f0f95045d8325d66b6e7f9c224f0c7ebec27ea8333ee9bf274403b4e0'],
+    }),
+]
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+moduleclass = 'chem'

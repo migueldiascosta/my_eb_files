@@ -1,0 +1,11 @@
+--- Makefile.orig	2019-07-23 17:40:16.489733901 +0800
++++ Makefile	2019-07-23 17:40:33.656497133 +0800
+@@ -157,7 +157,7 @@
+ endif
+ 
+ check: all
+-	cd testsuite && $(MAKE) check
++	cd testsuite && $(MAKE) check && $(MAKE) check-parallel
+ 
+ check-save: all
+ 	cd testsuite && $(MAKE) check-save

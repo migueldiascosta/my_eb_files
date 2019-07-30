@@ -1,0 +1,51 @@
+easyblock = 'MakeCp'
+
+name = 'VASP'
+version = '5.4.4-18Apr17-p01'
+versionsuffix = '_nozcellrelax'
+
+homepage = 'http://www.vasp.at'
+description = """The Vienna Ab initio Simulation Package (VASP) is a computer program for atomic scale
+materials modelling, e.g. electronic structure calculations and quantum-mechanical molecular dynamics,
+from first principles."""
+
+toolchain = {'name': 'intel', 'version': '2018b'}
+toolchainopts = {'usempi': True}
+
+# Vasp is proprietary software, see http://www.vasp.at/index.php/faqs on how to get access to the code
+sources = ['%%(namelower)s.%s.tar.gz' % version.split('-')[0]]
+patches = [
+    'vasp.5.4.4.16052018.patch',
+    'vasp.5.4.4.vdwpath.patch',
+    'vasp.5.4.4.nozcellrelax.patch',
+]
+checksums = [
+    '5bd2449462386f01e575f9adf629c08cb03a13142806ffb6a71309ca4431cfb3',  # vasp.5.4.4.tar.gz
+    '3392a0ffccfa17a77775be86b1bed74f8f75a0a642f77ee0fae59950d0a3d3f4',  # vasp.5.4.4.16052018.patch
+    '46a9f653092db36650aeadefee999cfe9a6df801c689bdcc653e89d28c891024',  # vasp.5.4.4.vdwpath.patch
+    '9df2199992d8a00715b121a58c07b2aa00579ed835b4692c0f6eb3ee113ced7f',  # vasp.5.4.4.nozcellrelax.patch
+]
+
+# patch from Vaspwiki, http://cms.mpi.univie.ac.at/patches/patch.5.4.4.16052018.gz
+prebuildopts = 'cp arch/makefile.include.linux_intel ./makefile.include && '
+
+# Makefile uses LIBS as a list of folders
+prebuildopts += 'unset LIBS && '
+
+targets = ['std', 'gam', 'ncl']
+
+buildopts = '%s ' % ' '.join(targets)
+buildopts += 'FCL="$MPIF90" DEBUG="$FFLAGS" OFLAG="$FFLAGS" OFLAG_1="${FFLAGS/O2/O1}" OFLAG_2="$FFLAGS" '
+buildopts += 'OFLAG_3="${FFLAGS/O2/O3}" CFLAGS_LIB="$CFLAGS" FFLAGS_LIB="$FFLAGS" BLAS="$LIBBLAS" '
+buildopts += 'LAPACK="$LIBLAPACK" BLACS="$LIBBLACS" SCALAPACK="$LIBSCALAPACK" FFTW="$EBROOTFFTW"'
+
+parallel = 1
+
+files_to_copy = [(['bin/vasp_' + x for x in targets], 'bin')]
+
+sanity_check_paths = {
+    'files': ['bin/vasp_' + x for x in targets],
+    'dirs': []
+}
+
+moduleclass = 'phys'

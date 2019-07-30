@@ -1,0 +1,10 @@
+--- lib/kokkos/cmake/kokkos_options.cmake.orig	2019-06-04 10:11:48.833154017 +0800
++++ lib/kokkos/cmake/kokkos_options.cmake	2019-06-04 10:12:20.503663987 +0800
+@@ -76,6 +76,7 @@
+ list(APPEND KOKKOS_ARCH_LIST
+      None            # No architecture optimization
+      AMDAVX          # (HOST) AMD chip
++     EPYC            # (HOST) AMD EPYC Zen-Core CPU
+      ARMv80          # (HOST) ARMv8.0 Compatible CPU
+      ARMv81          # (HOST) ARMv8.1 Compatible CPU
+      ARMv8-ThunderX  # (HOST) ARMv8 Cavium ThunderX CPU
