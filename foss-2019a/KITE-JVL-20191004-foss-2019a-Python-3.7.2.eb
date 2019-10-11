@@ -1,0 +1,53 @@
+easyblock = 'CMakeMakeCp'
+
+name = 'KITE'
+
+version = 'JVL-20191004'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'http://quantum-kite.com'
+description = """KITE quantum transport software is a general-purpose, open-source code for accurate tight-binding
+ calculations of electronic structure and transport properties of large-scale molecular and condensed systems with
+ up to tens of billions of atomic orbitals."""
+
+toolchain = {'name': 'foss', 'version': '2019a'}
+toolchainopts = {'openmp': True}
+
+sources = ['KITE-%(version)s.tgz']
+source_urls = ['https://github.com/quantum-kite/kite/archive/']
+
+builddependencies = [('CMake', '3.13.3')]
+
+dependencies = [
+    ('Python', '3.7.2'),
+    ('Eigen', '3.3.7', '', True),
+    ('HDF5', '1.10.5'),
+    ('h5py', '2.9.0'),
+    ('pybinding', '0.9.4', versionsuffix),
+]
+
+separate_build_dir = False
+
+srcdir = 'Src'
+
+preconfigopts = 'sed -i "s/#define STRIDE.*/#define STRIDE 4/" Src/Generic.hpp && '
+
+configopts = '-DCMAKE_PREFIX_PATH=$EBROOTEIGEN'
+
+# buildopts = ' && cd tools && cmake src && make'
+
+files_to_copy = [
+    (['KITEx'], 'bin'),  # 'tools/KITE-tools'
+    (['kite.py', 'basic_on_site_disorder.py'], 'lib/python%(pyshortver)s/site-packages'),
+#    (['docs', 'examples'], 'share'),
+]
+
+sanity_check_paths = {
+    'files': ['bin/KITEx'],
+    'dirs': ["."]
+}
+
+modextrapaths = {'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages'}
+
+moduleclass = 'phys'
+
