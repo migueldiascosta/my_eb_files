@@ -63,9 +63,9 @@ exts_list = [
         'checksums': ['4249c6ba45587b959292a727532826c5032d59171f923f7f823788f413c2a5a3'],
     }),
     ('ruamel.yaml.clib', '0.2.0', {
+        'modulename': False,
         'source_urls': ['https://pypi.python.org/packages/source/r/ruamel.yaml.clib/'],
         'checksums': ['b66832ea8077d9b3f6e311c4a53d06273db5dc2db6e8a908550f3c14d67e718c'],
-        'modulename': 'sys', # don't try to load ruamel.yaml.clib
     }),
     ('ruamel.yaml', '0.16.5', {
         'source_urls': ['https://pypi.python.org/packages/source/r/ruamel.yaml/'],
