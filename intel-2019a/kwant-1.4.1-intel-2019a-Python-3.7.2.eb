@@ -32,7 +32,11 @@ exts_list = [
         'checksums': ['8c12d0fca9a45d79d23d4061c29f90aac4e25b66612a5ac56add07e512a2833a'],
     }),
     (name, version, {
-        'checksums': ['8c0ccf341dfa74e1d69f1508968c4d4e9fb36f74685f101897df6a84ed7043df'],
+        'patches': ['%(name)s-%(version)s_detect_mumps_mkl.patch'],
+        'checksums': [
+            '8c0ccf341dfa74e1d69f1508968c4d4e9fb36f74685f101897df6a84ed7043df',  # kwant-1.4.1.tar.gz
+            '03568a063b42918fda382e27bc7a135cb95709f25577eb81c04e21d9cad6c0f2',  # kwant-1.4.1_detect_mumps_mkl.patch
+        ],
     }),
 ]
 
