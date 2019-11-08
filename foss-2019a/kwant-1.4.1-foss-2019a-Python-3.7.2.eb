@@ -11,7 +11,7 @@ description = """Kwant is a free (open source), powerful, and easy to use Python
 toolchain = {'name': 'foss', 'version': '2019a'}
 
 dependencies = [
-    # ('MUMPS', '5.2.1', '-metis-seq'), # Kwant uses only the sequential, single core version of MUMPS
+    ('MUMPS', '5.2.1', '-metis-seq'), # Kwant uses only the sequential, single core version of MUMPS
     ('Python', '3.7.2'),
     ('matplotlib', '3.0.3', versionsuffix),
 ]
