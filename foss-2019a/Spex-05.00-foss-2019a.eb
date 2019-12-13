@@ -16,7 +16,7 @@ sources = ['%(namelower)s%(version)s.tgz']
 patches = ['%(name)s-%(version)s_missing_type.patch']
 checksums = [
     '7561e385140d7a3a852bb35133d43205ee88b4a69f3560989dffb0199d5e3656',  # spex05.00.tgz
-    'fa92ec2da2d1bac3ac3319b25c67b106e62c128495076df223f202c660096395',  # Spex-05.00_missing_type.patch
+    '811268052d03c17b8629a005a8cad0a1716355a82d1eb34e2e2f5b15d6e03047',  # Spex-05.00_missing_type.patch
 ]
 
 dependencies = [
@@ -24,7 +24,7 @@ dependencies = [
     ('Wannier90', '3.0.0'),
 ]
 
-configopts = "--enable-mpi --enable-load "
+configopts = "--enable-mpi "
 configopts += "--with-dft=fleur "
 configopts += "--with-wan=$EBROOTWANNIER90/lib "
 configopts += "FCFLAGS=-I$EBROOTHDF5/include"
