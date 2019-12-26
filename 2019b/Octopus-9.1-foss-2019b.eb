@@ -1,0 +1,64 @@
+easyblock = 'ConfigureMake'
+
+name = 'Octopus'
+version = '9.1'
+
+homepage = 'http://octopus-code.org'
+description = """Octopus is a scientific program aimed at the ab initio virtual experimentation 
+on a hopefully ever-increasing range of system types. Electrons are described quantum-mechanically 
+within density-functional theory (DFT), in its time-dependent form (TDDFT) when doing simulations 
+in time. Nuclei are described classically as point particles. 
+Electron-nucleus interaction is described within the pseudopotential approximation."""
+
+toolchain = {'name': 'foss', 'version': '2019b'}
+toolchainopts = {'usempi': True, 'opt': True}
+
+source_urls = ['https://gitlab.com/octopus-code/octopus/-/archive/%(version)s/']
+sources = [SOURCELOWER_TAR_GZ]
+checksums = ['c61ccc12285efd6e0a108d1200de53d5d8ca8feb34a9763b586e3ca5a60b53de']
+
+builddependencies = [
+    ('Autotools', '20180311'),
+    ('Perl', '5.30.0'),
+]
+
+dependencies = [
+    ('libxc', '4.3.4'),
+    ('libvdwxc', '0.4.0'),
+    ('PSolver', '1.7.7'),
+    ('ETSF_IO', '1.0.4'),
+    ('GSL', '2.6'),
+    ('ParMETIS', '4.0.3'),
+    ('arpack-ng', '3.7.0'),
+    ('libgd', '2.2.5'),
+]
+
+preconfigopts = "autoreconf -fi && "
+
+configopts = '--disable-openmp --enable-mpi '
+configopts += '--with-libxc-prefix=$EBROOTLIBXC '
+configopts += '--with-libvdwxc-prefix=$EBROOTLIBVDWXC '
+configopts += '--with-blas="-L$BLAS_LIB_DIR $LIBBLAS" '
+configopts += '--with-blacs="$EBROOTSCALAPACK/lib/libscalapack.a" '
+configopts += '--with-scalapack="$EBROOTSCALAPACK/lib/libscalapack.a" '
+configopts += '--with-netcdf-prefix=$EBROOTNETCDFMINFORTRAN '
+configopts += '--with-etsf-io-prefix=$EBROOTETSF_IO '
+configopts += '--with-fftw-prefix=$EBROOTFFTW '
+configopts += '--with-isf-prefix=$EBROOTPSOLVER '
+
+# Add gfortran flag to handle long lines
+configopts += 'FCFLAGS="$FCFLAGS -ffree-line-length-none" '
+
+# Octopus uses cpp to process Fortran files, so we need to set some flags to make sure it works
+# The -Dvector macro is a workaround for a known GCC issue on POWER
+configopts += 'FCCPP="/lib/cpp -C -ffreestanding -Dvector=vector" '
+
+# Run only the short tests, as the full testsuite can take a lot of time.
+runtest = 'MPIEXEC="`which mpirun` --bind-to none" check-short'
+
+sanity_check_paths = {
+    'files': ['bin/octopus'],
+    'dirs': ['share/octopus']
+}
+
+moduleclass = 'phys'

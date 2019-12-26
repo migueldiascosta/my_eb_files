@@ -1,0 +1,56 @@
+easyblock = 'MakeCp'
+
+name = 'Elk'
+version = '6.3.2'
+
+homepage = 'http://elk.sourceforge.net/'
+description = """An all-electron full-potential linearised augmented-plane wave (FP-LAPW) code with
+many advanced features. Written originally at Karl-Franzens-Universitat Graz as a milestone of the
+EXCITING EU Research and Training Network, the code is designed to be as simple as possible so that
+new developments in the field of density functional theory (DFT) can be added quickly and reliably.
+"""
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+toolchainopts = {'usempi': True, 'openmp': True}
+
+source_urls = [SOURCEFORGE_SOURCE]
+sources = [SOURCELOWER_TGZ]
+checksums = ['75508387ef502998b1c1f68bef132da557681fffc706642d6ad54632cc8f9a8a']
+
+dependencies = [
+    ('Wannier90', '3.0.0'),
+    ('libxc', '4.3.4'),
+]
+
+# make.inc file is generated interactively by "setup" command, creating it here
+prebuildopts = 'echo "MKLROOT = $EBROOTMKL" > make.inc && '
+prebuildopts += 'echo "MAKE = make" >> make.inc && '
+prebuildopts += 'echo "F90 = $MPIFC" >> make.inc && '
+prebuildopts += 'echo "F90_OPTS = $FFLAGS" >> make.inc && '
+prebuildopts += 'echo "F77 = $MPIFC" >> make.inc && '
+prebuildopts += 'echo "F77_OPTS = $FFLAGS" >> make.inc && '
+prebuildopts += 'echo "AR = ar" >> make.inc && '
+prebuildopts += 'echo "LIB_SYS = " >> make.inc && '
+prebuildopts += 'echo "LIB_LPK = $LIBLAPACK" >> make.inc && '
+prebuildopts += 'echo "SRC_MPI = " >> make.inc && '
+prebuildopts += 'echo "SRC_MKL = " >> make.inc && '
+prebuildopts += 'echo "SRC_OBLAS = oblas_stub.f90" >> make.inc && '
+prebuildopts += 'echo "SRC_BLIS = blis_stub.f90" >> make.inc && '
+prebuildopts += 'echo "SRC_W90S = " >> make.inc && '
+prebuildopts += 'echo "LIB_W90 = $EBROOTWANNIER90/lib/libwannier.a" >> make.inc && '
+prebuildopts += 'echo "LIB_libxc = $EBROOTLIBXC/lib64/libxcf90.a $EBROOTLIBXC/lib64/libxc.a" >> make.inc && '
+prebuildopts += 'echo "SRC_libxc = libxc_funcs.f90 libxc.f90 libxcifc.f90" >> make.inc && '
+prebuildopts += 'echo "SRC_FFT = zfftifc_fftw.f90" >> make.inc && '
+
+buildopts = 'all'
+
+parallel = 1
+
+files_to_copy = [(['src/elk', 'src/spacegroup/spacegroup', 'src/eos/eos'], 'bin')]
+
+sanity_check_paths = {
+    'files': ['bin/elk', 'bin/spacegroup', 'bin/eos'],
+    'dirs': []
+}
+
+moduleclass = 'phys'

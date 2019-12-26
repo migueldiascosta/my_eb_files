@@ -1,0 +1,32 @@
+easyblock = 'PythonPackage'
+
+name = 'phonopy'
+version = '2.4.2'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'http://atztogo.github.io/phonopy/'
+description = """Phonopy is an open source package of phonon calculations based on the supercell approach."""
+
+toolchain = {'name': 'foss', 'version': '2019b'}
+
+source_urls = [PYPI_SOURCE]
+sources = [SOURCE_TAR_GZ]
+checksums = ['6e6ce41ce8a51723b94d974adfee032cddce5b9300984dd23b59e101ed0a2861']
+
+dependencies = [
+    ('Python', '3.7.4'),
+    ('matplotlib', '3.1.1', versionsuffix),
+    ('lxml', '4.4.2'),
+    ('PyYAML', '5.1.2'),
+    ('h5py', '2.10.0', versionsuffix),
+]
+
+download_dep_fail = True
+use_pip = True
+
+sanity_check_paths = {
+    'files': ['bin/phonopy'],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+moduleclass = 'lib'

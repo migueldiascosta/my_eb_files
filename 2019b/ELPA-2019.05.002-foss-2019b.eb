@@ -1,0 +1,28 @@
+##
+# This file is an EasyBuild reciPY as per https://github.com/easybuilders/easybuild
+#
+# Authors::   Inge Gutheil <i.gutheil@fz-juelich.de>, Alan O'Cais <a.ocais@fz-juelich.de>
+# License::   MIT/GPL
+#
+##
+
+name = 'ELPA'
+version = '2019.05.002'
+
+homepage = 'http://elpa.rzg.mpg.de'
+description = """Eigenvalue SoLvers for Petaflop-Applications ."""
+
+toolchain = {'name': 'foss', 'version': '2019b'}
+toolchainopts = {'openmp': True, 'usempi': True}
+
+source_urls = ['http://elpa.mpcdf.mpg.de/html/Releases/%(version)s/']
+sources = [SOURCELOWER_TAR_GZ]
+checksums = ['d2eab5e5d74f53601220b00d18185670da8c00c13e1c1559ecfb0cd7cb2c4e8d']
+
+builddependencies = [
+    ('Autotools', '20180311'),
+]
+
+runtest = 'test'
+
+moduleclass = 'math'

@@ -1,0 +1,32 @@
+easyblock = 'PythonPackage'
+
+name = 'lxml'
+version = '4.4.2'
+
+homepage = 'https://lxml.de/'
+description = """The lxml XML toolkit is a Pythonic binding for the C libraries libxml2 and libxslt."""
+
+toolchain = {'name': 'GCCcore', 'version': '8.3.0'}
+
+source_urls = [PYPI_SOURCE]
+sources = [SOURCE_TAR_GZ]
+checksums = ['8afbb5cc6562ea70e8f6428f1537c02c10d9def359136978a5fce671d6f7e40d']
+
+multi_deps = {'Python': ['3.7.4', '2.7.16']}
+
+builddependencies = [('binutils', '2.32')]
+
+dependencies = [
+    ('libxml2', '2.9.9'),
+    ('libxslt', '1.1.34'),
+]
+
+download_dep_fail = True
+use_pip = True
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+moduleclass = 'lib'
