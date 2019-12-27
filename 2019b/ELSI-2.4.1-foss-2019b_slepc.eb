@@ -23,7 +23,7 @@ builddependencies = [
 ]
 
 dependencies = [
-#    ('ELPA', '2019.11.001.rc1'),  # tests fail when using external ELPA with foss toolchain
+    # ('ELPA', '2019.11.001.rc1'),  # tests fail when using external ELPA with foss toolchain
     ('SLEPc', '3.12.1'),
 ]
 

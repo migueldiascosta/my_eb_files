@@ -19,8 +19,9 @@ functionality.
 toolchain = {'name': 'intel', 'version': '2019b'}
 toolchainopts = {'openmp': True, 'usempi': True}
 
-sources = ['stable_%(version)s.tar.gz']
 source_urls = ['https://github.com/lammps/lammps/archive/']
+sources = ['stable_%(version)s.tar.gz']
+checksums = ['5380c1689a93d7922e3d65d9c186401d429878bb3cbe9a692580d3470d6a253f']
 
 builddependencies = [
     ('CMake', '3.15.3'),
@@ -43,7 +44,8 @@ separate_build_dir = True
 
 srcdir = '../lammps-stable_%(version)s/cmake'
 
-_parallelisation_packages = ['BUILD_MPI', 'BUILD_OMP', 'PKG_OPT', 'PKG_USER-OMP', 'PKG_USER-INTEL', 'PKG_KOKKOS']  # 'PKG_GPU'
+_parallelisation_packages = ['BUILD_MPI', 'BUILD_OMP', 'PKG_OPT', 'PKG_USER-OMP', 'PKG_USER-INTEL', 'PKG_KOKKOS']
+# 'PKG_GPU'
 
 _configuration_options = ['BUILD_LIB', 'BUILD_EXE', 'BUILD_SHARED_LIBS']
 
@@ -73,10 +75,10 @@ _kspace_opts = ['FFT' + '=MKL', 'FFT_PACK' + '=array']
 
 _optional_deps = ['WITH_JPEG', 'WITH_PNG', 'WITH_GZIP']
 
-_specific_opts = ' '.join("-D%s" % item for item in _kspace_opts) #  + _gpu_opts)
+_specific_opts = ' '.join("-D%s" % item for item in _kspace_opts)  # + _gpu_opts)
 _other_opts = ' '.join("-D%s=yes" % item for item in _optional_deps)
 
-configopts = _packages_opts + ' ' + _other_opts + ' ' + _specific_opts 
+configopts = _packages_opts + ' ' + _other_opts + ' ' + _specific_opts
 
 # example kokkos options for haswell with gpu
 # configopts += ' -DKOKKOS_ENABLE_OPENMP=yes -DKOKKOS_ARCH="HSW"'

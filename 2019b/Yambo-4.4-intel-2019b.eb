@@ -31,7 +31,7 @@ buildopts = 'all'
 parallel = 1
 
 sanity_check_paths = {
-    'files': ['bin/'+_prog for _prog in ['a2y', 'p2y', 'yambo', 'yambo_kerr', 'yambo_ph', 'yambo_rt',
+    'files': ['bin/' + _prog for _prog in ['a2y', 'p2y', 'yambo', 'yambo_kerr', 'yambo_ph', 'yambo_rt',
               'ypp', 'ypp_ph', 'ypp_rt']],
     'dirs': [],
 }

@@ -23,7 +23,7 @@ dependencies = [
     ('ASE', '3.19.0', versionsuffix),
     ('netcdf4-python', '1.5.3', versionsuffix),
     ('pyFFTW', '0.11.1', versionsuffix),
-#    ('spglib-python', '1.14.1', versionsuffix),
+    # ('spglib-python', '1.14.1', versionsuffix),
 ]
 
 download_dep_fail = True
