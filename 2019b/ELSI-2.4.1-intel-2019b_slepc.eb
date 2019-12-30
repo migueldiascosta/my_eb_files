@@ -23,7 +23,7 @@ builddependencies = [
 ]
 
 dependencies = [
-    ('ELPA', '2019.11.001.rc1'),
+    ('ELPA', '2019.11.001'),
     ('SLEPc', '3.12.1'),
 ]
 

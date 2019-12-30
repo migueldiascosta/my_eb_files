@@ -21,7 +21,7 @@ builddependencies = [
     ('CMake', '3.15.3'),
 ]
 
-dependencies = [('ELPA', '2019.11.001.rc1')]
+dependencies = [('ELPA', '2019.11.001')]
 
 build_internal_pexsi = False
 

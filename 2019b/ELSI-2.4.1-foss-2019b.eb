@@ -22,7 +22,7 @@ builddependencies = [
 ]
 
 dependencies = [
-    ('ELPA', '2019.11.001.rc1'),  # tests fail when using external ELPA with foss toolchain
+    # ('ELPA', '2019.11.001'),  # tests fail when using external ELPA with foss toolchain
 ]
 
 build_internal_pexsi = False
