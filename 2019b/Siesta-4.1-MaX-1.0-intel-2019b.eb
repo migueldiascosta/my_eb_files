@@ -20,7 +20,7 @@ dependencies = [
     ('xmlf90', '1.5.4'),
 ]
 
-with_transiesta = False # transiesta is now siesta --electrode
+with_transiesta = False  # transiesta is now siesta --electrode
 with_utils = True
 
 runtest = 'check'
