@@ -154,7 +154,7 @@ class EB_ELPA(ConfigureMake):
             self.cfg.update('configopts', '--with-mpi=no')
             self.cfg.update('configopts', 'LIBS="$LIBLAPACK"')
 
-        self.cfg.update('configopts', 'LDFLAGS="-L$EBROOTZLIB -lxml2 -lz"')
+        self.cfg.update('configopts', 'LDFLAGS="-L${EBROOTZLIB}/lib -L${EBROOTLIBXML2}/lib -lxml2 -lz"')
 
         # make all builds verbose
         self.cfg.update('buildopts', 'V=1')

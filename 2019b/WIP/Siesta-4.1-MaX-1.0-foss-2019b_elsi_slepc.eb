@@ -7,7 +7,7 @@ homepage = 'http://departments.icmab.es/leem/siesta'
 description = """SIESTA is both a method and its computer program implementation, to perform efficient electronic
  structure calculations and ab initio molecular dynamics simulations of molecules and solids."""
 
-toolchain = {'name': 'intel', 'version': '2019a'}
+toolchain = {'name': 'foss', 'version': '2019a'}
 toolchainopts = {'usempi': True, 'precise': True}
 
 source_urls = ['https://gitlab.com/siesta-project/siesta/-/archive/%s' % _release]
@@ -18,7 +18,7 @@ dependencies = [
     ('ELSI', '2.4.1', '_slepc'),
     ('libGridXC', '0.8.5'),
     ('libPSML', '1.1.8'),
-    ('netCDF-Fortran', '4.4.5'),
+    ('netCDF-Fortran', '4.5.2'),
     ('xmlf90', '1.5.4'),
 ]
 

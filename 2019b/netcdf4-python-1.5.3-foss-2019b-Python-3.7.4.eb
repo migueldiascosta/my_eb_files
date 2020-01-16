@@ -28,6 +28,7 @@ exts_list = [
         'checksums': ['1ac64f8f9066ea756ea27d67cedaf064e7c866275218fa7c84684066a5890f70'],
     }),
     (name, version, {
+        'preinstallopts': "export NO_NET=1 && ",
         'patches': ['netcdf4-python-1.1.8-avoid-diskless-test.patch'],
         'source_tmpl': 'netCDF4-%(version)s.tar.gz',
         'source_urls': ['https://pypi.python.org/packages/source/n/netCDF4'],

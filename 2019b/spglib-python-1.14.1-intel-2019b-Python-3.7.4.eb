@@ -15,6 +15,7 @@ checksums = ['1823aa0a10c0cde0504c8dae8c0012591e5334fd38e21c3bf540dc0219a3b44e']
 
 dependencies = [
     ('Python', '3.7.4'),
+    ('SciPy-bundle', '2019.10', versionsuffix),
 ]
 
 options = {'modulename': 'spglib'}

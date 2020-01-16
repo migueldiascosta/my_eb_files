@@ -42,7 +42,8 @@ buildopts += 'FCPP="cpp -C -nostdinc -nostdinc++" C_LINK="$MPICXX" C_OPTS="$CFLA
 buildopts += 'MATHFLAG="-DUSESCALAPACK -DUNPACKED -DUSEFFTW3 -DHDF5 -DUSEELPA" '
 buildopts += 'LAPACKLIB="$LIBLAPACK_MT" BLACSDIR="$BLACS_LIB_DIR" BLACS="$LIBBLACS" SCALAPACKLIB="$LIBSCALAPACK_MT" '
 buildopts += 'FFTWINCLUDE="$FFTW_INC_DIR" FFTWLIB="-lfftw3_omp -lfftw3" '
-buildopts += 'HDF5INCLUDE="$EBROOTHDF5/include" HDF5LIB="-lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 -lsz -lz" '
+buildopts += 'HDF5INCLUDE="$EBROOTHDF5/include" '
+buildopts += 'HDF5LIB="-L$EBROOTHDF5/lib -lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 -lsz -lz" '
 buildopts += 'ELPALIB="$EBROOTELPA/lib/libelpa_openmp.a" '
 buildopts += 'ELPAINCLUDE="$EBROOTELPA/include/elpa_openmp-$EBVERSIONELPA/modules" '
 

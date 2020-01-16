@@ -19,6 +19,8 @@ source_urls = ['http://elpa.mpcdf.mpg.de/html/Releases/%(version)s/']
 sources = [SOURCELOWER_TAR_GZ]
 checksums = ['10374a8f042e23c7e1094230f7e2993b6f3580908a213dbdf089792d05aff357']
 
+dependencies = [('libxml2', '2.9.9')]
+
 builddependencies = [
     ('Autotools', '20180311'),
 ]
