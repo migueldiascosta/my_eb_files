@@ -67,9 +67,9 @@ use easybuild environment variables and don't copy abinit and qe binaries, they 
 -ESPRESSO_DIR = /path/to/espresso
 -PW_EXE = $(ESPRESSO_DIR)/bin/pw.x
 -PP_EXE = $(ESPRESSO_DIR)/bin/pp.x
-+# ESPRESSO_DIR = $EBROOTQUANTUMESPRESSO
-+# PW_EXE = $(ESPRESSO_DIR)/bin/pw.x
-+# PP_EXE = $(ESPRESSO_DIR)/bin/pp.x
++ESPRESSO_DIR = ${EBROOTQUANTUMESPRESSO}
++PW_EXE = $(ESPRESSO_DIR)/bin/pw.x
++PP_EXE = $(ESPRESSO_DIR)/bin/pp.x
  #######################
  
  

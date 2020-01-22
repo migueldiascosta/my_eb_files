@@ -15,7 +15,8 @@ sources = ['%(name)s-%(version)s.tar.gz']
 patches = ['OCEAN-2.5.2_makefiles.patch']
 
 dependencies = [
-    ('ABINIT', '8.10.3'),
+    ('ABINIT', '8.10.3', '_libxc4'),
+    ('QuantumESPRESSO', '6.5'),
     ('FFTW', '3.3.8'),
     ('Perl', '5.30.0'),
 ]
