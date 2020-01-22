@@ -1,0 +1,86 @@
+use easybuild environment variables and don't copy abinit and qe binaries, they will be available in the PATH
+--- Makefile.arch.example.orig	2020-01-22 12:37:30.186441429 +0800
++++ Makefile.arch.example	2020-01-22 15:33:00.346331725 +0800
+@@ -1,18 +1,18 @@
+ # Change these settings for your install
+ 
+ # Fortran compiler
+-FC = ifort
+-MPIFORT = mpif90
++FC = ${F90}
++MPIFORT = ${MPIF90}
+ 
+ # Flags for the fortran compiler
+-OPTIONS = -O2 
++OPTIONS = ${FFLAGS}
+ 
+ # Currently the bse solver needs MPI and BLAS
+ OPTIONS += -DBLAS -DMPI
+ 
+ # Some installations of MPI don't have latest calls
+ # ( MPI_IALLREDUCE, etc. )
+-OPTIONS += -D__OLD_MPI
++# OPTIONS += -D__OLD_MPI
+ 
+ # We have some preprocessor macros using the "c-style"
+ OPTIONS += -cpp 
+@@ -26,19 +26,19 @@
+ # Other compiles likely have similar settings
+ 
+ # Many compilers have flush. We use it sometimes to force output before crashes
+-# OPTIONS += -DHAVE_FLUSH
++OPTIONS += -DHAVE_FLUSH
+ 
+ # Linear algebra libraries
+-BLAS = -L/path/to/mkl -lmkl_intel_lp64 -lmkl_sequential -lmkl_core
++BLAS = ${LIBLAPACK}
+ 
+ # FFTW path. Several programs can use FFTW. Find it at fftw.org. 
+ #  (There is a fallback fft so FFTW is not required)
+ OPTIONS += -D__FFTW3
+-FFTWI = -I/path/to/fftw/include/
+-FFTWL = -L/path/to/fftw/lib/ -lfftw3
++FFTWI = -I${EBROOTFFTW}/include
++FFTWL = -L${EBROOTFFTW}/lib -lfftw3
+ 
+ # Install Directory. 
+-INSTDIR = /path/to/ocean/install
++# INSTDIR = /path/to/ocean/install
+ 
+ 
+ # OCEAN can use either ABINIT or QE. 
+@@ -48,17 +48,17 @@
+ # ABINIT Flags 
+ # This says where abinit and cut3d live 
+ #   (cut3d is a post-processing tool available as part of the abinit toolset)
+-ABINIT_DIR = /path/to/abinit/install
+-ABINIT_EXE = $(ABINIT_DIR)/abinit
+-CUT3D_EXE  = $(ABINIT_DIR)/cut3d
++ABINIT_DIR = ${EBROOTABINIT}
++ABINIT_EXE = $(ABINIT_DIR)/bin/abinit
++CUT3D_EXE  = $(ABINIT_DIR)/bin/cut3d
+ #######################
+ 
+ 
+ #######################
+ # ESPRESSO Flags
+-ESPRESSO_DIR = /path/to/espresso
+-PW_EXE = $(ESPRESSO_DIR)/bin/pw.x
+-PP_EXE = $(ESPRESSO_DIR)/bin/pp.x
++# ESPRESSO_DIR = $EBROOTQUANTUMESPRESSO
++# PW_EXE = $(ESPRESSO_DIR)/bin/pw.x
++# PP_EXE = $(ESPRESSO_DIR)/bin/pp.x
+ #######################
+ 
+ 
+--- Makefile.orig	2020-01-22 15:40:14.967868746 +0800
++++ Makefile	2020-01-22 15:40:33.599677476 +0800
+@@ -35,7 +35,7 @@
+ install:
+ 	mkdir -p $(INSTDIR)
+ 	cp $(SCRIPTS) $(AUX) $(INSTDIR)
+-	cp $(AUX_EXE) $(INSTDIR)
++	#cp $(AUX_EXE) $(INSTDIR)
+ 	cd Common;       make install
+ 	cd DFT;          make install
+ 	cd PREP;         make install

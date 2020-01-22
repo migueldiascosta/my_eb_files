@@ -1,0 +1,34 @@
+easyblock = 'ConfigureMake'
+
+name = 'OCEAN'
+version = '2.5.2'
+
+homepage = 'https://monalisa.phys.washington.edu/ocean/'
+description = """OCEAN is a versatile and user-friendly package for calculating core edge spectroscopy including excitonic effects."""
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+toolchainopts = {'r8': True}
+
+# download requires registration, see http://monalisa.phys.washington.edu/ocean/ocean-download.html
+sources = ['%(name)s-%(version)s.tar.gz'] 
+
+patches = ['OCEAN-2.5.2_makefiles.patch']
+
+dependencies = [
+    ('ABINIT', '8.10.3'),
+    ('FFTW', '3.3.8'),
+    ('Perl', '5.30.0'),
+]
+
+skipsteps = ['configure']
+
+prebuildopts = "cp Makefile.arch.example Makefile.arch && "
+
+installopts = "INSTDIR=%(installdir)s/bin"
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ["."]
+}
+
+moduleclass = 'chem'
