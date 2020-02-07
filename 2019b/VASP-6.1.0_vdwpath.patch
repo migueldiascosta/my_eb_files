@@ -1,0 +1,24 @@
+--- src/vdw_nl.F.orig	2020-02-04 16:51:12.158991157 +0800
++++ src/vdw_nl.F	2020-02-07 11:11:10.516631638 +0800
+@@ -432,11 +432,19 @@
+     !generate the interpolation table for the kernel using phi
+     logical :: lkern
+     integer :: nmesh, IOstatus
++    CHARACTER(len=255) :: vdw_kernel_path
++    CALL get_environment_variable("VASP6_VDWKERNEL_PATH", vdw_kernel_path)
+     
+     !ok if the kernel table is here read it
+-    inquire( file='vdw_kernel.bindat', exist=lkern) 
++    inquire( file=vdw_kernel_path, exist=lkern)
++    IF (.NOT. lkern) THEN
++       inquire( file='vdw_kernel.bindat', exist=lkern)
++       if (lkern) THEN
++          vdw_kernel_path = 'vdw_kernel.bindat'
++       ENDIF
++    ENDIF
+     IF (lkern) then
+-      open (unit=10, file='vdw_kernel.bindat', form='unformatted')
++      open (unit=10, file=vdw_kernel_path, form='unformatted')
+       read(10,IOSTAT=IOstatus) nmesh
+       IF (nmesh .NE. nd) THEN
+         IF (IU0>=0) WRITE(IU0,*)  'nmesh ', nmesh
