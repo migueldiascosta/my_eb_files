@@ -21,7 +21,7 @@ checksums = [
     'e0ae9fb1ce8a8925199933165446656b3d15f5c3d5cf5e9f32ab05575ac52aec',  # VASP-6.1.0_vdwpath.patch
 ]
 
-prebuildopts = 'cp arch/makefile.include.linux_intel_omp ./makefile.include && '
+prebuildopts = 'cp arch/makefile.include.linux_intel ./makefile.include && '
 
 # Makefile uses LIBS as a list of folders
 prebuildopts += 'unset LIBS && '
