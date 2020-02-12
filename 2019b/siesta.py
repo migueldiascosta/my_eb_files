@@ -201,7 +201,7 @@ class EB_Siesta(ConfigureMake):
             if elpa:
                 elpa_ver = get_software_version('ELPA')
                 regex_subs.extend([
-                    (r"^(FPPFLAGS\s*:?=.*)$", r"\1 -DSIESTA__ELSI"),
+                    (r"^(FPPFLAGS\s*:?=.*)$", r"\1 -DSIESTA__ELPA"),
                     (r"^(FPPFLAGS\s*:?=.*)$", r"\1 -I%s/include/elpa-%s/modules" % (elpa, elpa_ver)),
                     (r"^(LIBS\s*=.*)$", r"\1 -L%s/lib -lelpa" % elpa),
                 ])
@@ -214,6 +214,8 @@ class EB_Siesta(ConfigureMake):
                     elsi_libs.append('elpa')
 
                 if os.path.isfile(os.path.join(elsi, 'lib', 'libpexsi.a')):
+                    copy_file(os.path.join(elsi, 'include', 'f_interface.f90'), obj_dir) 
+                    regex_subs.append((r"^(FPPFLAGS\s*:?=.*)$", r"\1 -DSIESTA__PEXSI"))
                     elsi_libs.extend(['pexsi', 'superlu_dist', 'ptscotchparmetis', 'ptscotch', 'ptscotcherr',
                                       'scotchmetis', 'scotch', 'scotcherr'])
 

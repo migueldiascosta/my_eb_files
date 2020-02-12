@@ -32,6 +32,7 @@ import re
 from easybuild.easyblocks.generic.cmakemake import CMakeMake, setup_cmake_env
 from easybuild.framework.easyconfig import CUSTOM
 from easybuild.tools.build_log import EasyBuildError
+from easybuild.tools.filetools import copy_file
 from easybuild.tools.modules import get_software_root, get_software_version
 
 
@@ -120,6 +121,12 @@ class EB_ELSI(CMakeMake):
         self.cfg.update('configopts', "-DINC_PATHS='%s'" % ';'.join(inc_paths))
 
         super(EB_ELSI, self).configure_step()
+
+    def install_step(self):
+        """Custom install step for ELSI."""
+        super(EB_ELSI, self).install_step()
+        copy_file(os.path.join(self.builddir, 'elsi-%s' % self.version, 'external', 'PEXSI', 'src', 'f_interface.f90'),
+                  os.path.join(self.installdir, 'include'))
 
     def sanity_check_step(self):
         """Custom sanity check for ELSI."""
