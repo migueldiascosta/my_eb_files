@@ -1,0 +1,49 @@
+* also check for "1" as well as "ON" when checking for enabled solvers
+author: Miguel Dias Costa (National University of Singapore)
+--- src/elsi_version.f90.in.orig	2020-02-12 11:19:52.875820272 +0800
++++ src/elsi_version.f90.in	2020-02-12 11:22:45.798080681 +0800
+@@ -36,7 +36,7 @@
+ 
+    character(len=*), parameter :: tmp = "@ENABLE_PEXSI@"
+ 
+-   if(tmp == "ON") then
++   if(tmp == "ON" .or. tmp == "1") then
+       pexsi_enabled = 1
+    else
+       pexsi_enabled = 0
+@@ -55,7 +55,7 @@
+ 
+    character(len=*), parameter :: tmp = "@ENABLE_SIPS@"
+ 
+-   if(tmp == "ON") then
++   if(tmp == "ON" .or. tmp == "1") then
+       sips_enabled = 1
+    else
+       sips_enabled = 0
+@@ -74,7 +74,7 @@
+ 
+    character(len=*), parameter :: tmp = "@ENABLE_EIGENEXA@"
+ 
+-   if(tmp == "ON") then
++   if(tmp == "ON" .or. tmp == "1") then
+       eigenexa_enabled = 1
+    else
+       eigenexa_enabled = 0
+@@ -93,7 +93,7 @@
+ 
+    character(len=*), parameter :: tmp = "@ENABLE_MAGMA@"
+ 
+-   if(tmp == "ON") then
++   if(tmp == "ON" .or. tmp == "1") then
+       magma_enabled = 1
+    else
+       magma_enabled = 0
+@@ -112,7 +112,7 @@
+ 
+    character(len=*), parameter :: tmp = "@ENABLE_BSEPACK@"
+ 
+-   if(tmp == "ON") then
++   if(tmp == "ON" .or. tmp == "1") then
+       bsepack_enabled = 1
+    else
+       bsepack_enabled = 0

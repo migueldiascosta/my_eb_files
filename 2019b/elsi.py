@@ -122,11 +122,11 @@ class EB_ELSI(CMakeMake):
 
         super(EB_ELSI, self).configure_step()
 
-    def install_step(self):
-        """Custom install step for ELSI."""
-        super(EB_ELSI, self).install_step()
-        copy_file(os.path.join(self.builddir, 'elsi-%s' % self.version, 'external', 'PEXSI', 'src', 'f_interface.f90'),
-                  os.path.join(self.installdir, 'include'))
+    #def install_step(self):
+        #"""Custom install step for ELSI."""
+        #super(EB_ELSI, self).install_step()
+        #copy_file(os.path.join(self.builddir, 'elsi-%s' % self.version, 'external', 'PEXSI', 'src', 'f_interface.f90'),
+        #          os.path.join(self.installdir, 'include'))
 
     def sanity_check_step(self):
         """Custom sanity check for ELSI."""
