@@ -32,6 +32,7 @@ import re
 from easybuild.easyblocks.generic.cmakemake import CMakeMake, setup_cmake_env
 from easybuild.framework.easyconfig import CUSTOM
 from easybuild.tools.build_log import EasyBuildError
+from easybuild.tools.filetools import copy_file
 from easybuild.tools.modules import get_software_root, get_software_version
 
 
@@ -58,8 +59,8 @@ class EB_ELSI(CMakeMake):
         self.cfg['separate_build_dir'] = True
 
         if self.cfg['runtest']:
-            self.cfg.update('configopts', "-DENABLE_TESTS=ON")
-            self.cfg.update('configopts', "-DENABLE_C_TESTS=ON")
+            self.cfg.update('configopts', "-DENABLE_TESTS=1")
+            self.cfg.update('configopts', "-DENABLE_C_TESTS=1")
             self.cfg['runtest'] = 'test'
 
         setup_cmake_env(self.toolchain)
@@ -71,7 +72,7 @@ class EB_ELSI(CMakeMake):
         elpa_root = get_software_root('ELPA')
         if elpa_root:
             self.log.info("Using external ELPA.")
-            self.cfg.update('configopts', "-DUSE_EXTERNAL_ELPA=ON")
+            self.cfg.update('configopts', "-DUSE_EXTERNAL_ELPA=1")
             elpa_lib = 'elpa_openmp' if self.toolchain.options.get('openmp', None) else 'elpa'
             inc_paths.append('%s/include/%s-%s/modules' % (elpa_root, elpa_lib, get_software_version('ELPA')))
             external_libs.extend([elpa_lib])
@@ -83,10 +84,10 @@ class EB_ELSI(CMakeMake):
             raise EasyBuildError("Both build_internal_pexsi and external PEXSI dependency found, only one can be set.")
         if pexsi or self.cfg['build_internal_pexsi']:
             self.log.info("Enabling PEXSI solver.")
-            self.cfg.update('configopts', "-DENABLE_PEXSI=ON")
+            self.cfg.update('configopts', "-DENABLE_PEXSI=1")
             if pexsi:
                 self.log.info("Using external PEXSI.")
-                self.cfg.update('configopts', "-DUSE_EXTERNAL_PEXSI=ON")
+                self.cfg.update('configopts', "-DUSE_EXTERNAL_PEXSI=1")
                 external_libs.append('pexsi')
             else:
                 self.log.info("No external PEXSI specified as dependency, building internal PEXSI.")
@@ -98,9 +99,9 @@ class EB_ELSI(CMakeMake):
                 raise EasyBuildError("Cannot use internal PEXSI with external SLEPc, due to conflicting dependencies.")
             self.enable_sips = True
             self.log.info("Enabling SLEPc-SIPs solver.")
-            self.cfg.update('configopts', "-DENABLE_SIPS=ON")
+            self.cfg.update('configopts', "-DENABLE_SIPS=1")
             external_libs.extend(['slepc', 'petsc', 'HYPRE', 'umfpack', 'klu', 'cholmod', 'btf', 'ccolamd', 'colamd',
-                                  'camd', 'amd', 'suitesparseconfig', 'metis', 'ptesmumps',
+                                  'camd', 'amd', 'suitesparseconfig', 'metis', 'ptesmumps',  # 'parmetis'
                                   'ptscotchparmetis', 'ptscotch', 'ptscotcherr', 'esmumps', 'scotch', 'scotcherr',
                                   'stdc++', 'dl'])
             if get_software_root('imkl') or get_software_root('FFTW'):
@@ -120,6 +121,12 @@ class EB_ELSI(CMakeMake):
         self.cfg.update('configopts', "-DINC_PATHS='%s'" % ';'.join(inc_paths))
 
         super(EB_ELSI, self).configure_step()
+
+    #def install_step(self):
+        #"""Custom install step for ELSI."""
+        #super(EB_ELSI, self).install_step()
+        #copy_file(os.path.join(self.builddir, 'elsi-%s' % self.version, 'external', 'PEXSI', 'src', 'f_interface.f90'),
+        #          os.path.join(self.installdir, 'include'))
 
     def sanity_check_step(self):
         """Custom sanity check for ELSI."""

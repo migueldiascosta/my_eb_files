@@ -14,7 +14,6 @@ toolchainopts = {'usempi': True}
 
 source_urls = ['http://wordpress.elsi-interchange.org/wp-content/uploads/2020/02/']
 sources = [SOURCELOWER_TAR_GZ]
-patches = ['ELSI-2.5.0_enabled_checks.patch']
 checksums = ['f4d77c4291341c9708ab8070dc4ec683577b3556e7d9f214370d626dc6a4753f']
 
 builddependencies = [
