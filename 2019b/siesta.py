@@ -214,8 +214,10 @@ class EB_Siesta(ConfigureMake):
                     elsi_libs.append('elpa')
 
                 if os.path.isfile(os.path.join(elsi, 'lib', 'libpexsi.a')):
-                    copy_file(os.path.join(elsi, 'include', 'f_interface.f90'), obj_dir) 
-                    regex_subs.append((r"^(FPPFLAGS\s*:?=.*)$", r"\1 -DSIESTA__PEXSI"))
+                    # this should only be necessary for the older PEXSI support, not for PEXSI from ELSI
+                    #copy_file(os.path.join(elsi, 'include', 'f_interface.f90'), obj_dir) 
+                    # the manual recommends not setting -DSIESTA__PEXSI when using PEXSI from ELSI
+                    #regex_subs.append((r"^(FPPFLAGS\s*:?=.*)$", r"\1 -DSIESTA__PEXSI"))
                     elsi_libs.extend(['pexsi', 'superlu_dist', 'ptscotchparmetis', 'ptscotch', 'ptscotcherr',
                                       'scotchmetis', 'scotch', 'scotcherr'])
 
