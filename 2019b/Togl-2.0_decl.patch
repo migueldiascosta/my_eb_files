@@ -1,3 +1,5 @@
+* fix function declaration to match previous definition
+author: Miguel Dias Costa (National University of Singapore)
 --- toglDecls.h.orig	2020-01-17 14:57:44.000178028 +0800
 +++ toglDecls.h	2020-01-17 14:58:07.046072088 +0800
 @@ -117,7 +117,7 @@
