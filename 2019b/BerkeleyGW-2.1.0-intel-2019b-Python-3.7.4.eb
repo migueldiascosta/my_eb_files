@@ -29,6 +29,6 @@ dependencies = [
 ]
 
 # two tests failing (Si-EPM_subspace_cplx) with the intel toolchain... 
-runtest = False
+# runtest = False
 
 moduleclass = 'phys'

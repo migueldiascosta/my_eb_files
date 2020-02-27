@@ -1,0 +1,33 @@
+--- src/main.F.orig	2018-01-19 16:36:07.157814000 +0800
++++ src/main.F	2018-01-19 16:36:45.857510840 +0800
+@@ -3144,7 +3144,7 @@
+       ENDIF
+ 
+       CALL CHAIN_FORCE(T_INFO%NIONS,DYN%POSION,TOTEN,TIFOR, &
+-           LATT_CUR%A,LATT_CUR%B,IO%IU6)
++           TSIF,LATT_CUR%A,LATT_CUR%B,IO%IU6)
+ 
+       CALL PARALLEL_TEMPERING(NSTEP,T_INFO%NIONS,DYN%POSION,DYN%VEL,TOTEN,TIFOR,DYN%TEBEG,DYN%TEEND, &
+            LATT_CUR%A,LATT_CUR%B,IO%IU6)
+--- src/.objects.orig	2018-01-19 16:53:32.692739000 +0800
++++ src/.objects	2018-01-19 16:55:55.151464249 +0800
+@@ -69,6 +69,19 @@
+ 	tet.o \
+ 	tetweight.o \
+ 	hamil_rot.o \
++	bfgs.o \
++	dynmat.o  \
++	instanton.o \
++	lbfgs.o \
++	sd.o \
++	cg.o \
++	dimer.o \
++	bbm.o \
++	fire.o \
++	lanczos.o \
++	neb.o  \
++	qm.o \
++	opt.o \
+ 	chain.o \
+ 	dyna.o \
+ 	k-proj.o \
