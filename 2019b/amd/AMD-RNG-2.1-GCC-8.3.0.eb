@@ -1,0 +1,21 @@
+easyblock = 'Binary'
+
+name = 'AMD-RNG'
+version = '2.1'
+
+homepage = 'https://developer.amd.com/amd-cpu-libraries/rng-library/'
+description = """AMD Random Number Generator Library is a pseudorandom number generator library."""
+
+toolchain = {'name': 'GCC', 'version': '8.3.0'}
+
+sources = ['aocl-rng-linux-gcc-%(version)s.tar.gz']
+checksums = ['d0c145909f8a42348845fc0ccc54d66146294c8090bf704dfcbef66a783b80a1']
+
+extract_sources = True
+
+sanity_check_paths = {
+    'files': ['rng/include/rng.h'],
+    'dirs': ['rng/lib'],
+}
+
+moduleclass = 'numlib'

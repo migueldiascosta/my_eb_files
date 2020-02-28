@@ -1,0 +1,31 @@
+easyblock = 'ConfigureMake'
+
+name = 'BLIS'
+version = '2.1'
+versionsuffix = '-amd'
+
+homepage = 'https://developer.amd.com/amd-cpu-libraries/blas-library/'
+description = """AMD fork of BLIS. BLIS is a portable software framework for instantiating high-performance
+ BLAS-like dense linear algebra libraries."""
+
+toolchain = {'name': 'GCC', 'version': '8.3.0'}
+
+source_urls = ['https://github.com/amd/blis/archive/']
+sources = ['%(version)s.tar.gz']
+checksums = ['3b1d611d46f0f13b3c0917e27012e0f789b23dbefdddcf877b20327552d72fb3']
+
+builddependencies = [('Python', '2.7.16')]
+
+configopts = '--enable-cblas --enable-shared CC="$CC" auto'
+
+runtest = 'check'
+
+sanity_check_paths = {
+    'files': ['include/blis/cblas.h', 'include/blis/blis.h',
+              'lib/libblis.a', 'lib/libblis.%s' % SHLIB_EXT],
+    'dirs': [],
+}
+
+modextrapaths = {'CPATH': 'include/blis'}
+
+moduleclass = 'numlib'

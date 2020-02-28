@@ -1,0 +1,20 @@
+name = 'ScaLAPACK'
+version = '2.1'
+versionsuffix = '-amd'
+
+homepage = 'https://github.com/amd/scalapack'
+description = """ScaLAPACK for AMD is the optimized version of ScaLAPACK for AMD EPYC family of processors."""
+
+toolchain = {'name': 'gompi', 'version': '2019b'}
+toolchainopts = {'pic': True}
+
+source_urls = ['https://github.com/amd/scalapack/archive/']
+sources = [{'filename': 'aocl-scalapack-%(version)s.tar.gz', 'download_filename': '%(version)s.tar.gz'}]
+checksums = ['08986130833d3d0d603cd96ba19a76911e4d45bbfa0ae1986d8bcd886814330d']
+
+dependencies = [
+    ('BLIS', version, versionsuffix),
+    ('libFLAME', version, versionsuffix),
+]
+
+moduleclass = 'numlib'

@@ -1,0 +1,22 @@
+easyblock = 'Binary'
+
+name = 'AMD-LibM'
+version = '3.5.0'
+
+homepage = 'https://developer.amd.com/amd-cpu-libraries/amd-math-library-libm/'
+description = """AMD LibM is a software library containing a collection of basic math functions
+ optimized for x86-64 processor based machines."""
+
+toolchain = {'name': 'GCC', 'version': '8.3.0'}
+
+sources = ['aocl-libm-linux-gcc-%(version)s.tar.gz']
+checksums = ['3375c987d1c99f48387476057041536c67451448ffd61d3d0fa6b89759236b43']
+
+extract_sources = True
+
+sanity_check_paths = {
+    'files': ['lib/libamdlibm.so', 'lib/libamdlibm.a'],
+    'dirs': ['lib']
+}
+
+moduleclass = 'numlib'

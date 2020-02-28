@@ -1,0 +1,35 @@
+easyblock = 'Toolchain'
+
+name = 'amd'
+version = '2019b'
+
+homepage = ''
+description = """GNU Compiler Collection (GCC) based compiler toolchain, including
+ OpenMPI for MPI support, AMD fork of BLIS (BLAS support), AMD fork of libFLAME,
+ FFTW and ScaLAPACK."""
+
+toolchain = SYSTEM
+
+gccver = '8.3.0'
+
+blaslib = 'BLIS'
+blasver = '2.1'
+amdsuffix = '-amd'
+blas = '%s-%s%s' % (blaslib, blasver, amdsuffix)
+
+# toolchain used to build foss dependencies
+comp_mpi_tc_name = 'gompi'
+comp_mpi_tc = (comp_mpi_tc_name, version)
+
+# we need GCC and OpenMPI as explicit dependencies instead of gompi toolchain
+# because of toolchain preparation functions
+dependencies = [
+    ('GCC', gccver),
+    ('OpenMPI', '3.1.4', '', ('GCC', gccver)),
+    (blaslib, blasver, amdsuffix, ('GCC', gccver)),
+    ('libFLAME', '2.1', amdsuffix, ('GCC', gccver)),
+    ('FFTW', '3.3.8', '-amd-2.1', comp_mpi_tc),
+    ('ScaLAPACK', '2.1', amdsuffix, comp_mpi_tc),
+]
+
+moduleclass = 'toolchain'
