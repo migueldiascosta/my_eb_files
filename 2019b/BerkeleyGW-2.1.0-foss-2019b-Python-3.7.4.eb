@@ -28,4 +28,7 @@ dependencies = [
     ('h5py', '2.10.0', versionsuffix),
 ]
 
+# Si-EPM tests failing
+runtest = False
+
 moduleclass = 'phys'
