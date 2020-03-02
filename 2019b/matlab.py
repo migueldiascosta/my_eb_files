@@ -45,6 +45,7 @@ from easybuild.framework.easyconfig import CUSTOM
 from easybuild.tools.build_log import EasyBuildError
 from easybuild.tools.filetools import adjust_permissions, change_dir, read_file, write_file
 from easybuild.tools.py2vs3 import string_type
+from easybuild.tools.modules import get_software_root
 from easybuild.tools.run import run_cmd
 from easybuild.tools.systemtools import get_shared_lib_ext
 
@@ -182,4 +183,7 @@ class EB_MATLAB(PackedBinary):
         txt = super(EB_MATLAB, self).make_module_extra()
         if self.cfg['java_options']:
             txt += self.module_generator.set_environment('_JAVA_OPTIONS', self.cfg['java_options'])
+        java_root = get_software_root('JAVA')
+        if java_root:
+            txt += self.module_generator.set_environment('MATLAB_JAVA', java_root)
         return txt
