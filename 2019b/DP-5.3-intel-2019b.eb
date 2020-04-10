@@ -1,0 +1,32 @@
+easyblock = 'ConfigureMake'
+
+name = 'DP'
+version = '5.3'
+
+homepage = 'https://http://etsf.grenoble.cnrs.fr/dp'
+description = """DP is a Linear Response TDDFT code, in Frequency-Reciprocal and Frequency-Real space, on a Plane Waves basis set."""
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+
+sources = [SOURCELOWER_TGZ]
+
+patches = ['DP-5.3_configure.patch']
+
+dependencies = [('FFTW', '3.3.8')]
+
+preconfigopts = 'export LDFLAGS="$LDFLAGS -nofor-main" && '
+
+configopts = '--enable-mpi --enable-scalapack '
+configopts += '--with-blas="$LIBBLAS" --with-lapack="$LIBSCALAPACK" --with-scalapack-dir="$LIBSCALAPACK" '
+configopts += '--with-fftw3=$EBROOTFFTW '
+
+parallel = 1
+
+# runtest = 'test'
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ["."]
+}
+
+moduleclass = 'chem'

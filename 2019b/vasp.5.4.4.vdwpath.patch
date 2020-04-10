@@ -1,14 +1,24 @@
---- vasp.5.4.4/src/vdw_nl.F.orig	2017-03-07 17:21:02.117486000 +0800
-+++ vasp.5.4.4/src/vdw_nl.F	2017-03-07 20:42:50.170020800 +0800
-@@ -419,9 +419,9 @@
+--- vasp.5.4.4/src/vdw_nl.F.orig	2020-04-08 12:11:14.811276791 +0800
++++ vasp.5.4.4/src/vdw_nl.F	2020-04-08 12:16:01.067848898 +0800
+@@ -433,11 +433,19 @@
+     !generate the interpolation table for the kernel using phi
+     logical :: lkern
      integer :: nmesh, IOstatus
++    CHARACTER(len=255) :: vdw_kernel_path
++    CALL get_environment_variable("VASP5_VDWKERNEL_PATH", vdw_kernel_path)
      
      !ok if the kernel table is here read it
 -    inquire( file='vdw_kernel.bindat', exist=lkern) 
-+    inquire( file='/lustre/share/vasp/library/vdw_kernel.bindat', exist=lkern) 
++    inquire( file=vdw_kernel_path, exist=lkern)
++    IF (.NOT. lkern) THEN
++       inquire( file='vdw_kernel.bindat', exist=lkern)
++       if (lkern) THEN
++          vdw_kernel_path = 'vdw_kernel.bindat'
++       ENDIF
++    ENDIF
      IF (lkern) then
 -      open (unit=10, file='vdw_kernel.bindat', form='unformatted')
-+      open (unit=10, file='/lustre/share/vasp/library/vdw_kernel.bindat', form='unformatted')
++      open (unit=10, file=vdw_kernel_path, form='unformatted')
        read(10,IOSTAT=IOstatus) nmesh
        IF (nmesh .NE. nd) THEN
          IF (IU0>=0) WRITE(IU0,*)  'nmesh ', nmesh

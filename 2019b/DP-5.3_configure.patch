@@ -1,0 +1,11 @@
+--- configure.orig	2020-03-23 15:05:28.513358000 +0800
++++ configure	2020-03-23 15:07:00.208955000 +0800
+@@ -5133,7 +5133,7 @@
+ fi;
+ if (test x$scalapack = xtrue); then
+   SCALAPACK="-DSCALAPACK"
+-  SCALAPACKDIR="-L${SCALAPACKLIBDIR} -lscalapack -lblacs -lblacsC -lblacsF77 -lblacs" # here the order is very important
++  SCALAPACKDIR="${SCALAPACKLIBDIR}"
+ else
+   SCALAPACKDIR=""
+   SCALAPACK=""
