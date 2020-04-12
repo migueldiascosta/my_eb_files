@@ -21,7 +21,7 @@ patches = [
 checksums = [
     '5bd2449462386f01e575f9adf629c08cb03a13142806ffb6a71309ca4431cfb3',  # vasp.5.4.4.tar.gz
     '3392a0ffccfa17a77775be86b1bed74f8f75a0a642f77ee0fae59950d0a3d3f4',  # vasp.5.4.4.16052018.patch
-    '46a9f653092db36650aeadefee999cfe9a6df801c689bdcc653e89d28c891024',  # vasp.5.4.4.vdwpath.patch
+    '8aca4717e2d5925248364a14ed128452af3817e03afbaad2a0b53ee8be4d94bf',  # vasp.5.4.4.vdwpath.patch
 ]
 
 dependencies = [('Wannier90', '2.1.0')]

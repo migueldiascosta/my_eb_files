@@ -27,7 +27,7 @@ checksums = [
     'a2e3bbca0b78b907df95cbef6c53ac829a7e9204da6a36e0a2206e30d5d1dc0e',  # vtstcode.tgz
     '48b9b16938584623279a0a7a64176bc296c163f7330c1535ec1e722734a00c77',  # vtstscripts.tgz
     '3392a0ffccfa17a77775be86b1bed74f8f75a0a642f77ee0fae59950d0a3d3f4',  # vasp.5.4.4.16052018.patch
-    '46a9f653092db36650aeadefee999cfe9a6df801c689bdcc653e89d28c891024',  # vasp.5.4.4.vdwpath.patch
+    '8aca4717e2d5925248364a14ed128452af3817e03afbaad2a0b53ee8be4d94bf',  # vasp.5.4.4.vdwpath.patch
     'bd4fc434db32c36f226cbdbd9234c9f359f804ca0ffe2e4dcdd8c2522768cb88',  # vasp.5.4.4.tst.patch
 ]
 
