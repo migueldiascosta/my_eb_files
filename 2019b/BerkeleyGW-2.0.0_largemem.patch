@@ -1,0 +1,11 @@
+--- Common/misc.f90.orig	2018-12-05 09:15:31.475765000 +0800
++++ Common/misc.f90		2018-12-05 09:21:46.522380000 +0800
+@@ -352,7 +352,8 @@
+     integer, intent(in), optional :: nfreq_group
+ 
+     integer, parameter :: host_len=64
+-    integer :: ierr,eof,info,iunit,m,n,p,i,j,pagesize
++    integer :: ierr,eof,info,iunit,p,i,j,pagesize
++    integer*8 :: m,n
+     real(DP) :: x,y,mac_m,mac_n
+ !    integer :: ntot
