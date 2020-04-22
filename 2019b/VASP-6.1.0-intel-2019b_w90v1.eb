@@ -1,0 +1,54 @@
+easyblock = 'MakeCp'
+
+name = 'VASP'
+version = '6.1.0'
+versionsuffix = '_w90v1'
+
+homepage = 'http://www.vasp.at'
+description = """The Vienna Ab initio Simulation Package (VASP) is a computer program for atomic scale
+materials modelling, e.g. electronic structure calculations and quantum-mechanical molecular dynamics,
+from first principles."""
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+toolchainopts = {'usempi': True}
+
+# Vasp is proprietary software, see http://www.vasp.at/index.php/faqs on how to get access to the code
+sources = ['%(namelower)s.%(version)s.tgz']
+patches = [
+    'VASP-6.1.0_vdwpath.patch',
+]
+checksums = [
+    '1343895b61c9a8c9b56ddff7d44152012120dc7b1ff3b16cb2b7001ccf9a6ae2',  # vasp.6.1.0.tgz
+    'e0ae9fb1ce8a8925199933165446656b3d15f5c3d5cf5e9f32ab05575ac52aec',  # VASP-6.1.0_vdwpath.patch
+]
+
+dependencies = [('Wannier90', '1.2')]
+
+prebuildopts = 'cp arch/makefile.include.linux_intel ./makefile.include && '
+
+# add wannier90 support to CPP_OPTIONS (which has other options)
+prebuildopts += 'sed -i "s/CPP_OPTIONS=/CPP_OPTIONS=-DVASP2WANNIER90/" makefile.include && '
+prebuildopts += 'sed -i "s|\$(SCALAPACK)|\$(EBROOTWANNIER90)/lib/libwannier.a \$(SCALAPACK)|" makefile.include && '
+
+# Makefile uses LIBS as a list of folders
+prebuildopts += 'unset LIBS && '
+
+_targets = ['std', 'gam', 'ncl']
+
+buildopts = '%s ' % ' '.join(_targets)
+buildopts += 'FCL="$MPIF90" DEBUG="$FFLAGS" OFLAG="$FFLAGS" OFLAG_1="${FFLAGS/O2/O1}" OFLAG_2="$FFLAGS" '
+buildopts += 'OFLAG_3="${FFLAGS/O2/O3}" CFLAGS_LIB="$CFLAGS" FFLAGS_LIB="$FFLAGS" BLAS="$LIBBLAS" '
+buildopts += 'LAPACK="$LIBLAPACK" BLACS="$LIBBLACS" SCALAPACK="$LIBSCALAPACK"'
+
+runtest = 'test'
+
+parallel = 1
+
+files_to_copy = [(['bin/vasp_' + x for x in _targets], 'bin')]
+
+sanity_check_paths = {
+    'files': ['bin/vasp_' + x for x in _targets],
+    'dirs': []
+}
+
+moduleclass = 'phys'
