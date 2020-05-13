@@ -1,0 +1,1116 @@
+diff -ru vasp.5.4.4/src/davidson.F ../vasp.5.4.4/src/davidson.F
+--- vasp.5.4.4/src/davidson.F.orig	2017-04-20 17:03:56.000000000 +0800
++++ vasp.5.4.4/src/davidson.F	2019-07-23 13:39:53.994585061 +0800
+@@ -354,6 +354,7 @@
+ ! now calculate the HF part and update CELEN accordingly
+ !=======================================================================
+           IF (LHFCALC_DAV) THEN
++!write(6,*) "hi"
+              IF (IT(1)==1) THEN
+              ! first iteration
+              ! update eigenvalues and d.c.
+diff -ru vasp.5.4.4/src/electron_all.F ../vasp.5.4.4/src/electron_all.F
+--- vasp.5.4.4/src/electron_all.F.orig	2017-04-20 17:03:56.000000000 +0800
++++ vasp.5.4.4/src/electron_all.F	2019-08-07 19:12:16.740387962 +0800
+@@ -262,6 +262,8 @@
+           IRDMAX, LMDIM, DENCOR, CHTOT )
+ 
+       IF (.NOT. INFO%LPOTOK) THEN
++! Nic: potlok ok
++! write(6,*) "call potlok before damping"
+       CALL POTLOK(GRID,GRIDC,GRID_SOFT, WDES%COMM_INTER, WDES, &
+                   INFO,P,T_INFO,E,LATT_CUR, &
+                   CHTOT,CSTRF,CVTOT,DENCOR,SV, SOFT_TO_C,XCSIF)
+@@ -352,6 +354,8 @@
+       NSIM=((NSIM+WDES%COMM_INTER%NCPU-1)/WDES%COMM_INTER%NCPU)*WDES%COMM_INTER%NCPU
+ #endif
+       IF ( N <= ABS(INFO%NELMDL)) THEN
++! Nic: No
++!WRITE(6,*) "call EDDAV"
+          CALL EDDAV(HAMILTONIAN,P, GRID,INFO,LATT_CUR,NONLR_S,NONL_S,W,WDES, NSIM, &
+               LMDIM,CDIJ,CQIJ, RMS,DESUM1,ICOUEV, SV, E%EXHF, IO%IU6,IO%IU0, &
+               LDELAY=.FALSE.,  LSUBROTI=.TRUE. ,  LEMPTY=.FALSE. )
+@@ -372,7 +376,10 @@
+          CALL PEAD_EDOTP(W,P,CQIJ,LATT_CUR,T_INFO,E)
+ 
+          BTRIAL=INFO%TIME
++! Nic: yes
++!WRITE(6,*) "call EDWAV"
+ 
++!WRITE(6,*) "IROT", IROT, "ICEL", ICEL, "IFLAG", IFLAG
+          CALL EDWAV(HAMILTONIAN,KINEDEN, &
+              INFO,ICONJU,IROT,ICEL,IRET,IO,BTRIAL,EFERMI, &
+              ORT,RMS, E, TOTEN,TOTEN2,DESUM1, &
+@@ -451,6 +458,8 @@
+ 
+ !---  update of charge if necessary
+       IF (.NOT.INFO%LCHCON .AND. N > ABS(INFO%NELMDL)) THEN
++! Nic: No
++!WRITE(6,*) "POTLOK CORRECTOR"
+ 
+          CALL SET_CHARGE(W, WDES, INFO%LOVERL, &
+               GRID, GRIDC, GRID_SOFT, GRIDUS, C_TO_US, SOFT_TO_C, &
+@@ -483,6 +492,8 @@
+       IFLAG=0
+       W%CELTOT=0
+ 
++! Nic No
++!write(6,*) "call EDDIAG"
+       CALL EDDIAG(HAMILTONIAN,GRID,LATT_CUR,NONLR_S,NONL_S,W,WDES,SYMM, &
+            LMDIM,CDIJ,CQIJ, IFLAG,SV,T_INFO,P,IO%IU0,E2%EXHF)
+ 
+@@ -501,6 +512,8 @@
+ !      for testing set IFLAG to 10 than several trial steps are done
+       IFLAG=2
+       
++! Nic No
++!write(6,*) "call EDWAV corrector"
+ 
+       DWRITE0 'edwav call '
+       CALL EDWAV(HAMILTONIAN,KINEDEN, &
+diff -ru vasp.5.4.4/src/fast_aug.F ../vasp.5.4.4/src/fast_aug.F
+--- vasp.5.4.4/src/fast_aug.F.orig	2017-04-20 17:03:56.000000000 +0800
++++ vasp.5.4.4/src/fast_aug.F	2019-08-01 15:42:23.493060383 +0800
+@@ -1614,6 +1614,8 @@
+        ! determine global type index for this ion type
+        NTP=T_INFO%ITYP(NI_GLOBAL(NIS, WDES%COMM_INB))
+        PP=>P(NTP)
++! Nic: no
++!write(6,*) "hi"
+        CALL SETUP_PAWFOCK(NTP, PP)
+ 
+        CALL SETUP_PAWFOCK_MATRIX( H%ENTRIES_FOR_TYPE(NT), H%CHANNEL1(:,NT), H%CHANNEL2(:,NT), H%L(:,NT), H%LM(:,NT), & 
+diff -ru vasp.5.4.4/src/fock.F ../vasp.5.4.4/src/fock.F
+--- vasp.5.4.4/src/fock.F.orig	2017-04-20 17:03:57.000000000 +0800
++++ vasp.5.4.4/src/fock.F	2019-08-06 15:15:32.846091833 +0800
+@@ -61,6 +61,10 @@
+   ! throughout all routines
+   REAL(q),SAVE :: AEXX=0
+ 
++!! Nic
++  ! Extra variable for range separated hybrid
++  REAL(q),SAVE :: CEXX=0
++
+   ! use Hartree Fock only in one center AE terms
+   LOGICAL,SAVE :: LHFONE=.FALSE.
+ 
+@@ -288,6 +292,8 @@
+       OPEN(UNIT=IU5,FILE=INCAR,STATUS='OLD')
+ 
+       AEXX=0.0
++      ! Nic
++      CEXX=0.0
+       AGGAX=1.0
+       AGGAC=1.0
+       LDAX =1.0
+@@ -912,10 +918,27 @@
+                  WRITE(IU0,*)'Error reading item ''AEXX'' from file INCAR.'
+          ENDIF
+          CALL XML_INCAR('AEXX','F',IDUM,AEXX,CDUM,LDUM,CHARAC,N)
++!! Nic
++! read in CEXX 
++!
++         CALL RDATAB(LOPEN,INCAR,IU5,'CEXX','=','#',';','F', &
++              &            IDUM,CEXX,CDUM,LDUM,CHARAC,N,1,IERR)
+ 
++         IF (((IERR/=0).AND.(IERR/=3)).OR. &
++              &                    ((IERR==0).AND.(N<1))) THEN
++            IF (IU0>=0) &
++                 WRITE(IU0,*)'Error reading item ''CEXX'' from file INCAR.'
++         ENDIF
++         CALL XML_INCAR('CEXX','F',IDUM,CEXX,CDUM,LDUM,CHARAC,N)
++! Passed test WRITE(6,*) CEXX
++!! Nic
++         BGGAX=1-AEXX-CEXX
++         BLDAX=1-AEXX-CEXX
+          AGGAX=1-AEXX
+          LDAX =1-AEXX
+ 
++         ! if CEXX = 0
++
+          ! for HF type calculations and full exchange, no correlation is usually included
+          IF (AEXX==1.0) THEN
+             ALDAC=0.0
+@@ -1748,7 +1771,11 @@
+    ! local
+       INTEGER    NI,NC,N1,N2,N3
+       REAL(q) :: DKX,DKY,DKZ,GX,GY,GZ,GSQU,GSQUP,GQUAD,SCALE, RHOEFF, FOMEGAP2
+-
++!! Nic 
++!      REAL(q), ALLOCATABLE :: TEMP(:), TEST(:)
++!      ALLOCATE( TEMP(GRID%MPLWV) )
++!      ALLOCATE( TEST(GRID%MPLWV) )
++!      TEMP(:) = 0
+       CALL CHECK_FULL_KPOINTS
+ 
+       ! effective electron density in a.u.^-3
+@@ -1782,6 +1809,8 @@
+             GSQU=(DKX+GX)**2+(DKY+GY)**2+(DKZ+GZ)**2
+             IF (GSQU<KPOINTS_FULL%VKPTMINDIST2/40) THEN
+                POTFAK(NI)=FSG
++!               TEMP(NI)=0
++!               TEST(NI)=FSG
+             ELSE
+                IF (MODEL_GW>0) THEN
+                   GSQUP=GSQU*(TPI*TPI)
+@@ -1797,6 +1826,7 @@
+                ELSE IF (HFSCREEN==0) THEN
+                   ! Coloumb kernel
+                   POTFAK(NI)=SCALE/(GSQU)
++!                  TEMP(NI)  = 0.0
+                ELSE IF (L_THOMAS_FERMI) THEN
+                   ! screened Thomas Fermi kernel
+                   POTFAK(NI)=SCALE/(GSQU+HFSCREEN*HFSCREEN/(TPI*TPI))
+@@ -1807,23 +1837,31 @@
+                   ! AEXX * case(HFSCREEN==0) + (1-AEXX)* default
+                   POTFAK(NI)=SCALE/GSQU*(1-(1-AEXX)*EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))
+                ELSE
+-                  POTFAK(NI)=SCALE/GSQU*(1-EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))
++! Nic
++!                  POTFAK(NI)=SCALE/GSQU*(1-EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))
++                  POTFAK(NI)=SCALE/GSQU*(AEXX+CEXX*EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))
++!                  TEMP  (NI)=SCALE/GSQU*(  EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN)))) !! FT of erf(HFSCREEN*r)
++!                  TEST  (NI)=SCALE/GSQU*(AEXX+ CEXX*EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN)))) !! FT of erf(HFSCREEN*r)
++! Passed test            WRITE(6,*) POTFAK(NI)+TEMP(NI), SCALE/GSQU
+                ENDIF
+             ENDIF
+             IF (PRESENT(ENCUT)) THEN
+                IF (HSQDTM*TPI*TPI*GSQU>ENCUT) THEN
+                   POTFAK(NI)=0
++         !         TEMP(NI)=0
+                ENDIF
+             ENDIF
+             IF (ENCUTFOCK>0) THEN
+                IF (HSQDTM*TPI*TPI*GSQU>ENCUTFOCK) THEN
+                   POTFAK(NI)=0
++         !         TEMP(NI)=0
+                ENDIF
+             ENDIF
+          ENDDO row
+       ENDDO col
+ 
+       CALL SETUNB_REAL(POTFAK,GRID)
++!     CALL SETUNB_REAL(TEMP,GRID)
+ 
+       IF (L_MODEL_HF) THEN
+          DO NC=1,GRID%RC%NP
+@@ -1832,9 +1870,19 @@
+       ELSE
+ 
+          DO NC=1,GRID%RC%NP
+-            POTFAK(NC)=POTFAK(NC)*(AEXX/GRID%NPLWV)
++!            POTFAK(NC)=POTFAK(NC)*(AEXX/GRID%NPLWV)
++            POTFAK(NC)=POTFAK(NC)/(GRID%NPLWV)
++!            TEMP  (NC)=TEMP  (NC)*((AEXX+CEXX)/GRID%NPLWV)
++            !TEMP  (NC)=TEMP  (NC)*((AEXX)/GRID%NPLWV)
++!            POTFAK(NC)=POTFAK(NC)+TEMP(NC)
++!            TEST(NC)=TEST(NC)/(GRID%NPLWV)
++!         IF (POTFAK(NC) - TEST(NC) > 1.0E-6_q) THEN
++!           write(6,*) "something wrong" 
++!         ENDIF
+          ENDDO
+       ENDIF
++
++!      DEALLOCATE (TEMP,TEST)
+     END SUBROUTINE SET_GFAC_VKPT
+ 
+ !
+@@ -1926,6 +1974,10 @@
+       INTEGER    NI,NP
+       REAL(q) :: DKX,DKY,DKZ,GX,GY,GZ,GSQU,GSQUP,GQUAD,SCALE, SCALEFSG, RHOEFF, FOMEGAP2
+       REAL(q) :: E
++!! Nic 
++!      REAL(q), ALLOCATABLE :: TEMP(:)
++!      ALLOCATE( TEMP(WDES1%NGVECTOR) )
++!      TEMP(:) = 0
+ 
+       ! effective electron density in a.u.^-3
+       RHOEFF=(HFSCREEN*HFSCREEN*AUTOA*AUTOA/(4._q*EXP(LOG(3._q/PI)/3._q)))**3
+@@ -1967,6 +2019,7 @@
+          GSQU=(DKX+GX)**2+(DKY+GY)**2+(DKZ+GZ)**2
+          IF (GSQU<KPOINTS_FULL%VKPTMINDIST2/40) THEN
+             POTFAK(NI)=FSG*SCALEFSG
++!            TEMP(NI)=0
+          ELSE
+             IF (MODEL_GW>0) THEN
+                GSQUP=GSQU*(TPI*TPI)
+@@ -1985,7 +2038,11 @@
+                ! AEXX * case(HFSCREEN==0) + (1-AEXX)* default
+                POTFAK(NI)=SCALE/GSQU*(1-(1-AEXX)*EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))
+             ELSE
+-               POTFAK(NI)=SCALE/GSQU*(1-EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))
++! Nic: The POTFAK here is the Coulomb kernel... we want the f_xc instead.
++! Need to write out the expression from scratch or call from xclib.F I think.
++!               POTFAK(NI)=SCALE/GSQU*(1-EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))
++               POTFAK(NI)=SCALE/GSQU*(AEXX+CEXX*EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))
++!               TEMP  (NI)=SCALE/GSQU*(  EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN)))) !! FT of erf(HFSCREEN*r)
+             ENDIF
+          ENDIF
+ 
+@@ -1994,6 +2051,7 @@
+          IF (PRESENT(ENCUT).AND. PRESENT(ENCUTSOFT)) THEN 
+             IF (E>ENCUTSOFT) THEN
+                POTFAK(NI)=POTFAK(NI)*(1+COS((E-ENCUTSOFT)/(ENCUT-ENCUTSOFT)*PI))/2
++!               TEMP  (NI)=TEMP  (NI)*(1+COS((E-ENCUTSOFT)/(ENCUT-ENCUTSOFT)*PI))/2
+             ENDIF
+          ENDIF
+       ENDDO
+@@ -2004,10 +2062,14 @@
+          ENDDO
+       ELSE
+          DO NI=1,NP
+-            POTFAK(NI)=POTFAK(NI)*(AEXX/WDES1%GRID%NPLWV)
++!            POTFAK(NI)=POTFAK(NI)*(AEXX/WDES1%GRID%NPLWV)
++            POTFAK(NI)=POTFAK(NI)/(WDES1%GRID%NPLWV)
++!            TEMP  (NI)=TEMP  (NI)*((AEXX+CEXX)/WDES1%GRID%NPLWV)
++!            POTFAK(NI)=POTFAK(NI)+TEMP(NI)
+          ENDDO
+       ENDIF
+ 
++!      DEALLOCATE (TEMP)
+     END SUBROUTINE SET_GFAC_WAVEFUN
+ 
+ 
+@@ -2245,7 +2307,9 @@
+                      ELSE
+                         ! screened Coulomb kernel (short range)
+                         FSG=FSG+FACTM*SCALE/GSQU*EXP(-GSQU*(HFALPHA*TPI*TPI)) &
+-                           *(1-EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))
++!                           *(1-EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))
++! Nic
++                           *(AEXX+CEXX*EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))
+                      ENDIF
+                   ENDIF
+                ENDDO row
+@@ -2285,8 +2349,11 @@
+             ! we need the selfenergy of an erfc(r) charge distribution in
+             ! a screened short range Coloumb potential 
+             !
+-            FSG=-FSG+EDEPS/(TPI**3)*2._q*HFALPHA *(PI/HFALPHA )**(3._q/2._q)- &
+-                 EDEPS/(TPI**3)*2._q*HFALPHAP*(PI/HFALPHAP)**(3._q/2._q)
++!            FSG=-FSG+EDEPS/(TPI**3)*2._q*HFALPHA *(PI/HFALPHA )**(3._q/2._q)- &
++!                 EDEPS/(TPI**3)*2._q*HFALPHAP*(PI/HFALPHAP)**(3._q/2._q)
++! Nic
++            FSG=-FSG+AEXX*EDEPS/(TPI**3)*2._q*HFALPHA *(PI/HFALPHA )**(3._q/2._q)+ &
++                 CEXX*EDEPS/(TPI**3)*2._q*HFALPHAP*(PI/HFALPHAP)**(3._q/2._q)
+          ENDIF
+       ENDIF
+       SET_FSG=FSG
+@@ -2322,6 +2389,7 @@
+       INTEGER    NI,NC,N1,N2,N3,I
+       REAL(q) :: DKX,DKY,DKZ,GX,GY,GZ,GSQU,GSQU2,SCALE,EXP_GSQU_DER,FACTM
+ 
++!write(6,*) "SET_GFAC_DER"
+       CALL CHECK_FULL_KPOINTS
+ 
+       SCALE=KPOINTS_FULL%WTKPT(NQ)*NKREDX*NKREDY*NKREDZ *EDEPS/LATT_CUR%OMEGA/TPI**2
+@@ -2386,6 +2454,8 @@
+                   ! AEXX * case(HFSCREEN==0) + (1-AEXX)* default
+                   POTFAK(NI,0)=SCALE/GSQU*(1-(1-AEXX)*EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))
+                ELSE
++! Nic: np
++write(6,*) "hi"
+                   POTFAK(NI,0)=(SCALE/GSQU )*(1-EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))
+                   ! negative derivative of previous equation
+                   EXP_GSQU_DER=(SCALE/GSQU2)*(1-EXP(-GSQU*(TPI*TPI/(4*HFSCREEN*HFSCREEN))))- &
+@@ -2461,6 +2531,8 @@
+       REAL(q) :: DIS=fd_displacement
+ 
+       CALL CHECK_FULL_KPOINTS
++! Nic
++write(6,*) "SET_FSG_DER"
+ !
+ ! this version is for molecules
+ ! stress calculations (which require the derivative of FSG with respect to the volume)
+@@ -3675,6 +3747,8 @@
+     REAL(q) :: EXHF
+     INTEGER IBLK,NBLK,NBSTART,NBSTOP
+ 
++! Nic
++!write(6,*) "FOCK_ACC"
+ 
+     PROFILING_START('fock_acc')
+ 
+@@ -3726,7 +3800,9 @@
+        IF (L_MODEL_HF) THEN
+           FSG_AEXX=FSG
+        ELSE
+-          FSG_AEXX=FSG*AEXX
++!          FSG_AEXX=FSG*AEXX
++! Nic test
++          FSG_AEXX=FSG
+        ENDIF
+ ! there are two in principle equivalent ways to perform
+ ! the convergence correction
+@@ -4806,6 +4882,8 @@
+     SUBROUTINE APPLY_ONE_CENTER_AEXX
+       USE setexm
+       USE fock
++! Nic: for my purposes no need this
++!WRITE(6,*) "LHFONE", LHFONE
+       IF (LHFONE) CALL PUSH_XC_TYPE(LEXCH, 1-AEXX, ALDAC, 1-AEXX, AGGAC, 0.0_q)
+ 
+     END SUBROUTINE APPLY_ONE_CENTER_AEXX
+@@ -4940,6 +5018,7 @@
+         ENDDO
+      ELSE
+         DO NP=1,GRID%RC%NP
++!write(6,*) POTFAK(NP)
+            EXCHANGE=EXCHANGE+POTFAK(NP)*CWORK(NP)*CONJG(CWORK(NP))
+            CWORK(NP)=POTFAK(NP)*CWORK(NP)
+         ENDDO
+@@ -5136,6 +5215,7 @@
+       IMPLICIT NONE
+       REAL(q) BEXX
+ 
++! Nic not used WRITE(6,*) "hfparam"
+       BEXX=AEXX
+ 
+       IF (L_MODEL_HF) THEN
+@@ -5160,6 +5240,7 @@
+       REAL(q) :: BRSEXX  ! amount of range seperated exchange
+       REAL(q) :: BEXX    ! amount of exact exchange
+ 
++! Nic yes  WRITE(6,*) "rsparam"
+       RMU=HFSCREEN
+       LRHF=LRHFCALC
+ 
+@@ -5176,6 +5257,42 @@
+ 
+     END SUBROUTINE RSPARAMETERS
+ 
++!********************** SUBROUTINE OTRSHPARAMETERS ************************
++!
++!  this subroutine returns the parameters for range-separated
++!  functionals it is called by RAD_POT_EX_HAR in pawfock.F
++!
++!***********************************************************************
++
++    SUBROUTINE OTRSHPARAMETERS(RMU, LRHF, BRSEXX, CRSEXX, BEXX)
++      USE prec
++      USE fock
++      IMPLICIT NONE
++      REAL(q) RMU
++      LOGICAL LRHF
++      REAL(q) :: BRSEXX  ! amount of short range seperated exchange
++      REAL(q) :: CRSEXX  ! amount of long  range seperated exchange
++      REAL(q) :: BEXX    ! amount of exact exchange
++
++      RMU=HFSCREEN
++      LRHF=LRHFCALC
++
++      IF (L_MODEL_HF) THEN
++         BRSEXX=(1-AEXX)
++         BEXX=AEXX
++      ELSEIF ((HFSCREEN/=0.AND.(.NOT.L_THOMAS_FERMI))) THEN
++         BRSEXX=AEXX
++         CRSEXX=CEXX
++         BEXX=0.0
++      ELSE
++         BRSEXX=0.0
++         BEXX=AEXX
++      ENDIF
++! Nic
++!WRITE(6,*) RMU, BRSEXX, CRSEXX
++
++    END SUBROUTINE OTRSHPARAMETERS
++
+ !********************** SUBROUTINE OVERL_FOCK *************************
+ !
+ ! calcs D_lml'm'<p_l'm'|psi_m> and adds it to CRESUL (being kappa_n) 
+diff -ru vasp.5.4.4/src/local_field.F ../vasp.5.4.4/src/local_field.F
+--- vasp.5.4.4/src/local_field.F.orig	2017-04-20 17:03:58.000000000 +0800
++++ vasp.5.4.4/src/local_field.F	2019-06-07 16:28:26.170580821 +0800
+@@ -2827,12 +2827,14 @@
+          GCHG34(NP, NSTRIP * NSTRIP), &
+          CHAM(NSTRIP1, NSTRIP2, NSTRIP, NSTRIP))
+ 
++! Nic: Is POTFAK f_xc here?
+     IF (PRESENT(ENCUTGWSOFT)) THEN
+        CALL SET_GFAC_WAVEFUN(WGWQ, LATT_CUR, FSG, POTFAK, ENCUTGW, ENCUTGWSOFT)
+     ELSE
+        CALL SET_GFAC_WAVEFUN(WGWQ, LATT_CUR, FSG, POTFAK )
+     ENDIF
+ 
++! Nic: IF reading W from GW output, will overwrite POTFAK
+     LFULL=.FALSE.
+     IF (ASSOCIATED(WPOTH)) CALL GET_WPOT( WPOTH, NQ, POTFAK, LFULL)
+ 
+@@ -4134,17 +4136,20 @@
+     REAL(q) :: POTFAK(GRIDHF%MPLWV)       ! 1/(G+dk)**2 (G)
+     REAL(q) :: HFSCREEN_SAVE, AEXX_SAVE, HFRCUT_SAVE
+     LOGICAL :: L_MODEL_HF_SAVE
+-
++! Nic
++    REAL(q) :: CEXX_SAVE
+     IF (FMUL==0) RETURN
+ ! use full Coulomb kernel
+     HFRCUT_SAVE  =HFRCUT
+     HFSCREEN_SAVE=HFSCREEN
+     AEXX_SAVE=AEXX
++    CEXX_SAVE=CEXX
+     L_MODEL_HF_SAVE=L_MODEL_HF
+ 
+     MODEL_GW=0   ! switch off all model dielectric functions
+     HFSCREEN=0   ! switch of screening
+     AEXX=1       ! full exchange 
++    CEXX=-1      ! full exchange
+     L_MODEL_HF=.FALSE.
+ 
+     ! set the descriptor for charge at the point k1-k3 = q
+@@ -4333,6 +4338,7 @@
+ 
+ !  restore semilocal exchange correlation
+     AEXX=AEXX_SAVE
++    CEXX=CEXX_SAVE
+     HFSCREEN=HFSCREEN_SAVE
+     HFRCUT=HFRCUT_SAVE
+     L_MODEL_HF=L_MODEL_HF_SAVE
+diff -ru vasp.5.4.4/src/main.F ../vasp.5.4.4/src/main.F
+--- vasp.5.4.4/src/main.F.orig	2017-04-20 17:03:58.000000000 +0800
++++ vasp.5.4.4/src/main.F	2019-07-25 17:24:01.827725074 +0800
+@@ -2153,6 +2153,7 @@
+       IF (LRHFATM()) THEN
+          CALL SET_PAW_ATOM_POT_RHF(P,T_INFO,INFO%LOVERL,INFO%EALLAT,IO)
+       ELSE
++!write(6,*) "checkpoint1"
+         CALL RHFATM_CROP_PSEUDO(P,T_INFO,INFO%LOVERL,IO)
+         CALL SET_PAW_ATOM_POT(P , T_INFO, INFO%LOVERL,  &
+              LMDIM, INFO%EALLAT, INFO%LMETAGGA, IO%IU6  )
+@@ -2161,6 +2162,8 @@
+       CALL SETUP_SUBROT_SCF(INFO,WDES,LATT_CUR,GRID,GRIDC,GRID_SOFT,SOFT_TO_C,IO%IU0,IO%IU5,IO%IU6)
+ ! setup pead
+       CALL PEAD_SETUP(WDES,GRID,GRIDC,GRIDUS,C_TO_US,KPOINTS,LATT_CUR,LATT_INI,T_INFO,P,LMDIM,INFO%LOVERL,IRDMAX,IO)
++! Nic:
++!write(6,*) "checkpoint2"
+ !=======================================================================
+ ! allocate wavefunctions
+ !=======================================================================
+@@ -2790,6 +2793,8 @@
+       CALL XML_TAG("calculation")
+ 
+       CALL ELECTRONIC_OPTIMIZATION
++! Nic
++WRITE(6,*) "ELECTRONS DONE"
+ 
+       ! possibly orbitals have been updated
+       ! force them to be real again be calling WVREAL_PRECISE
+@@ -4109,6 +4114,8 @@
+       INFO%LPOTOK=.TRUE.
+ 
+       IFLAG=3
++! Nic: no
++!write(6,*) "EDDIAG" 
+       CALL EDDIAG(HAMILTONIAN,GRID,LATT_CUR,NONLR_S,NONL_S,W,WDES,SYMM, &
+           LMDIM,CDIJ,CQIJ, IFLAG,SV,T_INFO,P,IO%IU0,E%EXHF)
+ 
+@@ -4263,16 +4270,18 @@
+          io_end
+ ! comment out the following line to add  exchange correlation
+          IF (IO%LVHAR) CALL SET_LEXCH(-1)
+-         CALL POTLOK(GRID,GRIDC,GRID_SOFT, WDES%COMM_INTER, WDES, &
+-                  INFO,P,T_INFO,E,LATT_CUR, &
+-                  CHTOT,CSTRF,CVTOT,DENCOR,SV, SOFT_TO_C,XCSIF)
+-
+-         IF (.NOT. IO%LVHAR) THEN
+-           CALL POTLOK_METAGGA(KINEDEN, &
+-                 GRID,GRIDC,GRID_SOFT,WDES%COMM_INTER,WDES,INFO,P,T_INFO,E,LATT_CUR, &
+-                 CHDEN,CHTOT,DENCOR,CVTOT,SV,HAMILTONIAN%MUTOT,HAMILTONIAN%MU,SOFT_TO_C,XCSIF)
+-         ENDIF
+-
++!         CALL POTLOK(GRID,GRIDC,GRID_SOFT, WDES%COMM_INTER, WDES, &
++!                  INFO,P,T_INFO,E,LATT_CUR, &
++!                  CHTOT,CSTRF,CVTOT,DENCOR,SV, SOFT_TO_C,XCSIF)
++
++!         IF (.NOT. IO%LVHAR) THEN
++!           CALL POTLOK_METAGGA(KINEDEN, &
++!                 GRID,GRIDC,GRID_SOFT,WDES%COMM_INTER,WDES,INFO,P,T_INFO,E,LATT_CUR, &
++!                 CHDEN,CHTOT,DENCOR,CVTOT,SV,HAMILTONIAN%MUTOT,HAMILTONIAN%MU,SOFT_TO_C,XCSIF)
++!         ENDIF
++! Nic
++! write only xc potential
++         CALL POTXC(GRIDC,INFO,WDES,LATT_CUR,CVTOT,CHTOT,DENCOR)
+          ! call the dipol routine without changing the potential
+          IF ( DIP%IDIPCO >0 ) THEN
+            DIP%LCOR_DIP=.FALSE.
+@@ -4370,6 +4379,8 @@
+       T_INFO,DYN,INFO,IO,KPOINTS,SYMM,GRID,LMDIM )
+ 
+       IF (FOURORBIT/=0) THEN
++! Nic; check, not needed
++!write(6,*) "fourorbit?"
+          ! Set all DFT exchange contributions to zero
+          CALL PUSH_XC_TYPE(LEXCH,1._q,1._q,0._q,1._q,LDASCREEN)
+          ! Initialize xc tables
+diff -ru vasp.5.4.4/src/paw.F ../vasp.5.4.4/src/paw.F
+--- vasp.5.4.4/src/paw.F.orig	2017-04-20 17:03:59.000000000 +0800
++++ vasp.5.4.4/src/paw.F	2019-08-06 11:47:05.817241463 +0800
+@@ -814,7 +814,11 @@
+          PP%DEXCCORE =PP%DEXCCORE+DEXC
+ 
+          ! switch to original potential type
++! Need to change this...?
++! What happen if change?
++! No need to change
+          IF(.NOT. VERSION46) CALL PUSH_XC_TYPE(PP%LEXCH,1.0_q,1.0_q,1.0_q,1.0_q, 0.0_q)
++
+          CALL RAD_CORE_XC( PP%R, PP%RHOAE, DEXC_OLD)
+          IF(.NOT. VERSION46) CALL POP_XC_TYPE
+ 
+@@ -850,6 +854,7 @@
+ 
+          IF (LUSE_THOMAS_FERMI) &
+               CALL PUSH_XC_TYPE(LEXCH, LDAX, ALDAC, AGGAX, AGGAC, 0.0_q)
++! Nic: ok if we do not modify PUSH_XC for this purpose
+          CALL APPLY_ONE_CENTER_AEXX()
+      ! recalculate  V_H(rho_val) + V_xc(rho_val+rho_core) using the present
+      ! one-centre xc potential
+@@ -914,6 +919,7 @@
+ ! and adding this to CHF the core DFT exchange correlation contribution is added to PP%DION
+ !   CHF += \int Q_ij(r) V_xc(rho_core)
+ ! can be used for HF/hybrid or GW calculations
++!Nic: no
+          CALL PUSH_XC_TYPE(PP%LEXCH,1.0_q,1.0_q,1.0_q,1.0_q, 0.0_q)
+          CALL RAD_POT( PP%R, ISPIN, 1, 1, .FALSE.,  &
+                  RHO*0.0_q, PP%RHOAE, PP%POTAE_XCUPDATED,  POT, DOUBLEAE_OLD, EXCG_OLD)
+@@ -948,6 +954,8 @@
+ #endif
+ 
+          IF (USEFOCK_ONECENTER()) THEN
++! Nic: yes
++!WRITE(6,*) "hi"
+             ! exact exchange energy for one-center AE wave functions
+             CALL SETUP_PAWFOCK_AE(NT, PP)
+             CALL CALC_PAWFOCK(NT, PP, CRHODE, CHF, EX_HF)
+@@ -988,6 +996,8 @@
+                ! HFSCREEN=0.0
+                !end core-valence HF
+ 
++! Nic
++!write(6,*) "core_fock"
+                CALL SET_PAW_CORE_FOCK(PP, CRHODE(:,:,1), EX_HF)
+ 
+                !core-valence HF
+@@ -1466,7 +1476,8 @@
+       INTEGER IDONE
+       LOGICAL LSKIP
+ 
+-
++! Nic
++!write(6,*) "set_dd_paw"
+       PROFILING_START('set_dd_paw')
+ 
+ !=======================================================================
+@@ -1519,6 +1530,8 @@
+          RETURN
+       ENDIF
+ 
++! Nic: no
++!WRITE(6,*) "LUSE_THOMAS_FERMI", LUSE_THOMAS_FERMI 
+       IF (LUSE_THOMAS_FERMI) CALL PUSH_XC_TYPE(LEXCH, LDAX, ALDAC, AGGAX, AGGAC, 0.0_q)
+ 
+       ALLOCATE(DDLM(LMDIM*LMDIM),RHOLM(LMDIM*LMDIM))
+@@ -1528,6 +1541,8 @@
+ 
+       LMMAX=(LYMAX+1)**2
+       NCDIJ = WDES%NCDIJ
++! Nic
++!write(6,*) "NCDIJ", NCDIJ
+ 
+       ALLOCATE ( POT( NDIM, LMMAX, NCDIJ ), RHO( NDIM, LMMAX, NCDIJ ), &
+      &   POTAE( NDIM, LMMAX, NCDIJ ), RHOAE( NDIM, LMMAX, NCDIJ), DRHOCORE(NDIM))
+@@ -1718,6 +1733,8 @@
+             CALL RAD_AUG_CHARGE(  RHO(:,:,ISP), PP%R, RHOLM_(:,ISP), PP%LMAX, PP%LPS,  &
+                   LYMAX, PP%AUG, PP%QPAW )
+             IF (ONE_CENTER_NMAX_FOCKAE()>0) THEN
++! Nic: no
++!write(6,*) "check"
+                CALL RAD_AUG_CHARGE_FOCK(  RHO(:,:,ISP), PP%R, RHOLM_(:,ISP), PP%LMAX, PP%LPS, &
+                     LYMAX, PP%AUG_FOCK, PP%QPAW_FOCK)
+             ENDIF
+@@ -1792,6 +1809,8 @@
+             IF (L_NO_LSDA()) RHOCOL(:,:,2:WDES%NCDIJ)=0
+ 
+             CALL APPLY_ONE_CENTER_AEXX()
++!WRITE(6,*) "APPLY ONE CENTER AEXX"
++!WRITE(6,*) "AEXX"
+             CALL RAD_POT( PP%R, 2, LYMAX, PP%LMAX_CALC, LASPH,  &
+                  RHOCOL, PP%RHOAE, PP%POTAE_XCUPDATED,  POTAE, DOUBLEAE,EXCG)
+ 
+@@ -1846,8 +1865,12 @@
+  
+             CALL SET_CL_DRHOCORE_AE(DRHOCORE, NT, PP%RHOAE, PP%POTAE , PP%R, PP%ZCORE, PP%ZVALF_ORIG )
+ 
++!!!! Nic: is GGAALL called when we are here? !!!!
++! Nic: not needed
+             CALL APPLY_ONE_CENTER_AEXX()
+ 
++! Nic: ok
++!write(6,*) "call RAD_POT from SET_DD_PAW"
+             CALL RAD_POT( PP%R, ISPIN, LYMAX, PP%LMAX_CALC, LASPH,   &
+                RHOCOL, PP%RHOAE-DRHOCORE(1:RNMAX), PP%POTAE_XCUPDATED,  POTAE, DOUBLEAE,EXCG)
+ 
+@@ -2005,6 +2028,8 @@
+                CALL CALC_PAWFOCK(NT, PP, COCC, CHF, DOUBLEC_HF)
+                DOUBLEC_AE = DOUBLEC_AE + DOUBLEC_HF*T_INFO%VCA(NT)
+             ELSE IF (USEFOCK_CONTRIBUTION()) THEN
++! Nic: yes
++!WRITE(6,*) "CALC_PAWFOCK"
+                CALL CALC_PAWFOCK(NT, PP, COCC, CHF, DOUBLEC_HF)
+                DOUBLEC_AE = DOUBLEC_AE + DOUBLEC_HF*T_INFO%VCA(NT)
+             ENDIF
+diff -ru vasp.5.4.4/src/pawfock.F ../vasp.5.4.4/src/pawfock.F
+--- vasp.5.4.4/src/pawfock.F.orig	2017-04-20 17:03:59.000000000 +0800
++++ vasp.5.4.4/src/pawfock.F	2019-08-06 11:46:23.483738488 +0800
+@@ -42,6 +42,8 @@
+     INTEGER I,NMAX
+     LOGICAL LFOUND
+ 
++! Nic: gs was not updated! no wonder
++!write(6,*) "RS_GreensFunc_type", RS_GreensFunc_type
+     IF (RS_GreensFunc_type<1) THEN
+        ! compute on-the-fly
+        CALL RS_COULOMB_GREEN_FUNC(R,RMU,LL,GRS,LRHF)
+@@ -118,6 +120,8 @@
+     INTEGER LMAX,I
+     LOGICAL LRHF
+ 
++! Nic: no
++!write(6,*) "hellO!"
+     IF (RS_GreensFunc_type<=0) RETURN
+ 
+     CALL RSPARAMETERS(RMU,LRHF,BRSEXX,BEXX)
+@@ -622,7 +626,7 @@
+       USE constant
+       USE radial
+       USE pseudo 
+-      USE RS_GreensFunc_kernel, ONLY : SET_RSGF
++      USE RS_GreensFunc_kernel !, ONLY : SET_RSGF
+       IMPLICIT NONE
+  
+       REAL(q) :: RHO(:)
+@@ -636,19 +640,25 @@
+       ! variables for range-separated HF hybrids
+       REAL(q) :: RMU     ! range seperation parameter
+       REAL(q) :: BRSEXX  ! amount of range seperated exchange
++! Nic
++      REAL(q) :: CRSEXX  ! amount of long range seperated exchange
++      REAL(q) :: POT2(SIZE(POT))
+       REAL(q) :: BEXX    ! amount of exact exchange
+       REAL(q), ALLOCATABLE :: GRS(:,:)
+       LOGICAL LRHF
+ #ifdef debug
+-      REAL(q) :: POT2(SIZE(POT))
+ #endif
+-      CALL RSPARAMETERS(RMU, LRHF, BRSEXX, BEXX )
++! Nic: OT-RSH: BEXX = 0, BRSEXX /= 0
++!      CALL RSPARAMETERS(RMU, LRHF, BRSEXX, BEXX )
++! Nic: OT-RSH...
++      CALL OTRSHPARAMETERS(RMU, LRHF, BRSEXX, CRSEXX, BEXX )
++! WRITE(6,*) BEXX, BRSEXX
+ 
+       IF (BRSEXX/=0) THEN
+          ALLOCATE(GRS(R%NMAX,R%NMAX))
+          ! get range-separated coulomb interaction green function
+-         CALL SET_RSGF(R,RMU,LL,LRHF,GRS)
+-!        CALL RS_COULOMB_GREEN_FUNC(R,RMU,LL,GRS,LRHF)
++!         CALL SET_RSGF(R,RMU,LL,LRHF,GRS)
++        CALL RS_COULOMB_GREEN_FUNC(R,RMU,LL,GRS,.FALSE.)
+          ! calculate the radial potential
+          DO I=1,R%NMAX
+             ! first segment \int_0^r G(r,r') rho(r') dr'
+@@ -675,6 +685,42 @@
+             POT(I)=V2(I)+V1(I)
+          ENDDO
+          POT(:)=POT(:)*FELECT*4*PI/(2*LL+1)*BRSEXX
++
++! Nic PAW LR test
++! Later test whether can just add the two together
++! No change to eigenvalues???
++! Safety
++GRS=0;POT2=0;T1=0;T2=0;V1=0;V2=0
++         ! get range-separated coulomb interaction green function
++!         CALL SET_RSGF(R,RMU,LL,.TRUE.,GRS)
++        CALL RS_COULOMB_GREEN_FUNC(R,RMU,LL,GRS,.TRUE.)
++         ! calculate the radial potential
++         DO I=1,R%NMAX
++            ! first segment \int_0^r G(r,r') rho(r') dr'
++            DO J=1,MIN(I+1,R%NMAX)
++               T1(J)=RHO(J)*GRS(I,J)*R%R(J)
++            ENDDO
++            V1(1)=0
++            DO L=3,MIN(I+1,R%NMAX),2
++               V1(L)  =V1(L-2)+R%H/3.0_q*(T1(L-2)+4.0_q*T1(L-1)+T1(L))
++               V1(L-1)=V1(L-2)+R%H/3.0_q*(1.25_q*T1(L-2)+2.0_q*T1(L-1)-0.25_q*T1(L))               
++            ENDDO
++            ! second segment \int_r^Rmax G(r',r) rho(r') dr'
++            DO J=R%NMAX,MAX(I-1,1),-1
++               T2(J)=RHO(J)*GRS(J,I)*R%R(J)
++            ENDDO
++            V2(R%NMAX)=0
++            DO L=R%NMAX-2,MAX(I-1,1),-2
++               V2(L)  =V2(L+2)+R%H/3.0_q*(T2(L+2)+4.0_q*T2(L+1)+T2(L))
++               V2(L+1)=V2(L+2)+R%H/3.0_q*(1.25_q*T2(L+2)+2.0_q*T2(L+1)-0.25_q*T2(L))
++            ENDDO
++#ifdef debug
++            POT2(I)=V2(I)+V1(I)
++#endif
++            POT2(I)=V2(I)+V1(I)
++         ENDDO
++         POT2(:)=POT2(:)*FELECT*4*PI/(2*LL+1)*(BRSEXX+CRSEXX)
++         POT(:)=POT(:)+POT2(:)
+          DEALLOCATE(GRS)
+       ELSE 
+          POT=0
+@@ -871,6 +917,8 @@
+        ! local variables
+       INTEGER I, LLOOP,LMIN,LMAX, LDIM
+       REAL(q) :: RHO(R%NMAX)
++! Nic no
++!WRITE (6,*) "COLOUMB_2POT"
+ 
+       LDIM=SIZE(POT,2)
+  
+@@ -1081,6 +1129,9 @@
+       INTEGER CHANNELS
+       INTEGER, EXTERNAL :: MAXL1, FOCK_LMAXONECENTER
+ 
++! Nic: test
++!write(6,*) "SETUP_PAWFOCK"
++!write(6,*) "NT", NT, "NTYP_SLATER", NTYP_SLATER
+       IF (NT==NTYP_SLATER) RETURN
+ 
+       IF (ALLOCATED(S)) THEN
+@@ -1136,6 +1187,9 @@
+       INTEGER CHANNELS
+       INTEGER, EXTERNAL :: MAXL1
+ 
++! Nic: test
++!write(6,*) "SETUP_PAWFOCK_AE"
++!write(6,*) "NT", NT, "NTYP_SLATER", NTYP_SLATER
+       IF (NT==NTYP_SLATER) RETURN
+ 
+       IF (ALLOCATED(S)) THEN
+@@ -1170,6 +1224,9 @@
+       INTEGER CHANNELS
+       INTEGER, EXTERNAL :: MAXL1
+ 
++! Nic: no
++!write(6,*) "SETUP_PAWFOCK_PS"
++!write(6,*) "NT", NT, "NTYP_SLATER", NTYP_SLATER
+       IF (NT==NTYP_SLATER) RETURN
+ 
+       IF (ALLOCATED(S)) THEN
+@@ -1268,7 +1325,9 @@
+       REAL(q) :: HF_ENERGY
+ 
+       ! setup the 
++!write(6,*) "NT", NT
+       CALL SETUP_PAWFOCK(NT, PP)
++!WRITE (6,*) "SETUP_PAWFOCK" 
+ ! test use AE contribution only
+ !     CALL RELEASE_PAWFOCK
+ !     CALL SETUP_PAWFOCK_AE(NT, PP)
+diff -ru vasp.5.4.4/src/pawlhf.F ../vasp.5.4.4/src/pawlhf.F
+--- vasp.5.4.4/src/pawlhf.F.orig	2017-04-20 17:03:59.000000000 +0800
++++ vasp.5.4.4/src/pawlhf.F	2019-08-05 11:12:42.862141283 +0800
+@@ -822,6 +822,8 @@
+       INTEGER I
+       REAL(q) :: AEXX
+ 
++! Nic: no
++!write(6,*) "pawlhf1"
+       CALL HFPARAMETERS(AEXX)        ! amount of exact exchange
+       RNMAX =PP%R%NMAX               ! number of grid points
+ 
+@@ -1145,6 +1147,8 @@
+       INTEGER I
+       REAL(q) :: AEXX
+       ! number of grid points
++! Nic: no
++!write(6,*) "pawlhf2"
+ 
+       CALL HFPARAMETERS(AEXX)
+       RNMAX =PP%R%NMAX
+diff -ru vasp.5.4.4/src/pead.F ../vasp.5.4.4/src/pead.F
+--- vasp.5.4.4/src/pead.F.orig	2017-04-20 17:03:59.000000000 +0800
++++ vasp.5.4.4/src/pead.F	2019-07-23 17:12:13.929161463 +0800
+@@ -437,6 +437,8 @@
+       OVERLAP TMP(LMDIM,LMDIM,WDES%NIONS,WDES%NCDIJ)
+       
+       IF (.NOT.LUSEPEAD()) RETURN
++! Nic: no
++!write(6,*) "pead?"
+ 
+       IF (ALLOCATED(d_IJ)) THEN
+          DEALLOCATE(d_IJ)
+diff -ru vasp.5.4.4/src/pot.F ../vasp.5.4.4/src/pot.F
+--- vasp.5.4.4/src/pot.F.orig	2017-04-20 17:03:59.000000000 +0800
++++ vasp.5.4.4/src/pot.F	2019-07-19 23:49:51.345815486 +0800
+@@ -187,11 +187,14 @@
+                     
+           CALL MAG_DIRECTION(CHTOT(1,1), CVTOT(1,1), GRIDC, WDES%NCDIJ)
+        ELSE
++! Nic
++!WRITE(6,*) "FEXCG", AGGAX, BGGAX 
+           IF (ISGGA()) THEN
+              ! gradient corrections to LDA
+              CALL FEXCG(GRIDC,LATT_CUR,XCENCG,EXCG,CVZERG,TMPSIF, &
+                   CHTOT,CVTOT,DENCOR)
+           ENDIF
++!WRITE(6,*) "FEXCP", LDAX, BLDAX
+                 
+           ! LDA part of potential
+           CALL FEXCP(GRIDC,LATT_CUR%OMEGA, &
+diff -ru vasp.5.4.4/src/radial.F ../vasp.5.4.4/src/radial.F
+--- vasp.5.4.4/src/radial.F.orig	2017-04-20 17:03:59.000000000 +0800
++++ vasp.5.4.4/src/radial.F	2019-07-23 11:26:37.072996614 +0800
+@@ -1011,6 +1011,7 @@
+ ! LDA+ GGA if required
+ !========================================================================
+       IF (.NOT. LASPH) THEN
++!WRITE(6,*) "RAD_POT", LDAX, BLDAX, AGGAX, BGGAX
+          ilda: IF (TLDA) THEN
+             
+             IF (ISPIN==1) THEN
+diff -ru vasp.5.4.4/src/steep.F ../vasp.5.4.4/src/steep.F
+--- vasp.5.4.4/src/steep.F.orig	2017-04-20 17:03:59.000000000 +0800
++++ vasp.5.4.4/src/steep.F	2019-07-23 16:08:58.059593920 +0800
+@@ -79,6 +79,8 @@
+     ENDIF
+ #endif
+ 
++! Nic: no
++!write(6,*) "hi"
+       ALLOCATE(W1%CR(GRID%MPLWV*WDES%NRSPINORS),CG(WDES%NRPLWV),PRECON(WDES%NRPLWV))
+ 
+       CALL SETWDES(WDES,WDES1,0)
+diff -ru vasp.5.4.4/src/subrot_scf.F ../vasp.5.4.4/src/subrot_scf.F
+--- vasp.5.4.4/src/subrot_scf.F.orig	2017-04-20 17:03:59.000000000 +0800
++++ vasp.5.4.4/src/subrot_scf.F	2019-07-23 17:12:18.626216655 +0800
+@@ -165,6 +165,8 @@
+       INFO%LMIX=.FALSE.
+ 
+       DWRITE0 'electron entered'
++! Nic no
++!WRITE(6,*) "SUBROT_SCF"
+ 
+ ! well yet undecided, PUSH_FOCK implies that the onsite terms 
+ ! are evaluated without the one-center Fock contributions
+@@ -536,6 +538,8 @@
+ !     IF (LINIT_SUBROT_SCF_DONE.OR.(.NOT.INFO%LDIAG).OR.(.NOT.INFO%LONESW)) RETURN
+       IF (LINIT_SUBROT_SCF_DONE.OR.(.NOT.INFO%LSUBROT).OR.(.NOT.INFO%LONESW)) RETURN
+ 
++! Nic: no
++!write(6,*) "subrot_scf?"
+       LOPEN=.FALSE.
+       OPEN(UNIT=IU5,FILE=INCAR,STATUS='OLD')
+       ENCUT_SUBROT_SCF=-1
+diff -ru vasp.5.4.4/src/symmetry.F ../vasp.5.4.4/src/symmetry.F
+--- vasp.5.4.4/src/symmetry.F.orig    2017-04-20 17:03:59.000000000 +0800 
++++ vasp.5.4.4/src/symmetry.F  2019-08-20 10:34:55.251262231 +0800
+@@ -2840,7 +2840,7 @@
+     7    CONTINUE
+       ENDDO
+       ENDDO
+-      IF (NKPT>NKDIM) CALL ERROR(' IBZKPT',' NKPT>NKDIM',NKPT)
++!      IF (NKPT>NKDIM) CALL ERROR(' IBZKPT',' NKPT>NKDIM',NKPT)
+ !=======================================================================
+ ! if LSHIFT_KPOINTS is set we need to include all k-points
+ ! that are differences of two other k-points in the full
+@@ -3774,7 +3774,7 @@
+                VKPT(3,NKPT)=VR(3)
+ ! ... and initialize the symmetry degeneracy counter:
+                WTKPT(NKPT)=1._q
+-               IF (NKPT>NKDIM) CALL ERROR(' IBZKPT',' NKPT>NKDIM',NKPT)
++!               IF (NKPT>NKDIM) CALL ERROR(' IBZKPT',' NKPT>NKDIM',NKPT)
+ ! Set connection table for this k-point:
+                IKPT(I1+1,I2+1,I3+1)=NKPT
+             ELSE
+
+diff -ru vasp.5.4.4/src/xclib.F ../vasp.5.4.4/src/xclib.F
+--- vasp.5.4.4/src/xclib.F.orig	2017-04-20 17:04:00.000000000 +0800
++++ vasp.5.4.4/src/xclib.F	2019-08-02 21:35:44.809808280 +0800
+@@ -2075,6 +2075,9 @@
+       REAL(q),SAVE :: ALDAC=1
+       REAL(q),SAVE :: AGGAX=1
+       REAL(q),SAVE :: AGGAC=1
++!! Nic
++      REAL(q),SAVE :: BLDAX=1
++      REAL(q),SAVE :: BGGAX=1
+       !
+       ! screened LDA exchange parameter
+       REAL(q),SAVE :: LDASCREEN=0
+@@ -2101,7 +2104,7 @@
+       ! the present exchange parameters temporarily
+       !
+       INTEGER, SAVE, PRIVATE ::  ISTACK=0
+-      REAL(q),SAVE,PRIVATE :: EX_STACK(7,5)
++      REAL(q),SAVE,PRIVATE :: EX_STACK(9,5)
+       LOGICAL,SAVE,PRIVATE :: EX_LSTACK(4,5)
+ 
+     CONTAINS
+@@ -2250,8 +2253,10 @@
+ 
+       EX_MOD=EX(RS,IFLG,TREL)
+       
++!WRITE(6,*)  LDAX, BLDAX, LDASCREEN
+       IF (LDASCREEN/=0 .OR. LDAX/=1 ) THEN
+          IF (LDASCREEN==0) THEN
++! no... WRITE(6,*) "SOMETIMES HERE... LDASCREEN==0"
+             EX_MOD=EX_MOD*LDAX
+          ELSE IF (LUSE_THOMAS_FERMI) THEN
+             EX_MOD=EX_MOD-EX_SX(RS,LDASCREEN,IFLG)*(1-LDAX)
+@@ -2263,8 +2268,19 @@
+          ! model sX 
+             EX_MOD=(EX(RS,IFLG,.FALSE.)-EX_SR(RS,LDASCREEN*AUTOA,IFLG))*LDAX
+          ELSE 
+-         ! WPBE: LDAX*EX_SR + EX_LR = EX - (1-LDAX)*EX_SR
+-            EX_MOD=EX(RS,IFLG,.FALSE.)-EX_SR(RS,LDASCREEN*AUTOA,IFLG)*(1-LDAX)
++!! Nic !! CHECK THE EXPRESSIONS AGAIN !!
++!! Should be TREL = .TRUE. right? Since using spinors
++            IF (BLDAX/=1) THEN
++!!! Passed test WRITE(6,*) "OTRSH Reporting for duty"
++            ! OTRSH: LDAX*EX_SR + BLDAX*EX_LR = BLDAX*EX + (LDAX-BLDAX)*EX_SR
++               EX_MOD=EX(RS,IFLG,.FALSE.)*BLDAX+EX_SR(RS,LDASCREEN*AUTOA,IFLG)*(LDAX-BLDAX)
++!!! Passed test WRITE(6,*) LDAX-BLDAX
++            ! WPBE: LDAX*EX_SR + EX_LR = EX - (1-LDAX)*EX_SR
++            ELSE
++! Nic: check, ok
++!write(6,*) "oh no.."
++               EX_MOD=EX(RS,IFLG,.FALSE.)-EX_SR(RS,LDASCREEN*AUTOA,IFLG)*(1-LDAX)
++            ENDIF
+          ENDIF
+       ENDIF
+     END FUNCTION EX_MOD
+@@ -2291,8 +2307,14 @@
+          ! model sX 
+             VX_MOD=(VX(RS,IFLG,.FALSE.)-VX_SR(RS,LDASCREEN*AUTOA,IFLG))*LDAX
+          ELSE
+-         ! WPBE: LDAX*VX_SR + VX_LR = VX - (1-LDAX)*VX_SR
+-            VX_MOD=VX(RS,IFLG,.FALSE.)-VX_SR(RS,LDASCREEN*AUTOA,IFLG)*(1-LDAX)
++            IF (BLDAX/=1) THEN
++            ! OTRSH: LDAX*VX_SR + BLDAX*VX_LR = BLDAX*VX + (LDAX-BLDAX)*VX_SR
++               VX_MOD=VX(RS,IFLG,.FALSE.)*BLDAX+VX_SR(RS,LDASCREEN*AUTOA,IFLG)*(LDAX-BLDAX)
++!!! Passed test WRITE(6,*) LDAX-BLDAX
++            ELSE
++            ! WPBE: LDAX*VX_SR + VX_LR = VX - (1-LDAX)*VX_SR
++               VX_MOD=VX(RS,IFLG,.FALSE.)-VX_SR(RS,LDASCREEN*AUTOA,IFLG)*(1-LDAX)
++            ENDIF
+          ENDIF
+       ENDIF
+     END FUNCTION VX_MOD
+@@ -2993,6 +3015,7 @@
+       INTEGER LEXCH_TEMP
+       REAL(q) LDAX_TEMP, LDAC_TEMP, LDASCREEN_TEMP, GGAX_TEMP, GGAC_TEMP
+ 
++!WRITE(6,*) "CALLED PUSH! CAREFUL..."
+       ISTACK=ISTACK+1
+       IF (ISTACK>SIZE(EX_STACK,2)) THEN
+          WRITE(*,*) 'internal ERROR in PUSH_XC_TYPE: push already exhausted',ISTACK
+@@ -3005,6 +3028,8 @@
+       EX_STACK (5,ISTACK)=AGGAX
+       EX_STACK (6,ISTACK)=AGGAC
+       EX_STACK (7,ISTACK)=ALDAC
++      EX_STACK (8,ISTACK)=BGGAX
++      EX_STACK (9,ISTACK)=BLDAX
+       EX_LSTACK(1,ISTACK)=LRANGE_SEPARATED_CORR
+       EX_LSTACK(2,ISTACK)=LUSE_LONGRANGE_HF
+       EX_LSTACK(3,ISTACK)=LUSE_THOMAS_FERMI
+@@ -3016,6 +3041,8 @@
+       LDASCREEN=LDASCREEN_TEMP
+       AGGAX    =GGAX_TEMP
+       AGGAC    =GGAC_TEMP
++      BGGAX    =-GGAX_TEMP
++      BLDAX    =-LDAX_TEMP
+ 
+     END SUBROUTINE PUSH_XC_TYPE
+ 
+@@ -3032,6 +3059,8 @@
+       AGGAX                =EX_STACK (5,ISTACK)
+       AGGAC                =EX_STACK (6,ISTACK)
+       ALDAC                =EX_STACK (7,ISTACK)
++      BGGAX                =EX_STACK (8,ISTACK)
++      BLDAX                =EX_STACK (9,ISTACK)
+       LRANGE_SEPARATED_CORR=EX_LSTACK(1,ISTACK)
+       LUSE_LONGRANGE_HF    =EX_LSTACK(2,ISTACK)
+       LUSE_THOMAS_FERMI    =EX_LSTACK(3,ISTACK)
+diff -ru vasp.5.4.4/src/xclib_grad.F ../vasp.5.4.4/src/xclib_grad.F
+--- vasp.5.4.4/src/xclib_grad.F.orig	2017-04-20 17:04:00.000000000 +0800
++++ vasp.5.4.4/src/xclib_grad.F	2019-08-05 10:53:37.399388194 +0800
+@@ -19,6 +19,7 @@
+       USE constant
+       USE setexm
+ 
++
+       IMPLICIT REAL(q) (A-H,O-Z)
+       PARAMETER (DDELTA=1E-4_q)
+       PARAMETER (THRD=1._q/3._q)
+@@ -66,9 +67,13 @@
+         ENDIF
+ ! Iann Gerber: range separating in GGA exchange
+         IF (LDASCREEN==0._q .OR. LUSE_THOMAS_FERMI .OR. FORCE_PBE) THEN
++! Nic: sometimes here
++!write(6,*) "hfscreen=0"
+            CALL EXCHPBE(D,DTHRD,S,EXLDA,EXC,EXDLDA,EXCD,EXCDD, &
+           &     ukfactor)
+         ELSE
++! Nic trouble; no resolved
++! write(6,*) "GGAALL", AEXX
+            CALL CALC_EXCHWPBE_SP(D,S, &
+           &  EXLDA,EXDLDA,EXLDA_SR,EXLDA_LR,EXDLDA_SR,EXDLDA_LR, &
+           &  EXWPBE_SR,EXWPBE_LR,EXWPBED_SR,EXWPBED_LR,EXWPBEDD_SR,EXWPBEDD_LR)
+@@ -95,6 +100,8 @@
+                  EXCDD=ECDD*AGGAC+ EXWPBEDD_LR*AGGAX +EXWPBEDD_SR       ! 
+               ELSE
+               ! wPBE
++! Nic: nothing happens here if using PBE POTCAR
++!write(6,*) "TEST"
+                  EXC  =EC  *AGGAC+ EXWPBE_SR/D*AGGAX +EXWPBE_LR/D +ECLDA
+                  EXCD =ECD *AGGAC+ EXWPBED_SR*AGGAX+EXWPBED_LR+ECDLDA
+                  EXCDD=ECDD*AGGAC+ EXWPBEDD_SR*AGGAX +EXWPBEDD_LR
+@@ -103,6 +110,8 @@
+         ELSE
+         ! Do not add LDA contributions
+            IF (LDASCREEN==0._q .OR. LUSE_THOMAS_FERMI .OR. FORCE_PBE) THEN
++! Nic: sometimes here
++!write(6,*) "hfscreen=0", AGGAX
+               EXC  =EC  *AGGAC +(EXC-EXLDA)/D*AGGAX
+               EXCD =ECD *AGGAC +(EXCD-EXDLDA)*AGGAX
+               EXCDD=ECDD*AGGAC + EXCDD*AGGAX
+@@ -114,9 +123,12 @@
+                  EXCDD=ECDD*AGGAC+ EXWPBEDD_LR*AGGAX +EXWPBEDD_SR         
+               ELSE
+               ! wPBE
+-                 EXC  =EC  *AGGAC+(EXWPBE_SR-EXLDA_SR)/D*AGGAX  +(EXWPBE_LR-EXLDA_LR)/D
+-                 EXCD =ECD *AGGAC+(EXWPBED_SR-EXDLDA_SR)*AGGAX+(EXWPBED_LR-EXDLDA_LR) 
+-                 EXCDD=ECDD*AGGAC+ EXWPBEDD_SR*AGGAX +EXWPBEDD_LR
++! Nic: modify here. add BGGAX. 
++! BGGAX
++! WRITE(6,*) AEXX, AGGAX,BGGAX
++                 EXC  =EC  *AGGAC+(EXWPBE_SR-EXLDA_SR)/D*AGGAX  +(EXWPBE_LR-EXLDA_LR)/D*BGGAX
++                 EXCD =ECD *AGGAC+(EXWPBED_SR-EXDLDA_SR)*AGGAX+(EXWPBED_LR-EXDLDA_LR)*BGGAX 
++                 EXCDD=ECDD*AGGAC+ EXWPBEDD_SR*AGGAX +EXWPBEDD_LR*BGGAX
+               ENDIF
+            ENDIF       
+         ENDIF
+@@ -1573,12 +1585,14 @@
+                  ECQ  =ECQ *AGGAC
+               ELSE
+               ! wPBE
++! TODO Nic: edit here
++! passed test WRITE(6,*) "test!!"
+                  EXC  =EC  *AGGAC+(EXWPBE_SR1-EXLDA_SR1+EXWPBE_SR2-EXLDA_SR2)/(2*D)*AGGAX+ &
+-                &                 (EXWPBE_LR1-EXLDA_LR1+EXWPBE_LR2-EXLDA_LR2)/(2*D)
+-                 EXCD1=ECD1*AGGAC+(EXWPBED_SR1-EXDLDA_SR1)*AGGAX+(EXWPBED_LR1-EXDLDA_LR1) 
+-                 EXCD2=ECD2*AGGAC+(EXWPBED_SR2-EXDLDA_SR2)*AGGAX+(EXWPBED_LR2-EXDLDA_LR2) 
+-                 EXCQ1=EXWPBEDD_SR1*AGGAX+EXWPBEDD_LR1
+-                 EXCQ2=EXWPBEDD_SR2*AGGAX+EXWPBEDD_LR2
++                &                 (EXWPBE_LR1-EXLDA_LR1+EXWPBE_LR2-EXLDA_LR2)/(2*D)*BGGAX
++                 EXCD1=ECD1*AGGAC+(EXWPBED_SR1-EXDLDA_SR1)*AGGAX+(EXWPBED_LR1-EXDLDA_LR1)*BGGAX 
++                 EXCD2=ECD2*AGGAC+(EXWPBED_SR2-EXDLDA_SR2)*AGGAX+(EXWPBED_LR2-EXDLDA_LR2)*BGGAX 
++                 EXCQ1=EXWPBEDD_SR1*AGGAX+EXWPBEDD_LR1*BGGAX
++                 EXCQ2=EXWPBEDD_SR2*AGGAX+EXWPBEDD_LR2*BGGAX
+                  ECQ  =ECQ *AGGAC
+               ENDIF
+            ENDIF
