@@ -1,7 +1,8 @@
 easyblock = 'CMakeMake'
 
 name = 'qcint'
-version = '3.0.18'
+version = '3.0.19-20200420'
+local_commit = 'd2759ec'
 
 homepage = 'http://wiki.sunqm.net/libcint'
 description = """libcint is an open source library for analytical Gaussian integrals.
@@ -11,8 +12,7 @@ toolchain = {'name': 'intel', 'version': '2019b'}
 toolchainopts = {'optarch': False, 'noopt': True}  # FIXME failing tests
 
 source_urls = ['https://github.com/sunqm/qcint/archive/']
-sources = ['v%(version)s.tar.gz']
-checksums = ['619d204294579086026bce32581155e9845145ab12f31fb1f914c3c2d2c51aaa']
+sources = ['%s.tar.gz' % local_commit]
 
 builddependencies = [
     ('CMake', '3.15.3'),

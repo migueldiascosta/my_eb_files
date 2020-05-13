@@ -19,7 +19,7 @@ dependencies = [
     ('Python', '3.7.4'),
     ('SciPy-bundle', '2019.10', versionsuffix),  # for numpy, scipy
     ('h5py', '2.10.0', versionsuffix),
-    ('qcint', '3.0.18'),
+    ('qcint', '3.0.19-20200420'),
     ('libxc', '3.0.1'),
     ('XCfun', '20190127', versionsuffix),
 ]
