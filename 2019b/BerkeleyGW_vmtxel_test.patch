@@ -1,0 +1,58 @@
+--- BSE/absp_io.f90.orig	2020-07-08 17:54:07.548072550 +0800
++++ BSE/absp_io.f90	2020-07-08 17:54:27.032894296 +0800
+@@ -479,7 +479,7 @@
+   PUSH_SUB(write_vmtxel)
+ 
+   if (peinf%inode.eq.0) then
+-    write(6,'(1x,a)') 'Writing matrix elements into vmtxel'
++    write(6,'(1x,a)') 'Writing matrix elements into vmtxel using function in absp_io.f90'
+     do ipol=1,xct%npol
+       if (xct%npol==1) then
+         fname = 'vmtxel'
+--- BSE/vmtxel.f90.orig	2020-07-08 17:54:33.964830882 +0800
++++ BSE/vmtxel.f90	2020-07-08 18:57:38.178118138 +0800
+@@ -445,13 +445,17 @@
+   PUSH_SUB(write_vmtxel)
+ 
+ #ifdef HDF5
++  write(6,*) this%use_hdf5
+   if (this%use_hdf5) then
++     write(6,'(1x,a)') 'HDF5 is defined and use_hdf5 is true'
+     call this%write_vmtxel_hdf5()
+   else
++     write(6,'(1x,a)') 'HDF5 is defined but use_hdf5 is false'
+     call this%write_vmtxel_bin()
+   end if
+ #else
+-    call this%write_vmtxel_bin()
++  write(6,'(1x,a)') 'HDF5 is not defined'
++  call this%write_vmtxel_bin()
+ #endif
+ 
+   POP_SUB(write_vmtxel)
+@@ -471,7 +475,7 @@
+   PUSH_SUB(write_vmtxel_bin)
+ 
+   if (this%is_master) then
+-    write(6,'(1x,a)') 'Writing matrix elements into vmtxel'
++    write(6,'(1x,a)') 'Writing matrix elements into vmtxel using function in vmtxel.f90'
+     do ipol=1,this%npol
+       if (this%npol==1) then
+         fname = 'vmtxel'
+@@ -623,12 +627,15 @@
+ 
+ #ifdef HDF5
+   if (this%use_hdf5) then
++    write(6,'(1x,a)') 'HDF5 is defined and use_hdf5 is true'
+     call this%read_vmtxel_hdf5()
+   else
++    write(6,'(1x,a)') 'HDF5 is defined but use_hdf5 is false'
+     call this%read_vmtxel_bin()
+   end if
+ #else
+-    call this%read_vmtxel_bin()
++  write(6,'(1x,a)') 'HDF5 is not defined'
++  call this%read_vmtxel_bin()
+ #endif
+ 
+   POP_SUB(read_vmtxel)
