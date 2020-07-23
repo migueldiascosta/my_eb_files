@@ -1,0 +1,22 @@
+--- BSE/diag.f90.orig	2020-07-08 19:21:45.300575729 +0800
++++ BSE/diag.f90	2020-07-08 19:21:11.991144033 +0800
+@@ -300,7 +300,7 @@
+   !        until the next release, so as not to break backward compatibility
+   !        Since using hdf5 for vmtxel is highly desirable, let us not
+   !        forget to reactivate it as soon as possible.
+-  dip%use_hdf5 = .false.
++  !dip%use_hdf5 = .false.
+ 
+   call timing%start(timing%vmtxel)
+ 
+--- BSE/haydock.f90.orig	2020-07-08 19:21:50.024942000 +0800
++++ BSE/haydock.f90		2020-07-08 19:21:57.302228844 +0800
+@@ -209,7 +209,7 @@
+   !        until the next release, so as not to break backward compatibility
+   !        Since using hdf5 for vmtxel is highly desirable, let us not
+   !        forget to reactivate it as soon as possible.
+-  dip%use_hdf5 = .false.
++  !dip%use_hdf5 = .false.
+ 
+ 
+ ! Since this code always compute an odd number of an's and bn's,
