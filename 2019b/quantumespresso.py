@@ -40,7 +40,7 @@ import easybuild.tools.toolchain as toolchain
 from easybuild.easyblocks.generic.configuremake import ConfigureMake
 from easybuild.framework.easyconfig import CUSTOM
 from easybuild.tools.build_log import EasyBuildError
-from easybuild.tools.filetools import apply_regex_substitutions, copy_dir, copy_file
+from easybuild.tools.filetools import copy_dir, copy_file
 from easybuild.tools.modules import get_software_root, get_software_version
 
 
@@ -134,15 +134,25 @@ class EB_QuantumESPRESSO(ConfigureMake):
 
             elpa_v = get_software_version("ELPA")
             if LooseVersion(self.version) >= LooseVersion("6"):
+
+                # NOTE: Quantum Espresso should use -D__ELPA_<year> for corresponding ELPA version
+                # However for ELPA VERSION >= 2017.11 Quantum Espresso needs to use ELPA_2018
+                # because of outdated bindings. See: https://xconfigure.readthedocs.io/en/latest/elpa/
+                if LooseVersion("2018") > LooseVersion(elpa_v) >= LooseVersion("2017.11"):
+                    dflags.append('-D__ELPA_2018')
+                else:
+                    # get year from LooseVersion
+                    elpa_year_v = elpa_v.split('.')[0]
+                    dflags.append('-D__ELPA_%s' % elpa_year_v)
+
                 elpa_min_ver = "2016.11.001.pre"
-                dflags.append('-D__ELPA_2016')
             else:
                 elpa_min_ver = "2015"
                 dflags.append('-D__ELPA_2015 -D__ELPA')
 
             if LooseVersion(elpa_v) < LooseVersion(elpa_min_ver):
                 raise EasyBuildError("QuantumESPRESSO %s needs ELPA to be " +
-                                     "version %s or newer" % (self.version, elpa_min_ver))
+                                     "version %s or newer", self.version, elpa_min_ver)
 
             if self.toolchain.options.get('openmp', False):
                 elpa_include = 'elpa_openmp-%s' % elpa_v
@@ -158,7 +168,9 @@ class EB_QuantumESPRESSO(ConfigureMake):
 
         if comp_fam == toolchain.INTELCOMP:
             # set preprocessor command (-E to stop after preprocessing, -C to preserve comments)
-            cpp = "%s -E -C" % os.getenv('CC')
+            # preserving comments breaks LAXlib in QE 6.6 when stdc-predef.h is present in the system
+            # cpp = "%s -E -C" % os.getenv('CC')
+            cpp = "%s -E" % os.getenv('CC')
             repls.append(('CPP', cpp, False))
             env.setvar('CPP', cpp)
 
@@ -193,6 +205,13 @@ class EB_QuantumESPRESSO(ConfigureMake):
 
         # always include -w to supress warnings
         dflags.append('-w')
+
+        if LooseVersion(self.version) >= LooseVersion("6.6"):
+            dflags.append(" -Duse_beef")
+            libbeef = get_software_root("libbeef")
+            if libbeef:
+                repls.append(('BEEF_LIBS_SWITCH', 'external', False))
+                repls.append(('BEEF_LIBS', '%s/lib/libbeef.a' % libbeef, False))
 
         repls.append(('DFLAGS', ' '.join(dflags), False))
 
@@ -255,6 +274,11 @@ class EB_QuantumESPRESSO(ConfigureMake):
                                       "\t$(CPP) -C $(CPPFLAGS) $< -o $*.F90\n" +
                                       "\t$(MPIF90) $(F90FLAGS) -c $*.F90 -o $*.o",
                                       line)
+
+                # fix order of BEEF_LIBS in QE_LIBS
+                if LooseVersion(self.version) >= LooseVersion("6.6"):
+                    line = re.sub(r"^(QELIBS\s*=[ \t]*)(.*) \$\(BEEF_LIBS\) (.*)$",
+                                  r"QELIBS = $(BEEF_LIBS) \2 \3", line)
 
                 sys.stdout.write(line)
         except IOError as err:
@@ -357,7 +381,11 @@ class EB_QuantumESPRESSO(ConfigureMake):
                         copy_file(full_path, bindir)
 
         if 'upf' in targets or 'all' in targets:
-            copy_binaries('upftools')
+            if LooseVersion(self.version) < LooseVersion("6.6"):
+                copy_binaries('upftools')
+            else:
+                copy_binaries('upflib')
+                copy_file(os.path.join(self.cfg['start_dir'], 'upflib', 'fixfiles.py'), bindir)
 
         if 'want' in targets:
             copy_binaries('WANT')
@@ -381,7 +409,6 @@ class EB_QuantumESPRESSO(ConfigureMake):
             bins.extend(["cp.x", "wfdd.x"])
             if LooseVersion(self.version) < LooseVersion("6.4"):
                 bins.append("cppp.x")
-
 
         # only for v4.x, not in v5.0 anymore, called gwl in 6.1 at least
         if 'gww' in targets or 'gwl' in targets:
@@ -437,16 +464,19 @@ class EB_QuantumESPRESSO(ConfigureMake):
 
         upftools = []
         if 'upf' in targets or 'all' in targets:
-            upftools = ["casino2upf.x", "cpmd2upf.x", "fhi2upf.x", "fpmd2upf.x", "ncpp2upf.x",
-                        "oldcp2upf.x", "read_upf_tofile.x", "rrkj2upf.x", "uspp2upf.x", "vdb2upf.x"]
-            if LooseVersion(self.version) > LooseVersion("5"):
-                upftools.extend(["interpolate.x", "upf2casino.x"])
-            if LooseVersion(self.version) >= LooseVersion("6.3"):
-                upftools.extend(["fix_upf.x"])
-            if LooseVersion(self.version) < LooseVersion("6.4"):
-                upftools.extend(["virtual.x"])
+            if LooseVersion(self.version) < LooseVersion("6.6"):
+                upftools = ["casino2upf.x", "cpmd2upf.x", "fhi2upf.x", "fpmd2upf.x", "ncpp2upf.x",
+                            "oldcp2upf.x", "read_upf_tofile.x", "rrkj2upf.x", "uspp2upf.x", "vdb2upf.x"]
+                if LooseVersion(self.version) > LooseVersion("5"):
+                    upftools.extend(["interpolate.x", "upf2casino.x"])
+                if LooseVersion(self.version) >= LooseVersion("6.3"):
+                    upftools.extend(["fix_upf.x"])
+                if LooseVersion(self.version) < LooseVersion("6.4"):
+                    upftools.extend(["virtual.x"])
+                else:
+                    upftools.extend(["virtual_v2.x"])
             else:
-                upftools.extend(["virtual_v2.x"])
+                upftools = ["upfconv.x", "virtual_v2.x", "fixfiles.py"]
 
         if 'vdw' in targets:  # only for v4.x, not in v5.0 anymore
             bins.extend(["vdw.x"])
@@ -468,7 +498,6 @@ class EB_QuantumESPRESSO(ConfigureMake):
 
         if 'xspectra' in targets:
             bins.extend(["xspectra.x"])
-
 
         yambo_bins = []
         if 'yambo' in targets:
