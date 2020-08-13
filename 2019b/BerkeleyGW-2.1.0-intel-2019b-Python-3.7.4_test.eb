@@ -1,7 +1,7 @@
 name = 'BerkeleyGW'
 version = '2.1.0'
 _pvs = '-Python-%(pyver)s'
-versionsuffix = '%s_vmtxelh5' % _pvs
+versionsuffix = '-Python-%(pyver)s_test'
 
 homepage = 'https://www.berkeleygw.org'
 description = """The BerkeleyGW Package is a set of computer codes that calculates the quasiparticle
@@ -16,7 +16,7 @@ sources = [{'download_filename': 'ze3azi5vlyw7hpwvl9i5f82kaiid6g0x.gz', 'filenam
 patches = [
     'BerkeleyGW-2.1.0_fix_path.patch',
     'BerkeleyGW-2.1.0_check.patch',
-    'BerkeleyGW-2.1.0_vmtxelh5.patch',
+    'BerkeleyGW_vmtxel_test.patch'
 ]
 checksums = [
     '31f3b643dd937350c3866338321d675d4a1b1f54c730b43ad74ae67e75a9e6f2',  # BerkeleyGW-2.1.0.tar.gz
@@ -26,8 +26,8 @@ checksums = [
 
 dependencies = [
     ('ELPA', '2019.11.001'),
-    ('Python', '2.7.16'),
-    ('h5py', '2.9.0', _pvs),
+    ('Python', '3.7.4'),
+    ('h5py', '2.10.0', _pvs),
 ]
 
 # two tests failing (Si-EPM_subspace_cplx) with the intel toolchain... 

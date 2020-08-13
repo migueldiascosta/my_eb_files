@@ -10,7 +10,7 @@
    call timing%start(timing%vmtxel)
  
 --- BSE/haydock.f90.orig	2020-07-08 19:21:50.024942000 +0800
-+++ BSE/haydock.f90	2020-07-08 19:21:57.302228844 +0800
++++ BSE/haydock.f90		2020-07-08 19:21:57.302228844 +0800
 @@ -209,7 +209,7 @@
    !        until the next release, so as not to break backward compatibility
    !        Since using hdf5 for vmtxel is highly desirable, let us not
