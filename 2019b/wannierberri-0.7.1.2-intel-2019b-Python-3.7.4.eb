@@ -1,0 +1,42 @@
+easyblock = 'PythonBundle'
+
+name = 'wannierberri'
+version = '0.7.1.2'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://wannier-berri.org'
+description = """Wannier Berri is a code to calculate different properties by means of Wannier interpolation.
+ It may be considered as a strongly improved version of postw90.x part of Wannier90."""
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+
+dependencies = [
+    ('Python', '3.7.4'),
+    ('pyFFTW', '0.11'),
+]
+
+use_pip = True
+sanity_pip_check = True
+
+# required because we're building Python packages (MarkupSafe) using Intel compilers on top of Python built with GCC.
+check_ldshared = True
+
+exts_default_options = {'source_urls': [PYPI_SOURCE]}
+
+exts_list = [
+    (name, version, {
+        'checksums': ['a8378ab57e91cfe1ba09b3639d8409bb7fc1a40b59479c7822d206e673ad93f9'],
+    }),
+]
+
+sanity_check_paths = {
+    'files': ['bin/%(name)s'],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ["."]
+}
+
+moduleclass = 'phys'

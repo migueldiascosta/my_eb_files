@@ -1,0 +1,120 @@
+# Built with EasyBuild version 4.2.0.dev0-r829f3d4cac21022fb8c6640c2ba447880c5bc650 on 2020-04-11_12-16-53
+easyblock = 'ConfigureMake'
+
+name = 'DFTB+'
+version = '19.1'
+versionsuffix = '-Python-%(pyver)s-mpi'
+
+homepage = 'https://www.dftb-plus.info'
+description = """DFTB+ is a fast and efficient versatile quantum mechanical simulation package.
+It is based on the Density Functional Tight Binding (DFTB) method, containing
+almost all of the useful extensions which have been developed for the DFTB
+framework so far.  Using DFTB+ you can carry out quantum mechanical simulations
+like with ab-initio density functional theory based packages, but in an
+approximate way gaining typically around two order of magnitude in speed."""
+
+toolchain = {'name': 'foss', 'version': '2019b'}
+toolchainopts = {'usempi': True}
+
+local_external_dir = '%%(builddir)s/dftbplus-%%(version)s/external/%s/origin/'
+local_external_extract = 'mkdir -p %s && tar -C %s' % (local_external_dir, local_external_dir)
+local_external_extract += ' --strip-components=1 -xzf %%s'
+
+sources = [
+    {
+        # DFTB+ source code
+        'source_urls': ['https://github.com/dftbplus/dftbplus/archive'],
+        'download_filename': '%(version)s.tar.gz',
+        'filename': SOURCE_TAR_GZ,
+    },
+    {
+        # mpifx source code
+        'source_urls': ['https://github.com/dftbplus/mpifx/archive'],
+        'download_filename': 'dftbplus-%(version)s.tar.gz',
+        'filename': 'mpifx-%(version)s.tar.gz',
+        'extract_cmd': local_external_extract % ('mpifx', 'mpifx'),
+    },
+    {
+        # scalapackfx source code
+        'source_urls': ['https://github.com/dftbplus/scalapackfx/archive'],
+        'download_filename': 'dftbplus-%(version)s.tar.gz',
+        'filename': 'scalapackfx-%(version)s.tar.gz',
+        'extract_cmd': local_external_extract % ('scalapackfx', 'scalapackfx'),
+    },
+    {
+        # Slater-Koster (slakos) data for testing
+        'source_urls': ['https://github.com/dftbplus/testparams/archive'],
+        'download_filename': 'd0ea16df2b56d14c7c3dc9329a8d3bac9fea50a0.tar.gz',
+        'filename': 'slakos-data-%(version)s.tar.gz',
+        'extract_cmd': local_external_extract % ('slakos', 'slakos'),
+    },
+]
+checksums = [
+    '4d07f5c6102f06999d8cfdb1d17f5b59f9f2b804697f14b3bc562e3ea094b8a8',  # DFTB+-19.1.tar.gz
+    '06f1809da36571d90d0d86dd9e1a697c8a43572a732127b55a400fb5780ef296',  # mpifx-19.1.tar.gz
+    '858ac0e84aa32f227e7e7240d0f62f4cb349996d7a9332cf3483fb066b25b90c',  # scalapackfx-19.1.tar.gz
+    '9b64193368a13ae7c238399da8be2b3730a0f3273f9bf6c8054b2ff57d748823',  # slakos-data-19.1.tar.gz
+]
+
+dependencies = [
+    ('Python', '2.7.16'),
+    ('SciPy-bundle', '2019.10', '-Python-2.7.16'),
+    ('dftd3-lib', '0.9'),
+]
+
+skipsteps = ['configure']
+
+# Use appropriate makefile and flags for this toolchain
+prebuildopts = "cp sys/make.x86_64-linux-gnu make.arch && "
+prebuildopts += 'sed -i "s/-O2/$OPTFLAGS/g" make.arch && '
+
+# Enable MPI and link to OpenBLAS from EB
+local_makeopts = ' WITH_MPI=1 LIB_LAPACK="$LIBLAPACK"'
+# Use DFTD3 from EB
+local_makeopts += ' WITH_DFTD3=1 COMPILE_DFTD3=0 DFTD3_INCS="-I$EBROOTDFTD3MINLIB/include"'
+local_makeopts += ' DFTD3_LIBS="-L$EBROOTDFTD3MINLIB/lib -ldftd3"'
+
+buildopts = local_makeopts
+
+runtest = 'test' + local_makeopts
+
+installopts = 'INSTALLDIR="%(installdir)s"'
+
+sanity_check_paths = {
+    'files': ['bin/' + x for x in ['dftb+', 'dp_bands', 'dp_dos', 'gen2cif', 'gen2xyz', 'makecube',
+                                   'modes', 'repeatgen', 'straingen', 'waveplot', 'xyz2gen']],
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
+}
+
+sanity_check_commands = [('python', '-c "import dptools"')]
+
+modextrapaths = {'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages'}
+
+moduleclass = 'phys'
+
+# Build statistics
+buildstats = [{
+    "build_time": 533.32,
+    "command_line": ["--buildpath='/dev/shm/build'", "--containerpath='/opt/apps/centos7/naples/containers'", '--debug', "--from-pr='10351'", "--git-working-dirs-path='/home/easybuild/git-working-dirs'", "--github-user='migueldiascosta'", "--hide-deps='ANTLR,APR,APR-util,AT-SPI2-ATK,AT-SPI2-core,ATK,Autoconf,Automake,Autotools,Bazel,Bison,Blosc,CFITSIO,CMake,CapnProto,CUSP,Coreutils,DB,DBus,DocBook-XML,Doxygen,Dyninst,Eigen,ETSF_IO,Exiv2,FFmpeg,FLTK,FTGL,FreeXL,FriBidi,GCC,GCCcore,GDAL,GEGL,GL2PS,GLEW,GLib,GLPK,GMP,GPC,GObject-Introspection,GTI,GTK+,GTS,Gdk-Pixbuf,Ghostscript,Guile,GraphicsMagick,GtkSourceView,HarfBuzz,JUnit,JSON-C,JSON-GLib,JasPer,LAME,LLVM,LMBD,LibTIFF,Lua,LibUUID,Libint,LittleCMS,M4,METIS,MPFR,Mesa,NASM,NLopt,NSPR,NSS,Nim,OPARI2,OpenJPEG,OpenPGM,OpenSSL,OTF2,PCRE,PDT,PROJ,Pango,PnMPI,PyCairo,PyGObject,Qhull,Qt,Qt5,S-Lang,SCons,SIP,SQLite,SWIG,Serf,Szip,Tcl,Tk,UCX,UDUNITS,X11,XML-LibXML,XML-Parser,XZ,XKeyboardConfig,YAXT,Yasm,adwaita-icon-theme,ant,assimp,babl,binutils,byacc,bzip2,cairo,cURL,dbus-glib,damageproto,eudev,expat,file,g2clib,g2lib,gc,gexiv2,glproto,gperf,gperfguile,grib_api,gsettings-desktop-schemas,fixesproto,flex,fontsproto,fontconfig,freeglut,freetype,gcccuda,gettext,help2man,hwloc,icc,ifort,iccifort,iccifortcuda,inputproto,intltool,itstool,jemalloc,jhbuild,kbproto,libGLU,libICE,libSM,libX11,libXau,libXaw,libXcursor,libXdamage,libXdmcp,libXext,libXfixes,libXfont,libXft,libXi,libXinerama,libXmu,libXpm,libXrandr,libXrender,libXt,libXtst,libcerf,libcroco,libctl,libdap,libdrm,libdwarf,libelf,libepoxy,libevent,libffi,libfontenc,libgd,libgeotiff,libglade,libidn,libjpeg-turbo,libmatheval,libmypaint,libpng,libpciaccess,libpthread-stubs,libreadline,librsvg,libsodium,libtool,libunistring,libunwind,libyaml,libxcb,libxkbcommon,libxml2,libxslt,makedepend,motif,ncurses,nettle,numactl,nvidia,pixman,pkg-config,pkgconfig,popt,pscom,protobuf,qrupdate,randrproto,recordproto,renderproto,scrollkeeper,tbb,tcsh,texinfo,util-linux,wxPropertyGrid,wxWidgets,x264,x265,xbitmaps,xcb-proto,xcb-util,xcb-util-image,xcb-util-keysyms,xcb-util-renderutil,xcb-util-wm,xextproto,xineramaproto,xorg-macros,xprop,xproto,xtrans,zlib'", "--hide-toolchains='GCCcore,GCC,gcccuda,gompi,gompic,iimpi,iimpic,iccifort,iccifortcuda'", "--hooks='/opt/apps/easyhooks/hooks.py'", "--installpath='/opt/apps/centos7/naples'", "--module-naming-scheme='HierarchicalMNS'", "--optarch='{\\'GCC\\': \\'march=znver1 -mavx2 -mfma -g\\', \\'Intel\\': \\'march=core-avx2 -fma -g -traceback\\'}'", "--packagepath='/opt/apps/centos7/naples/packages'", "--prefix='/opt/apps/centos7/naples'", '--rebuild', "--repositorypath='/opt/apps/centos7/naples/ebfiles_repo'", "--robot='/opt/apps/develop/easybuild-easyconfigs/easybuild/easyconfigs'", "--sourcepath='/opt/apps/sources'", "--subdir-user-modules='.local/easybuild/modules'", "--test-report-env-filter='^SSH|USER|HOSTNAME|UID|.*COOKIE.*'", "--tmpdir='/dev/shm/tmp'"],
+    "core_count": 64,
+    "cpu_arch_name": "zen",
+    "cpu_model": "AMD EPYC 7601 32-Core Processor",
+    "cpu_speed": 2200.0,
+    "cpu_vendor": "AMD",
+    "easybuild-easyblocks_version": "4.1.2.dev0-rb661dca978d4958b226394a58cc1272b1bb19fbe",
+    "easybuild-framework_version": "4.2.0.dev0-r829f3d4cac21022fb8c6640c2ba447880c5bc650",
+    "gcc_version": "Using built-in specs.; COLLECT_GCC=gcc; COLLECT_LTO_WRAPPER=/home/apps/centos7/naples/software/Core/GCCcore/8.3.0/bin/../libexec/gcc/x86_64-pc-linux-gnu/8.3.0/lto-wrapper; Target: x86_64-pc-linux-gnu; Configured with: ../configure --enable-languages=c,c++,fortran --enable-lto --enable-checking=release --disable-multilib --enable-shared=yes --enable-static=yes --enable-threads=posix --enable-plugins --enable-gold=default --enable-ld --with-plugin-ld=ld.gold --prefix=/opt/apps/centos7/naples/software/Core/GCCcore/8.3.0 --with-local-prefix=/opt/apps/centos7/naples/software/Core/GCCcore/8.3.0 --enable-bootstrap --with-isl=/dev/shm/build/GCCcore/8.3.0/dummy-/gcc-8.3.0/stage2_stuff; Thread model: posix; gcc version 8.3.0 (GCC) ; ",
+    "glibc_version": "2.17",
+    "hostname": "sms",
+    "install_size": 26649033,
+    "modules_tool": ('Lmod', '/opt/ohpc/admin/lmod/lmod/libexec/lmod', '7.8.15'),
+    "os_name": "centos linux",
+    "os_type": "Linux",
+    "os_version": "7.6.1810",
+    "platform_name": "x86_64-unknown-linux",
+    "python_version": "2.7.5 (default, Aug  7 2019, 00:51:29) ; [GCC 4.8.5 20150623 (Red Hat 4.8.5-39)]",
+    "system_gcc_path": "/opt/apps/centos7/naples/software/Core/GCCcore/8.3.0/bin/gcc",
+    "system_python_path": "/opt/apps/centos7/naples/software/Python/2.7.16-GCCcore-8.3.0/bin/python",
+    "timestamp": 1586578613,
+    "total_memory": 515687,
+}]

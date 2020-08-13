@@ -1,0 +1,55 @@
+easyblock = 'CMakeMake'
+
+name = 'DCore'
+version = '2.1.0'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://issp-center-dev.github.io/DCore'
+description = """
+ integrated DMFT software for Correlated electrons
+"""
+
+toolchain = {'name': 'foss', 'version': '2018b'}
+toolchainopts = {'pic': True, 'usempi': True}
+
+source_urls = ['https://github.com/issp-center-dev/DCore/releases/download/v.2.1.0/']
+sources = ['DCore-%(version)s.tar.gz']
+patches = ['DCore-2.1.0_cmakelists.patch']
+checksums = [
+    'b14f4f369c06ffd18b155a4f15c8cec001e18ce4fbe5d899ebdafa578a03dfaa',  # DCore-2.1.0.tar.gz
+    '3f874850f050d27d65cbf497cc6d948b02a7c7146f5c273794371dd86e7282a9',  # DCore-2.1.0_cmakelists.patch
+]
+
+dependencies = [
+    ('Python', '2.7.15'),
+    ('TRIQS', '2.1.1', versionsuffix),
+    ('TRIQS-dft_tools', '2.1.0', versionsuffix),
+    ('TRIQS-cthyb', '2.1.0', versionsuffix),
+]
+
+builddependencies = [
+    ('CMake', '3.12.1')
+]
+
+separate_build_dir = True
+
+configopts = "-DTRIQS_PATH=$EBROOTTRIQS -DTRIQS_DFTTOOLS_PATH=$EBROOTTRIQSMINDFT_TOOLS "
+configopts += "-DCMAKE_INSTALL_PREFIX=%(installdir)s ../"
+
+runtest = 'test'
+
+sanity_check_paths = {
+    'files': ['bin/dcore' + x for x in ['', '_bse', '_check', '_post', '_pre']],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+sanity_check_commands = [
+    "dcore --help",
+    "python -c 'import dcore'",
+]
+
+modextrapaths = {
+    'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages',
+}
+
+moduleclass = 'phys'
