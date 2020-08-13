@@ -40,7 +40,7 @@ builddependencies = [
 
 separate_build_dir = True
 
-configopts = '-DHybridisation_is_complex=On -DLocal_hamiltonian_is_complex=On'
+configopts = "-DHybridisation_is_complex=On -DLocal_hamiltonian_is_complex=On "
 
 runtest = 'test'
 
