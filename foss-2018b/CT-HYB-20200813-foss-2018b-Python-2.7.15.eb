@@ -1,0 +1,40 @@
+easyblock = 'CMakeMake'
+
+name = 'CT-HYB'
+version = '20200813'
+versionsuffix = '-Python-%(pyver)s'
+local_commit = '51cf6b6715ced29cb1f9c1266556691490a035b7'
+
+homepage = 'https://github.com/ALPSCore/CT-HYB'
+description = """Hybridization expansion quantum Monte Carlo impurity solver:
+ An open-source implementation of the continuous-time hybridization-expansion quantum Monte Carlo method.
+ This program solves impurity models with general instantaneous two-body interactions and complex hybridization functions.
+ The code is built on the ALPS libraries (Applications and Libraries for Physics Simulations)."""
+
+toolchain = {'name': 'foss', 'version': '2018b'}
+
+source_urls = ['https://github.com/ALPSCore/CT-HYB/archive/']
+sources = [{'download_filename': '%s.tar.gz' % local_commit, 'filename': SOURCE_TAR_GZ}]
+
+patches = []
+
+builddependencies = [
+    ('CMake', '3.12.1'),
+    ('Eigen', '3.3.7'),
+]
+
+dependencies = [
+    ('Python', '2.7.15'),
+    ('ALPSCore', version, versionsuffix),
+]
+
+configopts = "-DALPSCore_DIR=${EBROOTALPSCORE} -DEIGEN3_INCLUDE_DIR=${EBROOTEIGEN}/include"
+
+runtest = 'test'
+
+sanity_check_paths = {
+    'files': ['bin/hybmat'],
+    'dirs': [],
+}
+
+moduleclass = 'phys'

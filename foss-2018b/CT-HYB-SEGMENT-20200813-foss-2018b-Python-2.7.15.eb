@@ -1,0 +1,38 @@
+easyblock = 'CMakeMake'
+
+name = 'CT-HYB-SEGMENT'
+version = '20200813'
+versionsuffix = '-Python-%(pyver)s'
+local_commit = '623aa1a868fd915d11569eb332b20cda40da9a79'
+
+homepage = 'https://github.com/ALPSCore/CT-HYB-SEGMENT'
+description = """CT-HYB-SEGMENT is the hybridization expansion continuous-time quantum Monte Carlo code."""
+
+toolchain = {'name': 'foss', 'version': '2018b'}
+
+source_urls = ['https://github.com/ALPSCore/CT-HYB-SEGMENT/archive/']
+sources = [{'download_filename': '%s.tar.gz' % local_commit, 'filename': SOURCE_TAR_GZ}]
+patches = []
+checksums = ['fce949259cd54cc3b109951ee0e97c2e56b763af06fe0dcaf245a48cf9fb7caf']
+
+builddependencies = [
+    ('CMake', '3.12.1'),
+    ('Eigen', '3.3.7'),
+]
+
+dependencies = [
+    ('Python', '2.7.15'),
+    ('ALPSCore', version, versionsuffix),
+    ('NFFT', '3.5.1'),
+]
+
+preconfigopts = "NFFT3_DIR=${EBROOTNFFT} "
+
+configopts = "-DCMAKE_BUILD_TYPE=Release -DALPSCore_DIR=${EBROOTALPSCORE} -DEIGEN3_INCLUDE_DIR=${EBROOTEIGEN}/include"
+
+sanity_check_paths = {
+    'files': ['bin/alps_cthyb'],
+    'dirs': [],
+}
+
+moduleclass = 'phys'
