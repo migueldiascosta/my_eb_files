@@ -1,0 +1,31 @@
+easyblock = 'PythonBundle'
+
+name = 'Cheetah3'
+version = '3.2.6'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'http://cheetahtemplate.org'
+description = "Cheetah is an open source template engine and code generation tool."
+
+toolchain = {'name': 'GCCcore', 'version': '8.3.0'}
+
+builddependencies = [('binutils', '2.32')]
+
+dependencies = [('Python', '3.7.4')]
+
+use_pip = True
+
+exts_list = [
+    (name, version, {
+        'modulename': 'Cheetah',
+        'source_urls': ['https://pypi.python.org/packages/source/C/Cheetah3'],
+        'checksums': ['f1c2b693cdcac2ded2823d363f8459ae785261e61c128d68464c8781dba0466b'],
+    }),
+]
+
+sanity_check_paths = {
+    'files': ['bin/cheetah'],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+moduleclass = 'tools'

@@ -1,0 +1,10 @@
+--- SConstruct.orig	2020-10-05 12:20:40.045636593 +0800
++++ SConstruct	2020-10-05 12:22:06.804744523 +0800
+@@ -1024,6 +1024,7 @@
+                INSTALL_DIR=installDir,
+                CONFIG_HEADER_DEFINES={},
+                LIBDEPS_TAG_EXPANSIONS=[],
++               ENV=os.environ,
+                )
+ 
+ env = Environment(variables=env_vars, **envDict)

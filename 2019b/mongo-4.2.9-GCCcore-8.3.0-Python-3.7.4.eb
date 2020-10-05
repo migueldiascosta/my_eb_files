@@ -1,0 +1,38 @@
+easyblock = 'SCons'
+name = 'mongo'
+version = '4.2.9'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://www.mongodb.com/'
+description = """MongoDB is a general purpose, document-based, distributed database
+ built for modern application developers and for the cloud era."""
+
+toolchain = {'name': 'GCCcore', 'version': '8.3.0'}
+
+source_urls = ['https://github.com/mongodb/mongo/archive/']
+sources = ['r%(version)s.tar.gz']
+patches = ['mongo-4.2.9_path.patch']
+checksums = ['06edd188bb0e73a83ec7c0b748c2b995e1d51772cf2b0e9677a81c5a1fded067']
+
+builddependencies = [
+    ('binutils', '2.32'),
+    ('SCons', '3.1.1'),
+]
+
+dependencies = [
+    ('Python', '3.7.4'),
+    ('Cheetah3', '3.2.6', versionsuffix),
+    ('PyYAML', '5.1.2'),
+    ('cURL', '7.66.0'),
+]
+
+prefix_arg = '--prefix='
+buildopts = "MONGO_VERSION=%(version)s"
+installopts = "MONGO_VERSION=%(version)s"
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ["."],
+}
+
+moduleclass = 'data'

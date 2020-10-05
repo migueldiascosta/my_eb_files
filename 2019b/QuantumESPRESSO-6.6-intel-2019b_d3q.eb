@@ -1,5 +1,6 @@
 name = 'QuantumESPRESSO'
 version = '6.6'
+versionsuffix = '_d3q'
 
 homepage = 'https://www.quantum-espresso.org'
 description = """Quantum ESPRESSO  is an integrated suite of computer codes
@@ -15,15 +16,18 @@ source_urls = [
     'https://github.com/QEF/q-e/releases/download/qe-%(version)s/',
     'https://github.com/dceresoli/qe-gipaw/archive/',
     'https://github.com/wannier-developers/wannier90/archive/',
+    'https://downloads.sourceforge.net/project/d3q/QE_6.6/',
 ]
 sources = [
     'qe-%(version)s-ReleasePack.tgz',
     #{'filename': 'qe-gipaw-%(version)s.tar.gz', 'download_filename': '%(version)s.tar.gz'},
     {'filename': 'wannier90-3.1.0.tar.gz', 'download_filename': 'v3.1.0.tar.gz'},
+    'd3q-1.1.7-qe6.6.tgz',
 ]
 checksums = [
     'de6996b9f1bf480bcd0166d24e918f5ff3c8fdb710f59f781bc9d33819280eb5',  # qe-6.6-ReleasePack.tgz
     '40651a9832eb93dec20a8360dd535262c261c34e13c41b6755fa6915c936b254',  # wannier90-3.1.0.tar.gz
+    '77d0b7c89d6572829b1fc26ab8bfbbabbc975b66217ae8581eeffd8f16ee69d9',  # d3q-1.1.7-qe6.6.tgz
 ]
 
 dependencies = [
@@ -34,9 +38,10 @@ dependencies = [
 
 # The third party packages should be installed separately and added as
 # dependencies.  The exception is w90, which is force built
-buildopts = 'all gwl xspectra couple epw w90' # gipaw
+buildopts = 'pwall d3q'  # all gwl xspectra couple epw w90' # gipaw
 
 # parallel build tends to fail
 parallel = 1
 
 moduleclass = 'chem'
+
