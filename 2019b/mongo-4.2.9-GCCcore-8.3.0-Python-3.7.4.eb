@@ -24,10 +24,11 @@ dependencies = [
     ('Cheetah3', '3.2.6', versionsuffix),
     ('PyYAML', '5.1.2'),
     ('cURL', '7.66.0'),
+    ('OpenSSL', '1.1.1d'),
 ]
 
 prefix_arg = '--prefix='
-buildopts = "MONGO_VERSION=%(version)s"
+buildopts = "MONGO_VERSION=%(version)s CPPPATH=${EBROOTOPENSSL}/include LIBPATH=${EBROOTOPENSSL}/lib"
 installopts = "MONGO_VERSION=%(version)s"
 
 sanity_check_paths = {
