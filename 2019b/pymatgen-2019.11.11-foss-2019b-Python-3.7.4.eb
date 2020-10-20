@@ -57,6 +57,12 @@ exts_list = [
         'source_urls': ['https://pypi.python.org/packages/source/p/pybtex/'],
         'checksums': ['00816e5f8570609d8ce3360cd23916bd3e50428a3508127578fdb4dc2b731c1c'],
     }),
+    ('dnspython', '2.0.0', {
+        'modulename': 'dns',
+        'sources': ['%(name)s-%(version)s.zip'],
+        'source_urls': ['https://pypi.python.org/packages/source/d/dnspython/'],
+        'checksums': ['044af09374469c3a39eeea1a146e8cac27daec951f1f1f157b1962fc7cb9d1b7'],
+    }),
     ('pymongo', '3.10.0', {
         'source_urls': ['https://pypi.python.org/packages/source/p/pymongo/'],
         'checksums': ['c43879fe427ea6aa6e84dae9fbdc5aa14428a4cfe613fe0fee2cc004bf3f307c'],

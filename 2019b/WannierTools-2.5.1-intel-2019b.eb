@@ -1,0 +1,26 @@
+easyblock = 'MakeCp'
+
+name = 'WannierTools'
+version = '2.5.1'
+
+homepage = 'http://www.wanniertools.com/'
+description = "an open-source software package for novel topological materials"
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+
+source_urls = ['https://github.com/quanshengwu/wannier_tools/archive/']
+sources = ['V%(version)s.tar.gz']
+checksums = ['22aad8e95f2da07ac2dd892c2ca0438010779e6cc542e30f34ea5c3f580fd72c']
+
+prebuildopts = "cd soc && "
+buildopts = '-f Makefile.intel-mpi'
+parallel = 1
+
+files_to_copy = [(['bin/wt.x'], 'bin')]
+
+sanity_check_paths = {
+    'files': ['bin/wt.x'],
+    'dirs': [],
+}
+
+moduleclass = 'phys'

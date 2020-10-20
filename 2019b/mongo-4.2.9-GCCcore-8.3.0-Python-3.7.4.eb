@@ -29,7 +29,7 @@ dependencies = [
 
 prefix_arg = '--prefix='
 buildopts = "MONGO_VERSION=%(version)s CPPPATH=${EBROOTOPENSSL}/include LIBPATH=${EBROOTOPENSSL}/lib"
-installopts = "MONGO_VERSION=%(version)s"
+installopts = buildopts
 
 sanity_check_paths = {
     'files': [],

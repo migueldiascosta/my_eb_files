@@ -1,0 +1,40 @@
+easyblock = 'MakeCp'
+
+name = 'ALF'
+version = '2.0'
+
+# no releases/tags, using commit to get reproducible builds
+_commit = '5a7012bff736e767a55b1765b34591965c6ad445'
+versionsuffix = '_%s' % _commit[:8]
+
+homepage = 'https://alf.physik.uni-wuerzburg.de'
+description = """Algorithms for Lattice Fermions package provides a general code for the finite temperature 
+ auxiliary field Quantum Monte Carlo algorithm."""
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+toolchainopts = {'usempi': True, 'openmp': True}
+
+source_urls = ['https://git.physik.uni-wuerzburg.de/ALF/ALF/-/archive/%s/' % _commit]
+sources = ['%%(name)s_code-%s.tar.gz' % _commit]
+checksums = ['1371bced85491ed10a6ab168a6ddd091384e6f61c9a7b19c78ab60cea818bde6']
+
+unpack_options = '--strip-components=1'
+
+prebuildopts = ". ./configure.sh Intel && "
+
+_analysis = ['cov_%s' % _x for _x in ['eq', 'scal', 'tau', 'tau_ph']] + ['ana', 'Max_SAC']
+_prog = ['Hubbard', 'Hubbard_Plain_Vanilla', 'Kondo', 'LRC', 'tV', 'Z2_Matter']
+
+_files = ['Analysis/%s.out' % _x for _x in _analysis]
+_files += ['Prog/%s.out' % _x for _x in _prog]
+
+files_to_copy = [(_files, 'bin')]
+
+parallel = 1
+
+sanity_check_paths = {
+    'files': ['bin/%s.out' % _x for _x in _analysis + _prog],
+    'dirs': ["."]
+}
+
+moduleclass = 'phys'

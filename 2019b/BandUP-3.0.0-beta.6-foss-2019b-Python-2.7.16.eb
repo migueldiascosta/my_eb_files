@@ -21,7 +21,7 @@ checksums = [
 dependencies = [
     ('Python', '2.7.16'),
     ('SciPy-bundle', '2019.10', versionsuffix),
-    ('matplotlib', '2.2.4', versionsuffix),
+    ('matplotlib', '2.2.5', versionsuffix),
     ('FFTW', '3.3.8'),
 ]
 
