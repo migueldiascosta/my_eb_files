@@ -1,0 +1,51 @@
+easyblock = 'MakeCp'
+
+name = 'BandUP'
+version = '3.0.0-beta.6'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://www.ifm.liu.se/theomod/compphys/band-unfolding/'
+description = """Band Unfolding code for Plane-wave based calculations"""
+
+toolchain = {'name': 'foss', 'version': '2019b'}
+toolchainopts = {'openmp': True}
+
+source_urls = ['https://github.com/band-unfolding/bandup/archive/']
+sources = ['v%(version)s.tar.gz']
+patches = ['BandUP-%(version)s_build.patch']
+checksums = [
+    '4a2d846719e14ea869bb1b74126ee6fd3567dc3d484b925dc495e70d561e4771',  # v3.0.0-beta.6.tar.gz
+    '727aa94c1cb5ad69ec7b605cb37e1a1380ba3bc606201164f5caabdb1be7bf3e',  # BandUP-3.0.0-beta.6_build.patch
+]
+
+dependencies = [
+    ('Python', '2.7.16'),
+    ('SciPy-bundle', '2019.10', versionsuffix),
+    ('matplotlib', '2.2.4', versionsuffix),
+    ('FFTW', '3.3.8'),
+]
+
+prebuildopts = "sed -i 's/-openmp/-qopenmp/g' src/Makefile && "
+# prebuildopts += "sed -i 's/-openmp/-qopenmp/g' src/python_interface/bandupy/build.py && "
+
+build_cmd = "./build -compiler gfortran"
+
+files_to_copy = [
+    (['bandup', 'src', 'utils', 'tutorial'], ''),
+]
+
+# important
+parallel = False
+
+sanity_check_paths = {
+    'files': ['bandup', 'src/BandUP.x', 'src/get_SCKPTS_pre_BandUP.x'],
+    'dirs': ['src/python_interface', 'utils', 'tutorial']
+}
+
+modextrapaths = {
+    'PATH': '',
+    'BANDUPDIR': '',
+    'PYTHONPATH': ['src/python_interface'],
+}
+
+moduleclass = 'chem'
