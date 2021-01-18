@@ -128,9 +128,16 @@ class EB_BerkeleyGW(ConfigureMake):
 
         fftw = get_software_root('FFTW')
         if mkl or fftw:
+
+            fftlib = get_software_root('fftlib')
+            if fftlib:
+                fftw_libs = "%s -lstdc++ -ldl %s" % (os.path.join(fftlib, 'lib', 'fftlib.o'), os.environ['LIBFFT%s' % var_suffix])
+            else:
+                fftw_libs = os.environ['LIBFFT%s' % var_suffix]
+
             mathflags.append('-DUSEFFTW3')
             self.cfg.update('buildopts', 'FFTWINCLUDE="%s"' % os.environ['FFTW_INC_DIR'])
-            self.cfg.update('buildopts', 'FFTWLIB="%s"' % os.environ['LIBFFT%s' % var_suffix])
+            self.cfg.update('buildopts', 'FFTWLIB="%s"' % fftw_libs)
 
         hdf5 = get_software_root('HDF5')
         if hdf5:
@@ -169,7 +176,7 @@ class EB_BerkeleyGW(ConfigureMake):
 
         progs = ['epsilon', 'sigma', 'kernel', 'absorption', 'nonlinearoptics', 'parabands']
         flavors = ['real', 'cplx']
-        files = [os.path.join('bin',  prog + '.' + flavor + '.x') for prog in progs for flavor in flavors]
+        files = [os.path.join('bin', prog + '.' + flavor + '.x') for prog in progs for flavor in flavors]
 
         custom_paths = {
             'files': files,

@@ -1,0 +1,39 @@
+easyblock = 'PythonBundle'
+
+name = 'CellConstructor'
+version = '1.0alpha1'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://github.com/mesonepigreco/CellConstructor'
+description = """CellConstructor is a python library that allows to easily manipulate crystal structures
+  and phonon dynamical matrices. It is based on quantum espresso, and wraps in python many of the utilities
+ available in the PHonon package as post-processing tools."""
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+
+dependencies = [
+    ('Python', '3.7.4'),
+    ('ASE', '3.20.1', versionsuffix),
+]
+
+use_pip = True
+sanity_pip_check = True
+
+# required because we're building Python packages (MarkupSafe) using Intel compilers on top of Python built with GCC.
+check_ldshared = True
+
+exts_default_options = {'source_urls': [PYPI_SOURCE]}
+
+exts_list = [
+    (name, version, {
+        'preinstallopts': "mv setup.py setup.py.orig && sed 's/[\"lapack\", \"blas\"]/[\"openblas\"]/g' setup-EB-intel-Python.py > setup.py",
+        'checksums': ['685b988c746abd49ff1a4070135d4642d515a4c43312be0edd65b4eda884c99f'],
+    }),
+]
+
+sanity_check_paths = {
+    'files': ['bin/ase'],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+moduleclass = 'chem'

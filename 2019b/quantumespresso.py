@@ -172,8 +172,8 @@ class EB_QuantumESPRESSO(ConfigureMake):
             repls.append(('CPP', cpp, False))
             env.setvar('CPP', cpp)
 
-            # also define $FCCPP, but do *not* include -C (comments should not be preserved when preprocessing Fortran)
-            env.setvar('FCCPP', "%s -E" % os.getenv('CC'))
+        # also define $FCCPP, but do *not* include -C (comments should not be preserved when preprocessing Fortran)
+        env.setvar('FCCPP', "%s -E" % os.getenv('CC'))
 
         if comp_fam == toolchain.INTELCOMP:
             # Intel compiler must have -assume byterecl (see install/configure)
@@ -193,6 +193,11 @@ class EB_QuantumESPRESSO(ConfigureMake):
                 dflags.append('-D__FFTW3')
             else:
                 dflags.append('-D__FFTW')
+
+                fftlib = get_software_root('fftlib')
+                if fftlib:
+                    libfft = "%s -lstdc++ -ldl %s" % (os.path.join(fftlib, 'lib', 'fftlib.o'), libfft)
+
             env.setvar('FFTW_LIBS', libfft)
 
         if get_software_root('ACML'):
