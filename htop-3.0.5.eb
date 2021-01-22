@@ -1,0 +1,28 @@
+easyblock = 'ConfigureMake'
+
+name = 'htop'
+version = '3.0.5'
+
+homepage = 'http://hisham.hm/htop/'
+
+description = """An interactive process viewer for Unix"""
+
+toolchain = SYSTEM
+
+source_urls = ['https://github.com/htop-dev/htop/archive/']
+sources = ['%(version)s.tar.gz']
+checksums = ['4c2629bd50895bd24082ba2f81f8c972348aa2298cc6edc6a21a7fa18b73990c']
+
+dependencies = [
+    ('ncurses', '6.0'),
+]
+
+preconfigopts = 'export LIBS="$LIBS -ltinfo" && '
+preconfigopts += "./autogen.sh && "
+
+sanity_check_paths = {
+    'files': ['bin/htop'],
+    'dirs': ['share'],
+}
+
+moduleclass = 'tools'
