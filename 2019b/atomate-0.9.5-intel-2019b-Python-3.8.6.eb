@@ -1,0 +1,84 @@
+easyblock = 'PythonBundle'
+
+name = 'atomate'
+version = '0.9.5'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://pythonhosted.org/atomate/'
+description = """atomate has implementations of FireWorks workflows for Materials Science."""
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+
+dependencies = [
+    ('Python', '3.8.6'),
+    ('PyYAML', '5.3.1'),
+    ('pymatgen', '2020.12.31', versionsuffix),
+]
+
+exts_list = [
+    ('MarkupSafe', '1.1.1', {
+        'source_urls': ['https://pypi.python.org/packages/source/m/markupsafe/'],
+        'checksums': ['29872e92839765e546828bb7754a68c418d927cd064fd4708fab9fe9c8bb116b'],
+    }),
+    ('Jinja2', '2.11.2', {
+        'source_urls': ['https://pypi.python.org/packages/source/J/Jinja2/'],
+        'checksums': ['89aab215427ef59c34ad58735269eb58b1a5808103067f7bb9d5836c651b3bb0'],
+    }),
+    ('Werkzeug', '1.0.1', {
+        'source_urls': ['https://pypi.python.org/packages/source/W/Werkzeug/'],
+        'checksums': ['6c80b1e5ad3665290ea39320b91e1be1e0d5f60652b964a3070216de83d2e47c'],
+    }),
+    ('click', '7.1.2', {
+        'source_urls': ['https://pypi.python.org/packages/source/c/click/'],
+        'checksums': ['d2b5255c7c6349bc1bd1e59e08cd12acbbd63ce649f2588755783aa94dfb6b1a'],
+    }),
+    ('itsdangerous', '1.1.0', {
+        'source_urls': ['https://pypi.python.org/packages/source/i/itsdangerous/'],
+        'checksums': ['321b033d07f2a4136d3ec762eac9f16a10ccd60f53c0c91af90217ace7ba1f19'],
+    }),
+    ('Flask', '1.1.2', {
+        'source_urls': ['https://pypi.python.org/packages/source/F/Flask/'],
+        'checksums': ['4efa1ae2d7c9865af48986de8aeb8504bf32c7f3d6fdc9353d34b21f4b127060'],
+    }),
+    ('Flask-paginate', '0.8.1', {
+        'modulename': 'flask_paginate',
+        'source_tmpl': 'flask-paginate-%(version)s.tar.gz',
+        'source_urls': ['https://pypi.python.org/packages/source/F/Flask-paginate/'],
+        'checksums': ['31133c29c718aed95276425f7795d0a32b8d45a992ddd359c69600f22f869254'],
+    }),
+    ('sentry-sdk', '0.19.5', {
+        'source_urls': ['https://pypi.python.org/packages/source/s/sentry-sdk/'],
+        'checksums': ['737a094e49a529dd0fdcaafa9e97cf7c3d5eb964bd229821d640bc77f3502b3f'],
+    }),
+    ('custodian', '2021.1.8', {
+        'source_urls': ['https://pypi.python.org/packages/source/p/custodian/'],
+        'checksums': ['271a5e10234b935cf67ad9cd650ec014f8fcb5528649678bd24fe2af2909125e'],
+    }),
+    ('pydash', '4.9.2', {
+        'source_urls': ['https://pypi.python.org/packages/source/p/pydash/'],
+        'checksums': ['11d8f3c92d92a004e042fdb226b10dba28f4e311546b0de89d983e91539d5e55'],
+    }),
+    ('tqdm', '4.56.0', {
+        'source_urls': ['https://pypi.python.org/packages/source/t/tqdm/'],
+        'checksums': ['fe3d08dd00a526850568d542ff9de9bbc2a09a791da3c334f3213d8d0bbbca65'],
+    }),
+    ('FireWorks', '1.9.6', {
+        'source_urls': ['https://pypi.python.org/packages/source/F/FireWorks/'],
+        'checksums': ['8b1e4cb3816c5c047e28165df2a860f982899575c0e32d413ae669320aabe64f'],
+    }),
+    (name, version, {
+        'source_urls': ['https://pypi.python.org/packages/source/a/atomate/'],
+        'checksums': ['f25915e8e0197529e1010f700f6cf9594baa5c493a4cafa58276cf746bd64b6c'],
+    }),
+]
+
+# required because we're building a Python package using Intel compilers on top of Python built with GCC
+check_ldshared = True
+
+download_dep_fail = True
+use_pip = True
+
+sanity_pip_check = True
+
+
+moduleclass = 'chem'
