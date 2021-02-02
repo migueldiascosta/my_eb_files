@@ -8,7 +8,7 @@ description = """SIESTA is both a method and its computer program implementation
 toolchain = {'name': 'intel', 'version': '2019b'}
 toolchainopts = {'usempi': True, 'precise': True}
 
-source_urls = ['https://gitlab.com/siesta-project/siesta/-/archive/v%(version)s/']
+source_urls = ['https://gitlab.com/siesta-project/siesta/-/releases/v%(version)s/downloads/']
 sources = [SOURCELOWER_TAR_GZ]
 checksums = ['4203cda9ae1c609c28d54f6ec279eb535a567deb9b41618e41c14a1ceb30116a']
 
