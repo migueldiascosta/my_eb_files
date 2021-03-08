@@ -1,0 +1,63 @@
+easyblock = 'PythonBundle'
+
+name = 'wannierberri'
+version = '0.9.0.1'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://wannier-berri.org'
+description = """Wannier Berri is a code to calculate different properties by means of Wannier interpolation.
+ It may be considered as a strongly improved version of postw90.x part of Wannier90."""
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+
+dependencies = [
+    ('Python', '3.8.6'),
+    ('pyFFTW', '0.12.0', versionsuffix),
+    ('matplotlib', '3.3.3', versionsuffix),
+]
+
+use_pip = True
+sanity_pip_check = True
+
+# required because we're building Python packages (MarkupSafe) using Intel compilers on top of Python built with GCC.
+check_ldshared = True
+
+exts_default_options = {'source_urls': [PYPI_SOURCE]}
+
+exts_list = [
+    ('pyfiglet', '0.8.post1', {
+        'checksums': ['c6c2321755d09267b438ec7b936825a4910fec696292139e664ca8670e103639'],
+    }),
+    ('lazy-property', '0.0.1', {
+        'checksums': ['3a1cd36949b323468731ba569e169415a609d5904d53fffe982055fbe67b1180'],
+    }),
+    ('colorama', '0.4.4', {
+        'checksums': ['5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b'],
+    }),
+    ('termcolor', '1.1.0', {
+        'checksums': ['1d6d69ce66211143803fbc56652b41d73b4a400a2891d7bf7a1cdf4c02de613b'],
+    }),
+    ('packaging', '20.8', {
+        'checksums': ['78598185a7008a470d64526a8059de9aaa449238f280fc9eb6b13ba6c4109093'],
+    }),
+    ('fortio', '0.4', {
+        'checksums': ['e143fbb8cc2644550b3b08ecef62eae190daf82377b5527a68d04037be934650'],
+    }),
+    (name, version, {
+        'source_tmpl': '%(name)s-%(version)s-py3-none-any.whl',
+        'unpack_sources': False,
+        'checksums': ['103cbbae1db33201699d50c2715463dea7d386d07c0e45372f8a8659280cbc5b'],
+    }),
+]
+
+sanity_check_paths = {
+    'files': ['bin/%(name)s'],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ["."]
+}
+
+moduleclass = 'phys'

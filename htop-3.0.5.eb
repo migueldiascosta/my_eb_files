@@ -9,16 +9,15 @@ description = """An interactive process viewer for Unix"""
 
 toolchain = SYSTEM
 
-source_urls = ['https://github.com/htop-dev/htop/archive/']
-sources = ['%(version)s.tar.gz']
-checksums = ['4c2629bd50895bd24082ba2f81f8c972348aa2298cc6edc6a21a7fa18b73990c']
+source_urls = ['https://bintray.com/htop/source/download_file?file_path=']
+sources = [SOURCE_TAR_GZ]
+checksums = ['19535f8f01ac08be2df880c93c9cedfc50fa92320d48e3ef92a30b6edc4d1917']
 
 dependencies = [
-    ('ncurses', '6.0'),
+    ('ncurses', '6.2'),
 ]
 
-preconfigopts = 'export LIBS="$LIBS -ltinfo" && '
-preconfigopts += "./autogen.sh && "
+preconfigopts = 'LIBS="$LIBS -ltinfo"'
 
 sanity_check_paths = {
     'files': ['bin/htop'],
