@@ -1,6 +1,7 @@
 name = 'Siesta'
-version = '20200811'
-local_commit = 'c8e386d84aaf4da248604f32dfaf787ec4125e55'
+_release = 'MaX-1.0.1'
+version = '4.1-%s' % _release
+versionsuffix = '_no_utils'
 
 homepage = 'http://departments.icmab.es/leem/siesta'
 description = """SIESTA is both a method and its computer program implementation, to perform efficient electronic
@@ -9,12 +10,11 @@ description = """SIESTA is both a method and its computer program implementation
 toolchain = {'name': 'intel', 'version': '2019b'}
 toolchainopts = {'usempi': True, 'precise': True}
 
-source_urls = ['https://gitlab.com/siesta-project/siesta/-/archive/%s' % local_commit]
-sources = [{'download_filename': 'archive.tar.gz', 'filename': SOURCE_TAR_GZ}]
-checksums = ['c4c2d97de3e26b0cfa44775369b245480f6face95f6534af63da2baf83ada665']
+source_urls = ['https://gitlab.com/siesta-project/siesta/-/archive/%s' % _release]
+sources = ['%%(namelower)s-%s.tar.gz' % _release]
+checksums = ['c7de663b493f4f7f036a0dca37efb1967a16a2ec23d6828417185d52ef965361']
 
 dependencies = [
-    ('ELSI', '2.5.0'),
     ('libGridXC', '0.8.5'),
     ('libPSML', '1.1.8'),
     ('netCDF-Fortran', '4.5.2'),
@@ -22,8 +22,8 @@ dependencies = [
 ]
 
 with_transiesta = False  # transiesta is now siesta --electrode
-with_utils = True
+with_utils = False
 
-# runtest = 'check'
+#runtest = 'check'
 
 moduleclass = 'chem'

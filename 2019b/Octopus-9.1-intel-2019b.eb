@@ -54,7 +54,7 @@ configopts += 'FCFLAGS="$FCFLAGS -ffree-line-length-none" '
 configopts += 'FCCPP="/lib/cpp -C -ffreestanding -Dvector=vector" '
 
 # Run only the short tests, as the full testsuite can take a lot of time.
-runtest = 'MPIEXEC="`which mpirun` --bind-to none" check-short'
+#runtest = 'MPIEXEC="`which mpirun` --bind-to none" check-short'
 
 sanity_check_paths = {
     'files': ['bin/octopus'],

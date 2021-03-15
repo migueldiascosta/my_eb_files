@@ -20,8 +20,8 @@ dependencies = [
 ]
 
 with_transiesta = False  # transiesta is now siesta --electrode
-with_utils = False
+with_utils = True
 
-runtest = 'check'
+#runtest = 'check'
 
 moduleclass = 'chem'
