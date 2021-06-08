@@ -1,0 +1,11 @@
+--- Makefile.orig	2021-04-30 12:20:20.628951028 +0800
++++ Makefile	2021-04-30 12:20:50.627663683 +0800
+@@ -133,7 +133,7 @@
+ manual:
+ 	(cd documentation/users/manual && python assemble_manual.py)
+ 
+-install: all
++install: 
+ ifdef INSTDIR
+ 	mkdir -p $(INSTDIR)/bin
+ 	install bin/*.x $(INSTDIR)/bin/

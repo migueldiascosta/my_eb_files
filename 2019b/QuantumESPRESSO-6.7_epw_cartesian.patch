@@ -1,0 +1,20 @@
+--- qe-6.7/EPW/src/grid.f90.orig	2021-04-23 14:46:03.347076376 +0800
++++ qe-6.7/EPW/src/grid.f90	2021-04-23 14:46:22.646913152 +0800
+@@ -105,14 +105,14 @@
+           !
+         ENDDO
+         CLOSE(iunkf)
+-        IF (imatches("cartesian", coordinate_type)) THEN
+-          CALL cryst_to_cart(nkqtotf, xkf_, at, -1)
+-        ENDIF
+         !
+         ! redefine nkqtotf to include the k+q points
+         !
+         nkqtotf = 2 * nkqtotf
+         !
++        IF (imatches("cartesian", coordinate_type)) THEN
++          CALL cryst_to_cart(nkqtotf, xkf_, at, -1)
++        ENDIF
+       ELSEIF ((nkf1 /= 0) .AND. (nkf2 /= 0) .AND. (nkf3 /= 0)) THEN ! generate grid
+         IF (mp_mesh_k) THEN
+           ! get size of the mp_mesh in the irr wedge
