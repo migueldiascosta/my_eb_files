@@ -1,0 +1,24 @@
+--- src/vdw_nl.F.orig	2021-06-15 16:23:21.795207466 +0800
++++ src/vdw_nl.F	2021-06-15 16:24:24.916692176 +0800
+@@ -445,10 +445,19 @@
+     logical :: lkern
+     integer :: nmesh, IOstatus
+ 
++    CHARACTER(len=255) :: vdw_kernel_path
++    CALL get_environment_variable("VASP6_VDWKERNEL_PATH", vdw_kernel_path)
++
+     !ok if the kernel table is here read it
+-    inquire( file='vdw_kernel.bindat', exist=lkern)
++    inquire( file=vdw_kernel_path, exist=lkern)
++    IF (.NOT. lkern) THEN
++       inquire( file='vdw_kernel.bindat', exist=lkern)
++       if (lkern) THEN
++          vdw_kernel_path = 'vdw_kernel.bindat'
++       ENDIF
++    ENDIF
+     IF (lkern) then
+-      open (unit=10, file='vdw_kernel.bindat', form='unformatted')
++      open (unit=10, file=vdw_kernel_path, form='unformatted')
+       read(10,IOSTAT=IOstatus) nmesh
+       IF (nmesh .NE. nd) THEN
+         IF (IU0>=0) WRITE(IU0,*)  'nmesh ', nmesh
