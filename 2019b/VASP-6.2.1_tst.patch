@@ -1,0 +1,42 @@
+--- src/main.F.orig	2021-07-06 14:19:47.733522957 +0800
++++ src/main.F	2021-07-06 14:21:09.893802145 +0800
+@@ -886,7 +886,7 @@
+ ! init all chains (INCAR reader)
+ !-----------------------------------------------------------------------
+       LCHAIN = IMAGES > 0 .AND. .NOT.AFQMC_SET % ACTIVE
+-      IF (LCHAIN) CALL chain_init( T_INFO, IO)
++      CALL chain_init( T_INFO, IO)
+ !-----------------------------------------------------------------------
+ !xml finish copying parameters from INCAR to xml file
+ ! no INCAR reading from here 
+@@ -3403,7 +3403,7 @@
+       ENDIF
+ 
+       CALL CHAIN_FORCE(T_INFO%NIONS,DYN%POSION,TOTEN,TIFOR, &
+-           LATT_CUR%A,LATT_CUR%B,IO%IU6)
++           TSIF,LATT_CUR%A,LATT_CUR%B,IO%IU6)
+ 
+       CALL PARALLEL_TEMPERING(NSTEP,T_INFO%NIONS,DYN%POSION,DYN%VEL,TOTEN,TIFOR,DYN%TEBEG,DYN%TEEND, &
+            LATT_CUR%A,LATT_CUR%B,IO%IU6)
+--- src/.objects.orig	2021-07-06 14:22:26.443130522 +0800
++++ src/.objects	2021-07-06 14:24:54.413830671 +0800
+@@ -98,6 +98,19 @@
+ 	dos.o \
+ 	elf.o \
+ 	hamil_rot.o \
++	bfgs.o \
++	dynmat.o  \
++	instanton.o  \
++	lbfgs.o \
++	sd.o \
++	cg.o \
++	dimer.o \
++	bbm.o \
++	fire.o \
++	lanczos.o \
++	neb.o \
++	qm.o \
++	opt.o \
+ 	chain.o \
+ 	dyna.o \
+ 	fileio.o \
