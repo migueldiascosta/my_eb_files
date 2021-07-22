@@ -1,0 +1,16 @@
+--- /dev/null	2020-09-26 14:11:04.071938804 +0800
++++ setup.make	2021-07-22 15:30:21.694786869 +0800
+@@ -0,0 +1,11 @@
++CC = mpicc
++FC = mpiifort
++LUA_DIR = ${EBROOTLUA}
++INC += -I$(LUA_DIR)/include
++CFLAGS = -g
++FFLAGS = -g
++.f90.o:
++	$(FC) -c $(FFLAGS) $(INC) $<
++.F90.o:
++	$(FC) -c $(FFLAGS) $(INC) $<
++.c.o:
++	$(CC) -c $(CFLAGS) $(INC) $<
++

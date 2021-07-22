@@ -196,6 +196,14 @@ class EB_Siesta(ConfigureMake):
                 netcdf_lib_and_inc += "\nINCFLAGS = $(NETCDF_INCLUDE)"
                 regex_newlines.append((r"^(COMP_LIBS\s*=.*)$", r"\1\n%s" % netcdf_lib_and_inc))
 
+            flook = get_software_root('flook')
+            if flook:
+                regex_subs.extend([
+                    (r"^(LIBS\s*=.*)$", r"\1 -lflookall -llua -ldl"),
+                    (r"^(FPPFLAGS\s*:?=.*)$", r"\1 -I%s/include -DSIESTA__FLOOK" % flook),
+                    (r"^(COMP_LIBS\s*=.*)$", r"\1 libfdict.a"),
+                ])
+
             xmlf90 = get_software_root('xmlf90')
             if xmlf90:
                 regex_subs.append((r"^(XMLF90_ROOT\s*=).*$", r"\1%s" % xmlf90))
