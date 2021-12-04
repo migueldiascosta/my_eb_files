@@ -1,0 +1,36 @@
+name = 'BerkeleyGW'
+version = '3.0.1'
+versionsuffix = '_hdf1.10.2'
+
+homepage = 'https://www.berkeleygw.org'
+description = """The BerkeleyGW Package is a set of computer codes that calculates the quasiparticle
+ properties and the optical responses of a large variety of materials from bulk periodic crystals to
+ nanostructures such as slabs, wires and molecules."""
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+toolchainopts = {'usempi': True, 'openmp': True}
+
+source_urls = ['https://berkeley.box.com/shared/static/']
+sources = [{'download_filename': 'm1dgnhiemo47lhxczrn6si71bwxoxor8.gz', 'filename': SOURCE_TAR_GZ}]
+patches = [
+    'BerkeleyGW-2.1.0_tests.patch',
+    'BerkeleyGW-3.0_makefile.patch',
+    'BerkeleyGW-3.0.1_version.patch',
+]
+checksums = [
+    '7d8c2cc1ee679afb48efbdd676689d4d537226b50e13a049dbcb052aaaf3654f',  # BerkeleyGW-3.0.1.tar.gz
+    '38cdef673daaa78425af641d4b51437aa1038dcc7310ca523a38b117613dd4f2',  # BerkeleyGW-2.1.0_tests.patch
+    '9104b9da50b1f656dd441a636a6437a83c47dbd3bca260c90cb2f36f18af0011',  # BerkeleyGW-3.0_makefile.patch
+    '5da3dde435284558035b024d9d196417c670f3fce82ec6179d8666a1bca61f31',  # BerkeleyGW-3.0.1_version.patch
+]
+
+dependencies = [
+    ('ELPA', '2019.11.001'),
+    # ('Python', '3.8.6'),
+    # ('h5py', '3.1.0', versionsuffix),
+    ('HDF5', '1.10.2'),
+]
+
+runtest = False
+
+moduleclass = 'phys'
