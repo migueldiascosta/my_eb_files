@@ -1,0 +1,29 @@
+easyblock = 'ConfigureMake'
+
+name = 'atomsk'
+version = 'b0.11.2'
+
+homepage = 'http://atomsk.univ-lille1.fr/'
+description = """Atomsk is an Open Source command-line program dedicated to the creation, manipulation, and conversion of atomic data files."""
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+
+source_urls = ['http://atomsk.univ-lille1.fr/code']
+sources = ['%(name)s_%(version)s.tar.gz']
+checksums = ['7f92ce2216241610e0ce3c8bf16a8a0ae21a5d39946ef3aaab80981d5d0b3438']
+
+start_dir = 'src'
+
+skipsteps = ['configure']
+
+buildopts = '-f Makefile.ifort atomsk'
+
+preinstallopts = 'mkdir %(installdir)s/bin mkdir %(installdir)s/etc && '
+installopts = 'INSTPATH=%(installdir)s CONFPATH=%(installdir)s/etc/'
+
+sanity_check_paths = {
+    'files': ['bin/atomsk', 'etc/atomsk.conf'],
+    'dirs': ['bin', 'etc'],
+}
+
+moduleclass = 'phys'
