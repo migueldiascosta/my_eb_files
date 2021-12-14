@@ -1,0 +1,44 @@
+easyblock = 'MakeCp'
+
+name = 'VASP'
+version = '6.1.2_patched'
+
+homepage = 'http://www.vasp.at'
+description = """The Vienna Ab initio Simulation Package (VASP) is a computer program for atomic scale
+materials modelling, e.g. electronic structure calculations and quantum-mechanical molecular dynamics,
+from first principles."""
+
+toolchain = {'name': 'intel', 'version': '2020b'}
+toolchainopts = {'usempi': True}
+
+# Vasp is proprietary software, see http://www.vasp.at/index.php/faqs on how to get access to the code
+sources = ['%(namelower)s.%(version)s.tgz']
+
+checksums = [
+    'a9c459dd277e7adcefb54de8593ea7b19c047e2dc074940b4f4418439c65f532',  # vasp.6.1.2_patched.tgz
+]
+
+prebuildopts = 'cp arch/makefile.include.linux_intel ./makefile.include && '
+
+# Makefile uses LIBS as a list of folders
+prebuildopts += 'unset LIBS && '
+
+_targets = ['std', 'gam', 'ncl']
+
+buildopts = '%s ' % ' '.join(_targets)
+buildopts += 'FCL="$MPIF90" DEBUG="$FFLAGS" CFLAGS_LIB="$CFLAGS" FFLAGS_LIB="$FFLAGS" INCS="-I${FFT_INC_DIR}" '
+buildopts += 'OFLAG="$FFLAGS" OFLAG_1="${FFLAGS/O2/O1}" OFLAG_2="$FFLAGS" OFLAG_3="${FFLAGS/O2/O3}" '
+buildopts += 'LLIBS="$LIBSCALAPACK $LIBFFT -Lparser -lparser -lstdc++" '
+
+runtest = 'test'
+
+parallel = 1
+
+files_to_copy = [(['bin/vasp_' + x for x in _targets], 'bin')]
+
+sanity_check_paths = {
+    'files': ['bin/vasp_' + x for x in _targets],
+    'dirs': []
+}
+
+moduleclass = 'phys'

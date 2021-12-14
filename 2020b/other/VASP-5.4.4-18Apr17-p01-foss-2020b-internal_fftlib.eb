@@ -1,0 +1,61 @@
+easyblock = 'MakeCp'
+
+name = 'VASP'
+version = '5.4.4-18Apr17-p01'
+versionsuffix = '-internal_fftlib'
+
+homepage = 'http://www.vasp.at'
+description = """The Vienna Ab initio Simulation Package (VASP) is a computer program for atomic scale
+materials modelling, e.g. electronic structure calculations and quantum-mechanical molecular dynamics,
+from first principles."""
+
+toolchain = {'name': 'foss', 'version': '2020b'}
+toolchainopts = {'usempi': True}
+
+# Vasp is proprietary software, see http://www.vasp.at/index.php/faqs on how to get access to the code
+sources = ['%%(namelower)s.%s.tar.gz' % version.split('-')[0]]
+patches = [
+    'vasp.5.4.4.16052018.patch',
+    'vasp.5.4.4.vdwpath.patch',
+]
+checksums = [
+    '5bd2449462386f01e575f9adf629c08cb03a13142806ffb6a71309ca4431cfb3',  # vasp.5.4.4.tar.gz
+    '3392a0ffccfa17a77775be86b1bed74f8f75a0a642f77ee0fae59950d0a3d3f4',  # vasp.5.4.4.16052018.patch
+    '8aca4717e2d5925248364a14ed128452af3817e03afbaad2a0b53ee8be4d94bf',  # vasp.5.4.4.vdwpath.patch
+]
+
+# patch from Vaspwiki, http://cms.mpi.univie.ac.at/patches/patch.5.4.4.16052018.gz
+prebuildopts = 'cp arch/makefile.include.linux_gnu ./makefile.include && '
+
+# Makefile uses LIBS as a list of folders
+prebuildopts += 'unset LIBS && '
+
+# add -fallow-argument-mismatch to FFLAGS, needed in GCC 10
+prebuildopts += 'export FFLAGS="-fallow-argument-mismatch -ffpe-summary=none $FFLAGS" && '
+
+# use FFTLIB to cache FFTW plans
+prebuildopts += 'echo "# For the fft library" >> ./makefile.include && '
+prebuildopts += 'echo "CXX_FFTLIB = g++ -fopenmp -std=c++11 -DFFTLIB_THREADSAFE" >> ./makefile.include && '
+prebuildopts += 'echo "INCS_FFTLIB= -I./include -I$EBROOTFFTW/include" >> ./makefile.include && '
+prebuildopts += 'echo "LIBS       += fftlib" >> ./makefile.include && '
+prebuildopts += 'echo "LLIBS      += fftlib.o -fopenmp -ldl" >> ./makefile.include && '
+prebuildopts += 'cd src/fftlib && ln -s ../../makefile.include && make && cd - &&'
+prebuildopts += "sed -i 's|cp src/makefile |cp src/fftlib.o src/makefile |' makefile && "
+
+_targets = ['std', 'gam', 'ncl']
+
+buildopts = '%s ' % ' '.join(_targets)
+buildopts += 'FCL="$MPIF90" DEBUG="$FFLAGS" OFLAG="$FFLAGS" OFLAG_1="${FFLAGS/O2/O1}" OFLAG_2="$FFLAGS" '
+buildopts += 'OFLAG_3="${FFLAGS/O2/O3}" CFLAGS_LIB="$CFLAGS" FFLAGS_LIB="$FFLAGS" BLAS="$LIBBLAS" '
+buildopts += 'LAPACK="$LIBLAPACK" BLACS="$LIBBLACS" SCALAPACK="$LIBSCALAPACK" FFTW="$EBROOTFFTW"'
+
+parallel = 1
+
+files_to_copy = [(['bin/vasp_' + x for x in _targets], 'bin')]
+
+sanity_check_paths = {
+    'files': ['bin/vasp_' + x for x in _targets],
+    'dirs': []
+}
+
+moduleclass = 'phys'
