@@ -1,0 +1,106 @@
+--- a/tensorflow/python/eager/pywrap_tfe_src.cc		2020-01-26 11:57:51.000000000 +0800
++++ b/tensorflow/python/eager/pywrap_tfe_src.cc		2021-12-14 11:41:16.784586848 +0800
+@@ -1319,7 +1319,7 @@
+     sizeof(TFE_Py_Tape),                          /* tp_basicsize */
+     0,                                            /* tp_itemsize */
+     &TFE_Py_Tape_Delete,                          /* tp_dealloc */
+-    nullptr,                                      /* tp_print */
++    0,                                            /* tp_print */
+     nullptr,                                      /* tp_getattr */
+     nullptr,                                      /* tp_setattr */
+     nullptr,                                      /* tp_reserved */
+@@ -1353,7 +1353,7 @@
+     sizeof(TFE_Py_ForwardAccumulator),                      /* tp_basicsize */
+     0,                                                      /* tp_itemsize */
+     &TFE_Py_ForwardAccumulatorDelete,                       /* tp_dealloc */
+-    nullptr,                                                /* tp_print */
++    0,                                                      /* tp_print */
+     nullptr,                                                /* tp_getattr */
+     nullptr,                                                /* tp_setattr */
+     nullptr,                                                /* tp_reserved */
+--- a/tensorflow/python/lib/core/bfloat16.cc	2020-01-26 11:57:51.000000000 +0800
++++ b/tensorflow/python/lib/core/bfloat16.cc	2021-12-14 11:43:49.153404023 +0800
+@@ -317,7 +317,7 @@
+     sizeof(PyBfloat16),                        // tp_basicsize
+     0,                                         // tp_itemsize
+     nullptr,                                   // tp_dealloc
+-    nullptr,                                   // tp_print
++    0,                                         // tp_print
+     nullptr,                                   // tp_getattr
+     nullptr,                                   // tp_setattr
+     nullptr,                                   // tp_compare / tp_reserved
+--- a/tensorflow/python/lib/core/ndarray_tensor_bridge.cc	2020-01-26 11:57:51.000000000 +0800
++++ b/tensorflow/python/lib/core/ndarray_tensor_bridge.cc	2021-12-14 11:45:43.954515133 +0800
+@@ -86,7 +86,7 @@
+     0,                                /* tp_itemsize */
+     /* methods */
+     TensorReleaser_dealloc,      /* tp_dealloc */
+-    nullptr,                     /* tp_print */
++    0,                           /* tp_print */
+     nullptr,                     /* tp_getattr */
+     nullptr,                     /* tp_setattr */
+     nullptr,                     /* tp_compare */
+--- a/tensorflow/python/eager/pywrap_tensor.cc		2021-12-14 08:07:18.873967094 +0800
++++ b/tensorflow/python/eager/pywrap_tensor.cc		2021-12-14 08:07:37.210829470 +0800
+@@ -839,7 +839,7 @@
+     sizeof(EagerTensor),                /* tp_basicsize */
+     0,                                  /* tp_itemsize */
+     (destructor)EagerTensor_dealloc,    /* tp_dealloc */
+-    nullptr,                            /* tp_print */
++    0,                                  /* tp_print */
+     nullptr,                            /* tp_getattr */
+     nullptr,                            /* tp_setattr */
+     nullptr,                            /* tp_compare */
+--- a/tensorflow/python/lib/core/bfloat16.cc
++++ b/tensorflow/python/lib/core/bfloat16.cc
+@@ -517,7 +517,7 @@ bool RegisterBfloat16Cast(int numpy_type, bool cast_is_safe) {
+ }
+ 
+ template <typename InType, typename OutType, typename Functor>
+-void BinaryUFunc(char** args, npy_intp* dimensions, npy_intp* steps,
++void BinaryUFunc(char** args, const npy_intp* dimensions, const npy_intp* steps,
+                  void* data) {
+   const char* i0 = args[0];
+   const char* i1 = args[1];
+@@ -532,11 +532,17 @@ void BinaryUFunc(char** args, npy_intp* dimensions, npy_intp* steps,
+   }
+ }
+ 
++// Numpy changed const-ness of PyUFuncGenericFunction, provide overload.
+ template <typename Functor>
+ void CompareUFunc(char** args, npy_intp* dimensions, npy_intp* steps,
+                   void* data) {
+   BinaryUFunc<bfloat16, npy_bool, Functor>(args, dimensions, steps, data);
+ }
++template <typename Functor>
++void CompareUFunc(char** args, const npy_intp* dimensions,
++                  const npy_intp* steps, void* data) {
++  BinaryUFunc<bfloat16, npy_bool, Functor>(args, dimensions, steps, data);
++}
+ 
+ struct Bfloat16EqFunctor {
+   npy_bool operator()(bfloat16 a, bfloat16 b) { return a == b; }
+--- a/tensorflow/python/platform/tf_logging.py 	 2021-12-14 11:08:50.949609436 +0800
++++ b/tensorflow/python/platform/tf_logging.py	 2021-12-14 11:14:45.908222560 +0800
+@@ -58,8 +58,19 @@
+   return None, None
+ 
+ 
+-# The definition of `findCaller` changed in Python 3.2
+-if _sys.version_info.major >= 3 and _sys.version_info.minor >= 2:
++# The definition of `findCaller` changed in Python 3.2,
++# and further changed in Python 3.8
++if _sys.version_info.major >= 3 and _sys.version_info.minor >= 8:
++  def _logger_find_caller(stack_info=False, stacklevel=1):  # pylint: disable=g-wrong-blank-lines
++    code, frame = _get_caller(4)
++    sinfo = None
++    if stack_info:
++      sinfo = '\n'.join(_traceback.format_stack())
++    if code:
++      return (code.co_filename, frame.f_lineno, code.co_name, sinfo)
++    else:
++      return '(unknown file)', 0, '(unknown function)', sinfo
++elif _sys.version_info.major >= 3 and _sys.version_info.minor >= 2:
+   def _logger_find_caller(stack_info=False):  # pylint: disable=g-wrong-blank-lines
+     code, frame = _get_caller(4)
+     sinfo = None
