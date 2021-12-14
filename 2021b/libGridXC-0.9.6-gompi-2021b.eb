@@ -1,0 +1,37 @@
+easyblock = 'ConfigureMake'
+
+name = 'libGridXC'
+version = '0.9.6'
+
+homepage = 'https://launchpad.net/libgridxc'
+description = """A library to compute the exchange and correlation energy and potential in spherical (i.e. an atom)
+ or periodic systems. It is based on SiestaXC."""
+
+toolchain = {'name': 'gompi', 'version': '2021b'}
+
+source_urls = ['https://gitlab.com/siesta-project/libraries/libgridxc/uploads/e6e4ec1e3ec648a45b3613e724c7be04/']
+sources = [SOURCELOWER_TAR_GZ]
+checksums = ['ee513eeb08b631e2efaaea62e73d85b6fbf204da85963be785915802e5497463']
+
+dependencies = [('libxc', '4.3.4')]
+
+# skipsteps = ['configure', 'install']
+
+# prebuildopts = "mkdir build && cd build && sh ../src/config.sh && "
+# prebuildopts += "cp ../extra/fortran.mk . && "
+# prebuildopts += "sed -i 's/=gfortran/=${F90}/' fortran.mk && "
+# prebuildopts += "sed -i 's/=mpif90/=${MPIF90}/' fortran.mk && "
+# prebuildopts += "sed -i 's/-fimplicit-none/-fimplicit-none -fallow-argument-mismatch/g' fortran.mk && "
+prebuildopts = "export LIBXC_ROOT=$EBROOTLIBXC && "
+# prebuildopts += "make clean && "
+
+buildopts = "WITH_LIBXC=1 WITH_MPI=1 PREFIX=%(installdir)s"
+
+parallel = 1
+
+sanity_check_paths = {
+    'files': ['share/org.siesta-project/libxc.mk', 'share/org.siesta-project/gridxc.mk', 'lib/libgridxc.a'],
+    'dirs': [],
+}
+
+moduleclass = 'chem'

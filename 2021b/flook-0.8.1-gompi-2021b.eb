@@ -1,0 +1,33 @@
+easyblock = 'MakeCp'
+
+name = 'flook'
+version = '0.8.1'
+
+homepage = 'https://e-cam.readthedocs.io/en/latest/Electronic-Structure-Modules/modules/flook/readme.html'
+description = """The flook library is a simplifiled API for communicating between fortran code and the Lua scripting language."""
+
+toolchain = {'name': 'gompi', 'version': '2021b'}
+toolchainopts = {'usempi': True}
+
+sources = ['v%(version)s.tar.gz']
+source_urls = ['https://github.com/ElectronicStructureLibrary/flook/archive/refs/tags/']
+
+patches = [('flook_setup_make.patch', 0)]
+
+dependencies = [('Lua', '5.4.3')]
+
+prebuildopts = 'export FC=$MPIGC && '
+
+buildopts = 'liball'
+
+files_to_copy = [
+    (['libflookall.a'], 'lib'),
+    (['flook.mod'], 'include'),
+]
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib', 'include']
+}
+
+moduleclass = 'lib'

@@ -1,0 +1,38 @@
+easyblock = 'PythonPackage'
+
+name = 'BoltzTraP2'
+version = '20.7.1'
+
+homepage = 'https://www.imc.tuwien.ac.at/forschungsbereich_theoretische_chemie/forschungsgruppen/'
+homepage += 'prof_dr_gkh_madsen_theoretical_materials_chemistry/boltztrap2/'
+
+description = """BoltzTraP2 is a modern implementation of the smoothed Fourier interpolation algorithm
+ for electronic bands that formed the base of the original and widely used BoltzTraP code. """
+
+toolchain = {'name': 'foss', 'version': '2021b'}
+
+source_urls = [PYPI_SOURCE]
+sources = [SOURCE_TAR_GZ]
+checksums = ['41caa32e5778323471d87033f23537f6178a7aea64fba894c7f2b2579b51f7ed']
+
+builddependencies = [('CMake', '3.21.1')]
+
+dependencies = [
+    ('Python', '3.9.6'),
+    ('ASE', '3.22.0'),
+    ('netcdf4-python', '1.5.8'),
+    ('pyFFTW', '0.12.0'),
+    ('spglib-python', '1.16.1'),
+]
+
+download_dep_fail = True
+use_pip = True
+
+options = {'modulename': name}
+
+sanity_check_paths = {
+    'files': ['bin/btp2'],
+    'dirs': ['lib/python%(pyshortver)s/site-packages']
+}
+
+moduleclass = 'chem'

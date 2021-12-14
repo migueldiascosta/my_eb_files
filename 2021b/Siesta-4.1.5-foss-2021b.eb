@@ -1,0 +1,30 @@
+name = 'Siesta'
+version = '4.1.5'
+
+homepage = 'http://departments.icmab.es/leem/siesta'
+description = """SIESTA is both a method and its computer program implementation, to perform efficient electronic
+ structure calculations and ab initio molecular dynamics simulations of molecules and solids."""
+
+toolchain = {'name': 'foss', 'version': '2021b'}
+toolchainopts = {'usempi': True, 'precise': True}
+
+source_urls = ['https://gitlab.com/siesta-project/siesta/-/releases/v%(version)s/downloads/']
+sources = [SOURCELOWER_TAR_GZ]
+checksums = ['518df31aa6213af5e24cc73abb537b2c89a925b487171f5339d743d0c7140b3f']
+
+preconfigopts = 'export FCFLAGS="$FCFLAGS -fallow-argument-mismatch" && '
+
+dependencies = [
+    ('flook', '0.8.1'),
+    ('libGridXC', '0.9.6'),
+    ('libPSML', '1.1.10'),
+    ('netCDF-Fortran', '4.5.3'),
+    ('xmlf90', '1.5.4'),
+]
+
+with_transiesta = False  # transiesta is now siesta --electrode
+with_utils = True
+
+#runtest = 'check'
+
+moduleclass = 'chem'
