@@ -1,0 +1,10 @@
+--- tensorflow/compiler/jit/graphcycles/graphcycles.cc.orig	2021-12-14 18:21:35.568180580 +0800
++++ tensorflow/compiler/jit/graphcycles/graphcycles.cc	2021-12-14 18:21:48.920073073 +0800
+@@ -32,6 +32,7 @@
+ #include "tensorflow/compiler/jit/graphcycles/graphcycles.h"
+ 
+ #include <algorithm>
++#include <limits>
+ #include <unordered_set>
+ 
+ #include "absl/algorithm/container.h"

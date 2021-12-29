@@ -36,9 +36,9 @@ exts_list = [
         'modulename': 'absl',
         # 'checksums': ['75e737d6ce7723d9ff9b7aa1ba3233c34be62ef18d5859e706b8fdc828989830'],
     }),
-    ('grpcio', '1.27.2', {
+    ('grpcio', '1.42.0', {
         'modulename': 'grpc',
-        'checksums': ['5ae532b93cf9ce5a2a549b74a2c35e3b690b171ece9358519b3039c7b84c887e'],
+        # 'checksums': ['5ae532b93cf9ce5a2a549b74a2c35e3b690b171ece9358519b3039c7b84c887e'],
     }),
     ('opt-einsum', '3.2.0', {
         'source_tmpl': 'opt_einsum-%(version)s.tar.gz',
@@ -92,6 +92,7 @@ exts_list = [
             'TensorFlow-1.15.0_lrt-flag.patch',
             'TensorFlow-1.14.0_fix-mpi-undeclared-inclusion.patch',
             'TensorFlow-1.15.2_python38.patch',
+            'TensorFlow-1.15.2_gcc11.patch',
         ],
         'source_tmpl': 'v%(version)s.tar.gz',
         'source_urls': ['https://github.com/tensorflow/tensorflow/archive/'],

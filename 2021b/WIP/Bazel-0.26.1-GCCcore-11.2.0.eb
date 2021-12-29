@@ -26,4 +26,6 @@ builddependencies = [
 ]
 dependencies = [('Java', '1.8', '', True)]
 
+sanity_check_commands = ["env"]
+
 moduleclass = 'devel'
