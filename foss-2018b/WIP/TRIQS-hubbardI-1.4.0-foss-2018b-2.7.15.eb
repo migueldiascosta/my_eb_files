@@ -1,0 +1,61 @@
+easyblock = 'CMakeMake'
+
+name = 'TRIQS-hubbardI'
+version = '1.4.0'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://triqs.github.io/hubbardI'
+description = """
+ TRIQS (Toolbox for Research on Interacting Quantum Systems) is a
+ scientific project providing a set of C++ and Python libraries to
+ develop new tools for the study of interacting quantum systems.
+
+ hubbardI implements the Hubbard-I solver in pytriqs using  the
+ lightweight diagonalization routine which come with triqs/atom_diag.
+
+"""
+
+docurls = ['https://triqs.github.io/hubbardI/%(version_major_minor)s.x/']
+software_license = 'LicenseGPLv3'
+
+toolchain = {'name': 'foss', 'version': '2018b'}
+toolchainopts = {'pic': True, 'usempi': True}
+
+source_urls = ['https://github.com/TRIQS/hubbardI/archive/']
+sources = ['%(version)s.tar.gz']
+checksums = ['c9b163233f3967f9a6d3e0585952272b37b95c142f9c49d5d7608549fb12c8f0']
+
+dependencies = [
+    ('Python', '2.7.15'),
+    ('TRIQS', '1.4.1', versionsuffix),
+    ('NFFT', '3.5.1')
+]
+
+builddependencies = [
+    ('CMake', '3.12.1')
+]
+
+separate_build_dir = True
+
+runtest = 'test'
+
+sanity_check_paths = {
+    'files': [], # 'lib/libcthyb_c.so'],
+    'dirs': ['include/triqs/hubbardI',
+             'lib/python%(pyshortver)s/site-packages',
+	      'share'],
+}
+
+sanity_check_commands = ["python -c 'import triqs_hubbardI'"]
+
+modextrapaths = {
+    'CPLUS_INCLUDE_PATH': 'include',
+    'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages',
+    'CMAKE_PREFIX_PATH': 'lib/cmake/triqs_hubbardI',
+}
+modextravars = {
+    'TRIQS_HUBBARDI_ROOT': '%(installdir)s',
+    'TRIQS_HUBBARDI_VERSION': '%(version)s',
+}
+
+moduleclass = 'phys'

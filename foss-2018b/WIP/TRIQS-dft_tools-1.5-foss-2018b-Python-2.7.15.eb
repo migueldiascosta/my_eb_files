@@ -1,0 +1,62 @@
+easyblock = 'CMakeMake'
+
+name = 'TRIQS-dft_tools'
+version = '1.5'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://triqs.github.io/dft_tools'
+description = """
+ TRIQS (Toolbox for Research on Interacting Quantum Systems) is a
+ scientific project providing a set of C++ and Python libraries to
+ develop new tools for the study of interacting quantum systems.
+
+ This TRIQS-based-based application is aimed at ab-initio calculations 
+ for correlated materials, combining realistic DFT band-structure calculations 
+ with the dynamical mean-field theory. Together with the necessary tools to 
+ perform the DMFT self-consistency loop for realistic multi-band problems, 
+ the package provides a full-fledged charge self-consistent interface to the 
+ Wien2K package. In addition, if Wien2k is not available, it provides a generic
+ interface for one-shot DFT+DMFT calculations, where only the single-particle 
+ Hamiltonian in orbital space has to be provided.
+"""
+
+docurls = ['https://triqs.github.io/dft_tools/%(version_major_minor)s.x/']
+software_license = 'LicenseGPLv3'
+
+toolchain = {'name': 'foss', 'version': '2018b'}
+toolchainopts = {'pic': True, 'usempi': True}
+
+source_urls = ['https://github.com/TRIQS/dft_tools/archive/']
+sources = ['%(version)s.tar.gz']
+checksums = ['ca10069c5b766092d289b07d0d36a19dfed7a7f5512fe62607334387422329ac']
+
+dependencies = [
+    ('Python', '2.7.15'),
+    ('TRIQS', '1.4.2', versionsuffix)
+]
+
+builddependencies = [
+    ('CMake', '3.12.1')
+]
+
+separate_build_dir = True
+
+runtest = 'test'
+
+sanity_check_paths = {
+    'files': ['bin/dmftproj', 'lib/libatm_c.%s' % SHLIB_EXT],
+    'dirs': ['bin', 'lib', 'share',
+             'lib/python%(pyshortver)s/site-packages/triqs_dft_tools'],
+}
+
+sanity_check_commands = ["python -c 'import triqs_dft_tools'"]
+
+modextrapaths = {
+    'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages',
+}
+modextravars = {
+    'TRIQS_DFT_TOOLS_ROOT': '%(installdir)s',
+    'TRIQS_DFT_TOOLS_VERSION': '%(version)s',
+}
+
+moduleclass = 'phys'
