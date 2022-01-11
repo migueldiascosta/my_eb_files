@@ -1,0 +1,58 @@
+easyblock = 'CMakeMake'
+
+name = 'TRIQS'
+version = '2.2.0'
+versionsuffix = '-Python-%(pyver)s'
+
+homepage = 'https://triqs.github.io/'
+description = """
+ TRIQS (Toolbox for Research on Interacting Quantum Systems) is a
+ scientific project providing a set of C++ and Python libraries to
+ develop new tools for the study of interacting quantum systems.
+"""
+
+toolchain = {'name': 'foss', 'version': '2019b'}
+toolchainopts = {'usempi': True, 'pic': True}
+
+source_urls = ['https://github.com/%(name)s/%(namelower)s/releases/download/%(version)s/']
+sources = [SOURCELOWER_TAR_GZ]
+checksums = ['5f7fca3dd140d86e464ab18ff91fa16febad865344ec2c5b924434f507ef4038']
+
+builddependencies = [
+    ('CMake', '3.15.3'),
+]
+dependencies = [
+    ('Python', '2.7.16'),
+    ('SciPy-bundle', '2019.03'),
+    ('Boost', '1.71.0'),
+    ('Clang', '10.0.0'),
+    ('Clang-Python-bindings', '8.0.0', '-Python-%(pyver)s'),
+    ('GMP', '6.1.2'),
+    ('HDF5', '1.10.5'),
+    ('Mako', '1.1.0'),
+    ('h5py', '2.9.0'),
+]
+
+docurls = ['https://%(namelower)s.github.io/%(namelower)s/%(version_major_minor)s.x/reference.html']
+runtest = 'test'
+software_license = 'LicenseGPLv3'
+
+sanity_check_paths = {
+    'files': ['lib/libtriqs.so'],
+    'dirs': ['include/%(namelower)s', 'include/itertools', 'include/mpi', 'include/cpp2py', 'lib/python%(pyshortver)s/site-packages', 'share'],
+}
+
+sanity_check_commands = [
+    "%(namelower)s++ --help",
+    "c++2py --help",
+    "python -c 'import pytriqs'",
+]
+
+modextrapaths = {
+    'CMAKE_PREFIX_PATH': ['lib/cmake/%(namelower)s', 'lib/cmake/cpp2py'],
+    'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages',
+}
+
+modextravars = {'TRIQS_ROOT': '%(installdir)s'}
+
+moduleclass = 'phys'

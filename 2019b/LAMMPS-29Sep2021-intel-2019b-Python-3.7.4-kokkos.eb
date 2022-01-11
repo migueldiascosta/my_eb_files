@@ -30,10 +30,9 @@ patches = [
     'lammps-stable_29Sep2021_intel_ebflag.patch',
 ]
 checksums = [
-    'a1a2e3e763ef5baecea258732518d75775639db26e60af1634ab385ed89224d1',  # stable_3Mar2020.tar.gz
+    '2dff656cb21fd9a6d46c818741c99d400cfb1b12102604844663b655fb2f893d',  # stable_29Sep2021.tar.gz
     'c28fa5a1ea9608e4fd8686937be501c3bed8cc03ce1956f1cf0a1efce2c75349',  # lammps_vs_yaff_test_single_point_energy.py
-    # '7f010853d81022f286cf32e3babe252d5cc7c0bfb274bee5a2c64e810e170239',  # LAMMPS-3Mar2020_fix-docs-build.patch
-    '3b04681bf8d5c60818a197905f68c83e477ef41824278ebc05d437ecac6d5c0a',  # lammps-stable_3Mar2020_intel_ebflag.patch
+    'e48ec0e51fd7fab7cdcd07bb5a5e9b8eb04d3e69d2c36c9a0a3c82c89f87bd89',  # lammps-stable_29Sep2021_intel_ebflag.patch
 ]
 
 local_source_dir_name = '%(namelower)s-%(version)s'
@@ -63,12 +62,16 @@ dependencies = [
     ('Eigen', '3.3.7', '', True),
     ('yaff', '1.6.0', local_python_versionsuffix),
     ('PLUMED', '2.5.3', local_python_versionsuffix),
-    ('CMake', '3.21.1'),
+    ('ScaFaCoS', '1.0.1'),
+    ('CMake', '3.21.1'),  # to override an older CMake that is being loaded by some dependency
 ]
 
 # To use additional custom configuration options, use the 'configopts' easyconfig parameter
 # See docs and lammps easyblock for more information.
 # https://github.com/lammps/lammps/blob/master/cmake/README.md#lammps-configuration-options
+
+# Use the bfd linker for C++ (this will only be picked up when using Kokkos)
+preconfigopts = 'export CXXFLAGS="-fuse-ld=bfd $CXXFLAGS" &&'
 
 # Disable building the docs
 configopts = "-DBUILD_DOC=off "
@@ -76,7 +79,7 @@ configopts = "-DBUILD_DOC=off "
 # having the USER-INTEL package (https://lammps.sandia.gov/doc/Speed_intel.html) enabled with intel/2019b
 # results in a LAMMPS installation that yields incorrect results,
 # so disable this particular package for now...
-configopts += '-DPKG_USER-INTEL=off'
+configopts += '-DPKG_USER-INTEL=off '
 
 # auto-enabled by easyblock
 # 'GPU'    - if cuda package is present and kokkos is disabled
@@ -85,24 +88,84 @@ configopts += '-DPKG_USER-INTEL=off'
 # not enabled (yet), needs more work/additional dependencies:
 # 'LATTE', - https://lammps.sandia.gov/doc/Build_extras.html#latte-package
 # 'MSCG',  - https://lammps.sandia.gov/doc/Build_extras.html#mscg-package
-general_packages = [
-    'ASPHERE', 'BODY', 'CLASS2', 'COLLOID', 'COMPRESS', 'CORESHELL', 'DIPOLE',
-    'GRANULAR', 'KIM', 'KSPACE', 'MANYBODY', 'MC', 'MESSAGE', 'MISC',
-    'MOLECULE', 'MPIIO', 'PERI', 'POEMS', 'PYTHON', 'QEQ', 'REPLICA', 'RIGID',
-    'SHOCK', 'SNAP', 'SPIN', 'SRD', 'VORONOI', 'EXTRA-PAIR',
-]
 
 # not enabled (yet), needs more work/additional dependencies:
 # ADIOS - https://lammps.sandia.gov/doc/Build_extras.html#user-adios-package
 # AWPMD - https://lammps.sandia.gov/doc/Build_extras.html#user-awpmd-package
+# QMMM  - https://lammps.sandia.gov/doc/Packages_details.html#pkg-user-qmmm
 # QUIP  - https://lammps.sandia.gov/doc/Build_extras.html#user-quip-package
 # SCAFACOS - https://lammps.sandia.gov/doc/Build_extras.html#user-scafacos-package
 # VTK - https://lammps.sandia.gov/doc/Build_extras.html#user-vtk-package
-user_packages = [
-    'ATC', 'BOCS', 'CGDNA', 'CGSDK', 'COLVARS', 'DIFFRACTION', 'DPD', 'DRUDE',
-    'EFF', 'FEP', 'H5MD', 'LB', 'MANIFOLD', 'MEAMC', 'MESO', 'MGPT', 'MISC',
-    'MOFFF', 'MOLFILE', 'NETCDF', 'PHONON', 'PLUMED', 'PTM', 'QTB', 'REAXC',
-    'SDPD', 'SMD', 'SMTBQ', 'SPH', 'TALLY', 'UEF', 'YAFF',
+
+# USER packages no longer exist as of July 2021
+user_packages = []
+
+general_packages = [
+    'ASPHERE',
+    'BODY',
+    'CLASS2',
+    'COLLOID',
+    'COMPRESS',
+    'CORESHELL',
+    'DIPOLE',
+    'GRANULAR',
+    'INTERLAYER',
+    'KIM',
+    'KSPACE',
+    'MANYBODY',
+    'MC',
+    'MESSAGE',
+    'MISC',
+    'MLIAP',
+    'MOLECULE',
+    'MPIIO',
+    'PERI',
+    'POEMS',
+    'PYTHON',
+    'QEQ',
+    'REPLICA',
+    'RIGID',
+    'SHOCK',
+    'SNAP',
+    'SPIN',
+    'SRD',
+    'VORONOI',
+    'ATC',
+    'BOCS',
+    'CGDNA',
+    'CGSDK',
+    'COLVARS',
+    'DIFFRACTION',
+    'DPD',
+    'DRUDE',
+    'EFF',
+    'EXTRA-PAIR',
+    'FEP',
+    'H5MD',
+    'LB',
+    'MANIFOLD',
+    'MEAMC',
+    'MESODPD',
+    'MESONT',
+    'MGPT',
+    'MISC',
+    'MOFFF',
+    'MOLFILE',
+    'NETCDF',
+    'PHONON',
+    'PLUMED',
+    'PTM',
+    'QTB',
+    'REACTION',
+    'REAXC',
+    'SCAFACOS',
+    'SDPD',
+    'SMD',
+    'SMTBQ',
+    'SPH',
+    'TALLY',
+    'UEF',
+    'YAFF',
 ]
 
 enhance_sanity_check = True
