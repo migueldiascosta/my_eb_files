@@ -1,0 +1,40 @@
+easyblock = 'MakeCp'
+
+name = 'CONQUEST'
+version = '1.0.6-pre'
+
+homepage = 'http://www.order-n.org/'
+description = """CONQUEST is a large scale DFT electronic structure code, capable of both diagonalisation and linear scaling, or O(N), calculations."""
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+
+source_urls = ['https://github.com/OrderN/CONQUEST-release/archive/refs/tags/']
+sources = ['v%(version)s.tar.gz']
+patches = []
+checksums = ['35946d8367c542e37e8b1e5d7b31c3ee51d8651851032ac014904f7ca17e9486']
+
+dependencies = [
+    ('FFTW', '3.3.8'),
+    ('libxc', '4.3.4'),
+]
+
+files_to_copy = [(['src/Conquest', 'tools/BasisGeneration/MakeIonFiles'], 'bin')]
+
+prebuildopts = "cd src && "
+prebuildopts += "sed -i 's|/usr/local/include|\${EBROOTLIBXC}/include|' system.make && "
+prebuildopts += "sed -i 's|-lscalapack|\${LIBSCALAPACK}|' system.make && "
+prebuildopts += "sed -i 's|-lvecLibFort|\${LIBBLAS}|' system.make && "
+prebuildopts += "sed -i 's|-lfftw3|\${LIBFFTW}|' system.make && "
+
+buildopts = " && cd ../tools/BasisGeneration && "
+buildopts += "sed -i 's|/usr/local/include|\${EBROOTLIBXC}/include|' system.make && "
+buildopts += "sed -i 's|-lscalapack|\${LIBSCALAPACK}|' system.make && "
+buildopts += "sed -i 's|-lvecLibFort|\${LIBBLAS}|' system.make && "
+buildopts += "sed -i 's|-lfftw3|\${LIBFFTW}|' system.make && make "
+
+sanity_check_paths = {
+    'files': ['bin/Conquest', 'bin/MakeIonFiles'],
+    'dirs': [],
+}
+
+moduleclass = 'chem'
