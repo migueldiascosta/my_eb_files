@@ -1,8 +1,7 @@
 easyblock = 'MakeCp'
 
 name = 'VASP'
-version = '6.2.1'
-versionsuffix = '_w90v3'
+version = '6.3.0'
 
 homepage = 'https://www.vasp.at'
 description = """The Vienna Ab initio Simulation Package (VASP) is a computer program for atomic scale
@@ -20,7 +19,7 @@ patches = [
 ]
 checksums = ['d25e2f477d83cb20fce6a2a56dcee5dccf86d045dd7f76d3ae19af8343156a13']
 
-dependencies = [('Wannier90', '3.1.0', '_serial')]  # https://www.vasp.at/wiki/index.php/Makefile.include#Wannier90_.28optional.29
+dependencies = [('Wannier90', '3.1.0')]
 
 prebuildopts = 'cp arch/makefile.include.linux_intel ./makefile.include && '
 
