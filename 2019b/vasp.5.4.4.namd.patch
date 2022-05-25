@@ -1,0 +1,50 @@
+--- src/main.F.orig	2017-04-20 17:03:58.000000000 +0800
++++ src/main.F	2022-02-16 10:42:43.110470186 +0800
+@@ -4485,17 +4485,17 @@
+ !=======================================================================
+ 
+       IF (INFO%LOVERL) THEN
+-       IF (STM(4) > 0) THEN
++       ! IF (STM(4) > 0) THEN
+ #ifdef MPI
+          IF (WDES%COMM_KINTER%NODE_ME.EQ.1) THEN
+ #endif
+           do_io WRITE(*,*) "writing IETS projectors"
+           CALL WRT_IETS(LMDIM, WDES%NIONS, WDES%NRSPINORS, CQIJ, WDES, W)
+           do_io WRITE(*,*) "IETS projectors  written, exiting"
+-         END IF
+ #ifdef MPI
+-       END IF
++         END IF
+ #endif
++       ! END IF
+       END IF
+ !=======================================================================
+ !  possibly decompose into Bloch states of a given primitive cell
+--- src/stm.F.orig	2017-04-20 17:03:59.000000000 +0800
++++ src/stm.F	2022-02-16 10:42:45.188454532 +0800
+@@ -459,7 +459,7 @@
+     COMPLEX(q),ALLOCATABLE :: CPROJ(:)
+     ! integer
+     INTEGER, PARAMETER :: IU=77
+-    INTEGER ISPIN,NK,N,NT
++    INTEGER ISPIN,NK,N,NT, NCORE, NPAR, NCPU
+     ! parallel version
+     TYPE (wavedes1) WDES1
+     INTEGER NODE_ME,IONODE,NNODE,NB_L
+@@ -500,7 +500,14 @@
+         NB_L=NB_LOCAL(N,WDES1)
+ 
+ ! node which containts the wavefuntion
+-        NNODE = MOD(N-1,WDES%NB_PAR)+1
++
++        ! NNODE = MOD(N-1,WDES%NB_PAR)+1
++        NCPU  = WDES%COMM%NCPU
++        NPAR  = WDES%NB_PAR
++        NCORE = NCPU / NPAR
++        NNODE = MOD((N-1) * NCORE, NCPU) + 1
++        ! if (NNODE == 0) NNODE = NNODE + 1
++        ! write(*,*) "kaka", NCPU, NPAR, NCORE, NNODE
+ 
+ ! if wavefunction is located on this node merge its projectors
+         IF ( MOD(N-1,WDES%NB_PAR)+1 == WDES1%NB_LOW) THEN

@@ -1,0 +1,55 @@
+easyblock = 'MakeCp'
+
+name = 'VASP'
+version = '6.3.1'
+versionsuffix = '_openmp'
+
+homepage = 'https://www.vasp.at'
+description = """The Vienna Ab initio Simulation Package (VASP) is a computer program for atomic scale
+materials modelling, e.g. electronic structure calculations and quantum-mechanical molecular dynamics,
+from first principles."""
+
+toolchain = {'name': 'intel', 'version': '2019b'}
+toolchainopts = {'usempi': True, 'openmp': True}
+
+# Vasp is proprietary software, see http://www.vasp.at/index.php/faqs on how to get access to the code
+sources = ['%(namelower)s.%(version)s.tgz']
+patches = [
+    'vasp.5.4.4.optcell.patch',
+    'VASP-6.2.1_vdwpath.patch',
+]
+checksums = [
+    '113db53c4346287c89982f52887a65d12d246e38de7ccd024e44499c4774dc66',  # vasp.6.3.1.tgz
+    'f6f86dea9f8c2a60872f57ef7a41ab9df69e8077e1bf05c536ce8255df855c32',  # vasp.5.4.4.optcell.patch
+    '9e70b029774fca71cbf32879d0149bd8ad18535437931d1ec1b581711f6236d5',  # VASP-6.2.1_vdwpath.patch
+]
+
+prebuildopts = 'cp arch/makefile.include.intel_omp ./makefile.include && '
+
+# Makefile uses LIBS as a list of folders
+prebuildopts += 'unset LIBS && '
+
+local_targets = ['std', 'gam', 'ncl']
+
+buildopts = '%s ' % ' '.join(local_targets)
+buildopts += 'FCL="$MPIF90" DEBUG="$FFLAGS" OFLAG="$FFLAGS" OFLAG_1="${FFLAGS/O2/O1}" OFLAG_2="$FFLAGS" '
+buildopts += 'OFLAG_3="${FFLAGS/O2/O3}" CFLAGS_LIB="$CFLAGS" FFLAGS_LIB="$FFLAGS" MKLROOT="${EBROOTMKL}" '
+buildopts += 'LLIBS="-lstdc++ ${LIBSCALAPACK_MT}" '
+
+# https://www.vasp.at/wiki/index.php/Validation_tests
+# pretestopts = 'export MPIRUN="mpirun -np 4 -genv OMP_NUM_THREADS=4 -genv OMP_STACKSIZE=512m" && '
+# pretestopts += 'export VASP_TESTSUITE_EXE_STD="$MPIRUN %(builddir)s/vasp.%(version)s/bin/vasp_std" && '
+# pretestopts += 'export VASP_TESTSUITE_EXE_NCL="$MPIRUN %(builddir)s/vasp.%(version)s/bin/vasp_ncl" && '
+# pretestopts += 'export VASP_TESTSUITE_EXE_GAM="$MPIRUN %(builddir)s/vasp.%(version)s/bin/vasp_gam" && '
+# runtest = 'test'
+
+parallel = 1
+
+files_to_copy = [(['bin/vasp_' + x for x in local_targets], 'bin')]
+
+sanity_check_paths = {
+    'files': ['bin/vasp_' + x for x in local_targets],
+    'dirs': []
+}
+
+moduleclass = 'phys'
